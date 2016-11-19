@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#212121"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/et_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:background="#fff"
+            android:hint="email"
+            android:text="houxg09@foxmail.com   "
+            android:padding="8dp"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_below="@id/et_email"
+            android:background="#fff"
+            android:hint="password"
+            android:text="asd456789"
+            android:inputType="textPassword"
+            android:padding="8dp"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/et_custom_host"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_below="@id/et_password"
+            android:background="#fff"
+            android:hint="host address"
+            android:padding="8dp"
+            android:textSize="18sp"
+            android:scaleY="0"/>
+
+        <RelativeLayout
+            android:id="@+id/ll_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/et_password"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_sign_in"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="32dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="16dp"
+                android:background="#757575"
+                android:gravity="center"
+                android:padding="8dp"
+                android:layout_centerHorizontal="true"
+                android:text="Sign in"
+                android:textColor="#EEEEEE"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:indeterminate="true"
+                android:layout_centerHorizontal="true"
+                android:layout_alignTop="@id/tv_sign_in"
+                android:layout_alignBottom="@id/tv_sign_in"
+                android:alpha="0"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:layout_below="@id/tv_sign_in"
+                android:layout_centerHorizontal="true"
+                android:text="forgot your password?"
+                android:textColor="#EEEEEE" />
+        </RelativeLayout>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ll_action"
+            android:padding="8dp"
+            android:textSize="18sp"
+            android:visibility="invisible"/>
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/tv_custom_host"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:text="Using custom host"
+        android:textColor="#EEEEEE"
+        android:textSize="16sp" />
+
+</RelativeLayout>

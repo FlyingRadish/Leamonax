@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Leanote Lite</string>
+    <string name="network_is_unavailable">Network is unavailable</string>
+    <string name="save_note_failed">Save note failed</string>
+    <string name="sync_notes_failed">Sync notes failed</string>
+    <string name="saving_note">Saving note</string>
+    <string name="save_to_server">save to server</string>
+    <string name="revert">revert</string>
+    <string name="reverting">Reverting</string>
+    <string name="Edit">Edit</string>
+    <string name="link">Link</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="are_you_sure_to_delete_note">Are you sure to delete %s?</string>
+    <string name="delete_note">Delete note</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+</resources>

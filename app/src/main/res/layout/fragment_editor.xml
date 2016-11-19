@@ -1,0 +1,64 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll_tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#EEEEEE">
+
+        <ImageView
+            android:id="@+id/btn_img"
+            style="@style/FormatButton"
+            android:src="@drawable/ic_insert_photo_black_disable" />
+
+        <include layout="@layout/separator_horizontal" />
+
+        <org.houxg.leanotelite.widget.ToggleImageButton
+            android:id="@+id/btn_link"
+            style="@style/FormatButton"
+            android:src="@drawable/ic_insert_link_black_disable" />
+
+        <include layout="@layout/separator_horizontal" />
+
+        <org.houxg.leanotelite.widget.ToggleImageButton
+            android:id="@+id/btn_order_list"
+            style="@style/FormatButton"
+            app:checkedDrawable="@drawable/ic_format_list_bulleted_black_enable"
+            app:uncheckedDrawable="@drawable/ic_format_list_bulleted_black_disable" />
+
+        <include layout="@layout/separator_horizontal" />
+
+        <org.houxg.leanotelite.widget.ToggleImageButton
+            android:id="@+id/btn_unorder_list"
+            style="@style/FormatButton"
+            app:checkedDrawable="@drawable/ic_format_list_numbered_black_enable"
+            app:uncheckedDrawable="@drawable/ic_format_list_numbered_black_disable" />
+
+        <include layout="@layout/separator_horizontal" />
+
+        <org.houxg.leanotelite.widget.ToggleImageButton
+            android:id="@+id/btn_bold"
+            style="@style/FormatButton"
+            app:checkedDrawable="@drawable/ic_format_bold_black_enable"
+            app:uncheckedDrawable="@drawable/ic_format_bold_black_disable" />
+
+        <include layout="@layout/separator_horizontal" />
+
+        <org.houxg.leanotelite.widget.ToggleImageButton
+            android:id="@+id/btn_italic"
+            style="@style/FormatButton"
+            app:checkedDrawable="@drawable/ic_format_italic_black_enable"
+            app:uncheckedDrawable="@drawable/ic_format_italic_black_disable" />
+    </LinearLayout>
+
+    <org.houxg.leanotelite.widget.LeaWebView
+        android:id="@+id/web_editor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/ll_tools" />
+</RelativeLayout>
