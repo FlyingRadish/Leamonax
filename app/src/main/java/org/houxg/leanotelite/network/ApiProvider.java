@@ -25,9 +25,6 @@ public class ApiProvider {
     }
 
     public static ApiProvider getInstance() {
-        if (SingletonHolder.INSTANCE.mApiRetrofit == null) {
-            SingletonHolder.INSTANCE.init(AccountService.getCurrent().getHost());
-        }
         return SingletonHolder.INSTANCE;
     }
 

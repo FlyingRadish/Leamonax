@@ -36,6 +36,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
 
     private static final String TAG = "NoteEditActivity";
     public static final String EXT_NOTE_LOCAL_ID = "ext_note_local_id";
+    public static final String EXT_IS_NEW_NOTE = "ext_is_new_note";
     public static final String TAG_EDITOR = "tag_editor_tag";
     public static final String TAG_SETTING = "tag_setting_tag";
     public static final int FRAG_EDITOR = 0;
@@ -45,6 +46,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     private SettingFragment mSettingsFragment;
     private Note mOriginal;
     private Note mModified;
+    private boolean mIsNewNote;
 
     private LeaViewPager mPager;
 
@@ -68,14 +70,16 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
             finish();
             return;
         }
+        mIsNewNote = getIntent().getBooleanExtra(EXT_IS_NEW_NOTE, false);
         mOriginal = AppDataBase.getNoteByLocalId(noteLocalId);
         mModified = AppDataBase.getNoteByLocalId(noteLocalId);
         setResult(RESULT_CANCELED);
     }
 
-    public static Intent getOpenIntent(Context context, long noteLocalId) {
+    public static Intent getOpenIntent(Context context, long noteLocalId, boolean isNewNote) {
         Intent intent = new Intent(context, NoteEditActivity.class);
         intent.putExtra(EXT_NOTE_LOCAL_ID, noteLocalId);
+        intent.putExtra(EXT_IS_NEW_NOTE, isNewNote);
         return intent;
     }
 
@@ -97,7 +101,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                checkChangeOrDirty()
+                filterUnchanged()
                         .doOnCompleted(new Action0() {
                             @Override
                             public void call() {
@@ -106,15 +110,15 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                         })
                         .subscribe(new Action1<Note>() {
                             @Override
-                            public void call(Note noteInfo) {
-                                saveAsDraft(noteInfo);
+                            public void call(Note note) {
+                                saveAsDraft(note);
                                 setResult(RESULT_OK);
                                 if (NetworkUtils.isNetworkAvailable(NoteEditActivity.this)) {
-                                    boolean isSucceed = NoteService.updateNote(AppDataBase.getNoteByLocalId(mModified.getId()));
+                                    boolean isSucceed = NoteService.updateNote(AppDataBase.getNoteByLocalId(note.getId()));
                                     if (isSucceed) {
-                                        Note note = AppDataBase.getNoteByLocalId(mModified.getId());
-                                        note.setIsDirty(false);
-                                        note.save();
+                                        Note localNote = AppDataBase.getNoteByLocalId(note.getId());
+                                        localNote.setIsDirty(false);
+                                        localNote.save();
                                     } else {
                                         ToastUtils.show(NoteEditActivity.this, R.string.save_note_failed);
                                     }
@@ -136,7 +140,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         if (mPager.getCurrentItem() > FRAG_EDITOR) {
             mPager.setCurrentItem(FRAG_EDITOR);
         } else {
-            checkChangeOrDirty()
+            filterUnchanged()
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnCompleted(new Action0() {
                         @Override
@@ -148,26 +152,30 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                         @Override
                         public void call(Note note) {
                             setResult(RESULT_OK);
-                            if (!isNewNote(note) ||
-                                    !(TextUtils.isEmpty(note.getTitle()) || TextUtils.isEmpty(note.getContent()))) {
-                                saveAsDraft(note);
-                            } else {
+                            Log.i(TAG, note.toString());
+
+                            if (mIsNewNote && isTitleContentEmpty(note)) {
                                 Log.i(TAG, "remove empty note, id=" + note.getId());
                                 AppDataBase.deleteNoteByLocalId(note.getId());
+                            } else {
+                                saveAsDraft(note);
                             }
                         }
                     });
         }
     }
 
-    private Observable<Note> checkChangeOrDirty() {
+    private Observable<Note> filterUnchanged() {
         return Observable.create(
                 new Observable.OnSubscribe<Note>() {
                     @Override
                     public void call(Subscriber<? super Note> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             updateNote();
-                            if (mModified.isDirty() || mModified.hasChanges(mOriginal) || isNewNote(mModified)) {
+                            if (mModified.isDirty()
+                                    || mModified.hasChanges(mOriginal)
+                                    || isLocalNote(mModified)
+                                    || isTitleContentEmpty(mModified)) {
                                 subscriber.onNext(mModified);
                             }
                             subscriber.onCompleted();
@@ -175,6 +183,14 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                     }
                 })
                 .subscribeOn(Schedulers.io());
+    }
+
+    private boolean isTitleContentEmpty(Note note) {
+        return TextUtils.isEmpty(note.getTitle()) && TextUtils.isEmpty(note.getContent());
+    }
+
+    private boolean isLocalNote(Note note) {
+        return TextUtils.isEmpty(note.getNoteId());
     }
 
     private void updateNote() {
@@ -196,11 +212,12 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         noteFromDb.setTags(note.getTags());
         noteFromDb.setIsPublicBlog(note.isPublicBlog());
         noteFromDb.setIsDirty(true);
+        long updateTime = System.currentTimeMillis();
+        noteFromDb.setUpdatedTimeVal(updateTime);
+        if (mIsNewNote) {
+            noteFromDb.setCreatedTimeVal(updateTime);
+        }
         noteFromDb.update();
-    }
-
-    private boolean isNewNote(Note note) {
-        return TextUtils.isEmpty(note.getNoteId());
     }
 
     @Override

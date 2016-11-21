@@ -74,7 +74,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_edit:
-                startActivityForResult(NoteEditActivity.getOpenIntent(this, mNote.getId()), REQ_EDIT);
+                startActivityForResult(NoteEditActivity.getOpenIntent(this, mNote.getId(), false), REQ_EDIT);
                 return true;
         }
         return super.onOptionsItemSelected(item);
