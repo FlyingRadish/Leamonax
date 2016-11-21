@@ -26,14 +26,14 @@ public class ApiProvider {
     }
 
     public static ApiProvider getInstance() {
+        Account account = AccountService.getCurrent();
+        if (account != null && SingletonHolder.INSTANCE.mApiRetrofit == null) {
+            SingletonHolder.INSTANCE.init(account.getHost());
+        }
         return SingletonHolder.INSTANCE;
     }
 
     private ApiProvider() {
-        Account account = AccountService.getCurrent();
-        if (account != null) {
-            init(account.getHost());
-        }
     }
 
     public void init(String host) {
