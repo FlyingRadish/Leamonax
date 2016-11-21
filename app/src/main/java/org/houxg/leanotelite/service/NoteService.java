@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -152,57 +150,11 @@ public class NoteService {
         AppDataBase.deleteFileExcept(noteLocalId, excepts);
     }
 
-    public static String replace(String content, String tagExp, String targetExp, Replacer replacer, Object... extraData) {
-        Pattern tagPattern = Pattern.compile(tagExp);
-        Pattern targetPattern = Pattern.compile(targetExp);
-        Matcher tagMather = tagPattern.matcher(content);
-        StringBuilder contentBuilder = new StringBuilder(content);
-        int offset = 0;
-        while (tagMather.find()) {
-            String tag = tagMather.group();
-            Matcher targetMatcher = targetPattern.matcher(tag);
-            if (!targetMatcher.find()) {
-                continue;
-            }
-            String original = targetMatcher.group();
-            int originalLen = original.length();
-            String modified = replacer.replaceWith(original, extraData);
-            contentBuilder.replace(tagMather.start() + targetMatcher.start() + offset,
-                    tagMather.end() - (tag.length() - targetMatcher.end()) + offset,
-                    modified);
-            offset += modified.length() - originalLen;
-        }
-        return contentBuilder.toString();
-    }
-
-    public static void find(String content, String tagExp, String targetExp, Finder finder, Object... extraData) {
-        Pattern tagPattern = Pattern.compile(tagExp);
-        Pattern targetPattern = Pattern.compile(targetExp);
-        Matcher tagMather = tagPattern.matcher(content);
-        while (tagMather.find()) {
-            String tag = tagMather.group();
-            Matcher targetMatcher = targetPattern.matcher(tag);
-            if (!targetMatcher.find()) {
-                continue;
-            }
-            String original = targetMatcher.group();
-            finder.onFound(original);
-        }
-    }
-
-    public interface Finder {
-        void onFound(String original, Object... extraData);
-    }
-
-    public interface Replacer {
-        String replaceWith(String original, Object... extraData);
-    }
-
     private static String convertToLocalImageLinkForRichText(long noteLocalId, String noteContent) {
-        return replace(noteContent,
+        return StringUtils.replace(noteContent,
                 "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>",
                 String.format(Locale.US, "\\ssrc\\s*=\\s*\"%s/api/file/getImage\\?fileId=.*?\"", AccountService.getCurrent().getHost()),
-                new Replacer() {
+                new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
                         Log.i(TAG, "in=" + original);
@@ -225,10 +177,10 @@ public class NoteService {
     }
 
     private static String convertToLocalImageLinkForMD(long noteLocalId, String noteContent) {
-        return replace(noteContent,
+        return StringUtils.replace(noteContent,
                 String.format(Locale.US, "!\\[.*?\\]\\(%s/api/file/getImage\\?fileId=.*?\\)", AccountService.getCurrent().getHost()),
                 String.format(Locale.US, "\\(%s/api/file/getImage\\?fileId=.*?\\)", AccountService.getCurrent().getHost()),
-                new Replacer() {
+                new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
                         Uri linkUri = Uri.parse(original.substring(1, original.length() - 1));
@@ -276,10 +228,10 @@ public class NoteService {
     }
 
     private static String convertToServerImageLinkForMD(String noteContent) {
-        return replace(noteContent,
+        return StringUtils.replace(noteContent,
                 "!\\[.*?\\]\\(file:/getImage\\?id=.*?\\)",
                 "\\(file:/getImage\\?id=.*?\\)",
-                new Replacer() {
+                new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
                         Uri linkUri = Uri.parse(original.substring(1, original.length() - 1));
@@ -294,10 +246,10 @@ public class NoteService {
     }
 
     private static String convertToServerImageLinkForRichText(String noteContent) {
-        return replace(noteContent,
+        return StringUtils.replace(noteContent,
                 "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>",
                 "\\ssrc\\s*=\\s*\"file:/getImage\\?id=.*?\"",
-                new Replacer() {
+                new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
                         Uri linkUri = Uri.parse(original.substring(6, original.length() - 1));
@@ -361,9 +313,8 @@ public class NoteService {
         requestBodyMap.put("Content", createPartFromString(content));
         requestBodyMap.put("IsMarkdown", createPartFromString(getBooleanString(note.isMarkDown())));
         requestBodyMap.put("IsBlog", createPartFromString(getBooleanString(note.isPublicBlog())));
-        long current = System.currentTimeMillis();
-        requestBodyMap.put("CreatedTime", createPartFromString(TimeUtils.toServerTime(current)));
-        requestBodyMap.put("UpdatedTime", createPartFromString(TimeUtils.toServerTime(current)));
+        requestBodyMap.put("CreatedTime", createPartFromString(TimeUtils.toServerTime(note.getCreatedTimeVal())));
+        requestBodyMap.put("UpdatedTime", createPartFromString(TimeUtils.toServerTime(note.getUpdatedTimeVal())));
 
         List<String> imageLocalIds;
         if (note.isMarkDown()) {
@@ -392,10 +343,10 @@ public class NoteService {
 
     private static List<String> getImagesFromContentForRichText(String noteContent) {
         final List<String> localIds = new ArrayList<>();
-        find(noteContent,
+        StringUtils.find(noteContent,
                 "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>",
                 "\\ssrc\\s*=\\s*\"file:/getImage\\?id=.*?\"",
-                new Finder() {
+                new StringUtils.Finder() {
                     @Override
                     public void onFound(String original, Object... extraData) {
                         Uri linkUri = Uri.parse(original.substring(6, original.length() - 1));
@@ -408,10 +359,10 @@ public class NoteService {
 
     private static List<String> getImagesFromContentForMD(String noteContent) {
         final List<String> localIds = new ArrayList<>();
-        find(noteContent,
+        StringUtils.find(noteContent,
                 "!\\[.*?\\]\\(file:/getImage\\?id=.*?\\)",
                 "\\(file:/getImage\\?id=.*?\\)",
-                new Finder() {
+                new StringUtils.Finder() {
                     @Override
                     public void onFound(String original, Object... extraData) {
                         Uri linkUri = Uri.parse(original.substring(1, original.length() - 1));

@@ -9,14 +9,29 @@ import java.util.Locale;
 
 public class TimeUtils {
 
-    private static final SimpleDateFormat mServerWithMillsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US);
-    private static final SimpleDateFormat mServerFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US);
+    private static final SimpleDateFormat mServerWithMillsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.US);
+    private static final SimpleDateFormat mServerFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US);
     private static final SimpleDateFormat mTimeFormat = new SimpleDateFormat("H:mm:ss", Locale.US);
     private static final SimpleDateFormat mDateFormat = new SimpleDateFormat("M-dd H:mm:ss", Locale.US);
     private static final SimpleDateFormat mYearFormat = new SimpleDateFormat("yyyy-M-dd H:mm:ss", Locale.US);
 
     public static long toTimestamp(String serverTime) {
         try {
+            serverTime = StringUtils.replace(serverTime,
+                    "T\\d{2}:\\d{2}:\\d{2}.\\d+\\+",
+                    "\\.\\d+",
+                    new StringUtils.Replacer() {
+                        @Override
+                        public String replaceWith(String original, Object... extraData) {
+                            String modified;
+                            if (original.length() > 4) {
+                                modified = original.substring(0, 4);
+                            } else {
+                                modified = original;
+                            }
+                            return modified;
+                        }
+                    });
             Date date = mServerWithMillsFormat.parse(serverTime);
             return date.getTime();
         } catch (ParseException e) {
