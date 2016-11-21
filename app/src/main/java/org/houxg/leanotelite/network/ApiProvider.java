@@ -1,5 +1,6 @@
 package org.houxg.leanotelite.network;
 
+import org.houxg.leanotelite.model.Account;
 import org.houxg.leanotelite.network.api.AuthApi;
 import org.houxg.leanotelite.network.api.NoteApi;
 import org.houxg.leanotelite.network.api.NotebookApi;
@@ -29,6 +30,10 @@ public class ApiProvider {
     }
 
     private ApiProvider() {
+        Account account = AccountService.getCurrent();
+        if (account != null) {
+            init(account.getHost());
+        }
     }
 
     public void init(String host) {
@@ -64,7 +69,6 @@ public class ApiProvider {
 
     private static boolean shouldAddTokenToQuery(String path) {
         return !path.startsWith("/api/auth/login")
-//                && !path.startsWith("/api/note/updateNote")
                 && !path.startsWith("/api/auth/register");
     }
 
