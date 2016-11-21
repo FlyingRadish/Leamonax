@@ -77,7 +77,9 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public String getContent() {
         String content = HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "ZSSEditor.getField('zss_field_content').getHTML();"));
-        content = appendPTag(content);
+        if (!TextUtils.isEmpty(content)) {
+            content = appendPTag(content);
+        }
         return content;
     }
 
