@@ -45,6 +45,10 @@ public abstract class Editor {
 
     public abstract void updateLink(String title, String url);
 
+    public abstract void redo();
+
+    public abstract void undo();
+
     public abstract void toggleOrderList();
 
     public abstract void toggleUnorderList();

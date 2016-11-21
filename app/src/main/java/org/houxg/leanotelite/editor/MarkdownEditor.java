@@ -87,6 +87,16 @@ public class MarkdownEditor extends Editor {
     }
 
     @Override
+    public void redo() {
+        execJs("MD.undoMgr.redo()");
+    }
+
+    @Override
+    public void undo() {
+        execJs("MD.undoMgr.undo()");
+    }
+
+    @Override
     public void toggleOrderList() {
         execJs("ZSSEditor.setOrderedList();");
     }

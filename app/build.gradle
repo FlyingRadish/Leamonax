@@ -69,4 +69,5 @@ dependencies {
     compile 'com.android.support:support-v13:24.1.0'
     compile project(':img-selector')
     compile 'com.facebook.stetho:stetho:1.4.1'
+    compile 'com.github.houxg:FlexLayout:1.2'
 }

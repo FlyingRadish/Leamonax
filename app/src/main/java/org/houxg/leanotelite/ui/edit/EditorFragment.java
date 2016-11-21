@@ -44,7 +44,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     private EditorFragmentListener mListener;
     private Editor mEditor;
 
-    @BindView(R.id.ll_tools)
+    @BindView(R.id.fl_tools)
     View mToolContainer;
 
     @BindView(R.id.btn_bold)
@@ -199,6 +199,16 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     @OnClick(R.id.btn_italic)
     void toggleItalic() {
         mEditor.toggleItalic();
+    }
+
+    @OnClick(R.id.btn_undo)
+    void undo() {
+        mEditor.undo();
+    }
+
+    @OnClick(R.id.btn_redo)
+    void redo() {
+        mEditor.redo();
     }
 
     public void setEditingEnabled(boolean enabled) {

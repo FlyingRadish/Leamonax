@@ -2,6 +2,7 @@ package org.houxg.leanotelite.editor;
 
 
 import android.annotation.SuppressLint;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -93,6 +94,16 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public void updateLink(String title, String url) {
         execJs(String.format(Locale.US, "ZSSEditor.updateLink('%s', '%s');", url, title));
+    }
+
+    @Override
+    public void redo() {
+        execJs("ZSSEditor.redo();");
+    }
+
+    @Override
+    public void undo() {
+        execJs("ZSSEditor.undo();");
     }
 
     @Override
