@@ -188,9 +188,9 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_sigle_edittext, null);
         final EditText mEdit = (EditText) view.findViewById(R.id.edit);
         new AlertDialog.Builder(this)
-                .setTitle("Add notebook")
+                .setTitle(R.string.add_notebook)
                 .setView(view)
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -248,7 +248,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     void showRecentNote() {
         mNoteFragment.loadNoteFromLocal(NoteFragment.RECENT_NOTES);
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
-        setTitle("Recent notes");
+        setTitle(getString(R.string.recent_notes));
     }
 
     @OnClick(R.id.rl_notebook)

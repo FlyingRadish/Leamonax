@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/settings_fragment_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,7 +23,7 @@
                 android:layout_height="34dp"
                 android:layout_weight="1"
                 android:focusable="false"
-                android:text="Public note" />
+                android:text="@string/public_note" />
 
             <Switch
                 android:id="@+id/sw_public"
@@ -43,13 +44,13 @@
                 android:layout_width="0dp"
                 android:layout_height="34dp"
                 android:layout_weight="1"
-                android:text="Note book" />
+                android:text="@string/notebook" />
 
             <TextView
                 android:id="@+id/tv_notebook"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="abc"
+                tools:text="abc"
                 android:textColor="#999" />
 
         </LinearLayout>
@@ -60,7 +61,7 @@
             android:id="@+id/tagsLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tags" />
+            android:text="@string/tags" />
 
         <EditText
             android:id="@+id/et_tags"

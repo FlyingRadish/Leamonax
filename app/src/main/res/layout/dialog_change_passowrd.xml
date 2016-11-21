@@ -9,7 +9,7 @@
         android:id="@+id/et_old_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Old password"
+        android:hint="@string/old_password"
         android:padding="8dp" />
 
     <EditText
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="New password"
+        android:hint="@string/new_password"
         android:padding="8dp" />
 
 </LinearLayout>

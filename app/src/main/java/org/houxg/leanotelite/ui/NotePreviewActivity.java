@@ -96,7 +96,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
     @OnClick(R.id.tv_save)
     void push() {
         if (!NetworkUtils.isNetworkAvailable(this)) {
-            ToastUtils.showNetworkUnavaliable(this);
+            ToastUtils.showNetworkUnavailable(this);
             return;
         }
         Observable.create(
@@ -132,7 +132,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                             mNote.save();
                             refresh();
                         } else {
-                            ToastUtils.show(NotePreviewActivity.this, getString(R.string.save_note_failed));
+                            ToastUtils.show(NotePreviewActivity.this, R.string.save_note_failed);
                         }
                     }
                 });
@@ -141,7 +141,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
     @OnClick(R.id.tv_revert)
     void revert() {
         if (!NetworkUtils.isNetworkAvailable(this)) {
-            ToastUtils.showNetworkUnavaliable(this);
+            ToastUtils.showNetworkUnavailable(this);
             return;
         }
         Observable.create(

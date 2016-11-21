@@ -107,7 +107,7 @@ public class SettingFragment extends Fragment {
             }
         }
         new AlertDialog.Builder(getActivity())
-                .setTitle("Choose notebook")
+                .setTitle(R.string.choose_notebook)
                 .setSingleChoiceItems(titles, currentSelection, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

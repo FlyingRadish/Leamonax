@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#212121"
@@ -20,8 +19,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:background="#fff"
-            android:hint="email"
-            android:text="houxg09@foxmail.com   "
+            android:hint="@string/email"
             android:padding="8dp"
             android:textSize="18sp" />
 
@@ -29,14 +27,13 @@
             android:id="@+id/et_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/et_email"
+            android:layout_marginBottom="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:layout_below="@id/et_email"
             android:background="#fff"
-            android:hint="password"
-            android:text="asd456789"
+            android:hint="@string/password"
             android:inputType="textPassword"
             android:padding="8dp"
             android:textSize="18sp" />
@@ -45,14 +42,14 @@
             android:id="@+id/et_custom_host"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/et_password"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:layout_below="@id/et_password"
             android:background="#fff"
-            android:hint="host address"
+            android:hint="@string/host_address"
             android:padding="8dp"
-            android:textSize="18sp"
-            android:scaleY="0"/>
+            android:scaleY="0"
+            android:textSize="18sp" />
 
         <RelativeLayout
             android:id="@+id/ll_action"
@@ -65,14 +62,14 @@
                 android:id="@+id/tv_sign_in"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:layout_marginEnd="32dp"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="16dp"
                 android:background="#757575"
                 android:gravity="center"
                 android:padding="8dp"
-                android:layout_centerHorizontal="true"
-                android:text="Sign in"
+                android:text="@string/sign_in"
                 android:textColor="#EEEEEE"
                 android:textSize="18sp" />
 
@@ -80,20 +77,20 @@
                 android:id="@+id/progress"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:indeterminate="true"
-                android:layout_centerHorizontal="true"
-                android:layout_alignTop="@id/tv_sign_in"
                 android:layout_alignBottom="@id/tv_sign_in"
-                android:alpha="0"/>
+                android:layout_alignTop="@id/tv_sign_in"
+                android:layout_centerHorizontal="true"
+                android:alpha="0"
+                android:indeterminate="true" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="4dp"
                 android:layout_below="@id/tv_sign_in"
                 android:layout_centerHorizontal="true"
-                android:text="forgot your password?"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:text="@string/forgot_password"
                 android:textColor="#EEEEEE" />
         </RelativeLayout>
 
@@ -103,7 +100,7 @@
             android:layout_below="@id/ll_action"
             android:padding="8dp"
             android:textSize="18sp"
-            android:visibility="invisible"/>
+            android:visibility="invisible" />
     </RelativeLayout>
 
 
@@ -114,7 +111,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
-        android:text="Using custom host"
+        android:text="@string/use_custom_host"
         android:textColor="#EEEEEE"
         android:textSize="16sp" />
 

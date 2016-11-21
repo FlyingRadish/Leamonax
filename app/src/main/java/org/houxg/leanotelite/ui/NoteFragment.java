@@ -202,7 +202,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
                     @Override
                     public void onError(Throwable e) {
-                        ToastUtils.show(getActivity(), "Delete note failed");
+                        ToastUtils.show(getActivity(), R.string.delete_note_failed);
                     }
 
                     @Override
@@ -223,7 +223,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                 mAdapter.loadFromLocal();
             }
             if (!event.isSucceed()) {
-                ToastUtils.show(getActivity(), getString(R.string.sync_notes_failed));
+                ToastUtils.show(getActivity(), R.string.sync_notes_failed);
             }
         }
     }

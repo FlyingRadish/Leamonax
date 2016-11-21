@@ -13,7 +13,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
@@ -24,7 +24,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Host" />
+                    android:text="@string/host" />
 
                 <TextView
                     android:id="@+id/tv_host"
@@ -48,15 +48,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="Avatar" />
+                    android:text="@string/avatar" />
 
                 <ImageView
                     android:id="@+id/iv_avatar"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    tools:text="Markdown" />
+                    android:layout_centerVertical="true" />
 
             </RelativeLayout>
 
@@ -70,7 +69,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Email" />
+                    android:text="@string/email" />
 
                 <TextView
                     android:id="@+id/tv_email"
@@ -91,7 +90,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="User name" />
+                    android:text="@string/user_name" />
 
                 <TextView
                     android:id="@+id/tv_user_name"
@@ -112,7 +111,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Change password" />
+                    android:text="@string/change_password" />
 
             </LinearLayout>
 
@@ -127,7 +126,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Editor" />
+                    android:text="@string/editor" />
 
                 <TextView
                     android:id="@+id/tv_editor"
@@ -150,7 +149,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Image size" />
+                    android:text="@string/image_size" />
 
                 <TextView
                     android:id="@+id/tv_image_size"
@@ -175,7 +174,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:text="Clear data" />
+                    android:text="@string/clear_data" />
 
                 <include layout="@layout/divider" />
             </LinearLayout>
@@ -189,7 +188,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Log out" />
+                    android:text="@string/log_out" />
 
             </LinearLayout>
 

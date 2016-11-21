@@ -1,6 +1,7 @@
 package org.houxg.leanotelite.adapter;
 
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -19,7 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -92,18 +92,19 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
     public void onBindViewHolder(NoteAdapter.NoteHolder holder, int position) {
         final Note note = mData.get(position);
         if (TextUtils.isEmpty(note.getTitle())) {
-            holder.titleTv.setText("Untitled");
+            holder.titleTv.setText(R.string.untitled);
         } else {
             holder.titleTv.setText(note.getTitle());
         }
         holder.contentTv.setText(note.getContent());
         holder.notebookTv.setText(mNotebookId2TitleMaps.get(note.getNoteBookId()));
         long updateTime = note.getUpdatedTimeVal();
+        Context context = holder.updateTimeTv.getContext();
         String time;
         if (updateTime >= TimeUtils.getToday().getTimeInMillis()) {
             time = TimeUtils.toTimeFormat(updateTime);
         } else if (updateTime >= TimeUtils.getYesterday().getTimeInMillis()) {
-            time = String.format(Locale.US, "Yesterday %s", TimeUtils.toTimeFormat(updateTime));
+            time = context.getString(R.string.time_yesterday, TimeUtils.toTimeFormat(updateTime));
         } else if (updateTime >= TimeUtils.getThisYear().getTimeInMillis()) {
             time = TimeUtils.toDateFormat(updateTime);
         } else {
@@ -167,6 +168,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
 
     public interface NoteAdapterListener {
         void onClickNote(Note note);
+
         void onLongClickNote(Note note);
     }
 }

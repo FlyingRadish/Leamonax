@@ -116,10 +116,10 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                                         note.setIsDirty(false);
                                         note.save();
                                     } else {
-                                        ToastUtils.show(NoteEditActivity.this, getString(R.string.save_note_failed));
+                                        ToastUtils.show(NoteEditActivity.this, R.string.save_note_failed);
                                     }
                                 } else {
-                                    ToastUtils.show(NoteEditActivity.this, getString(R.string.network_is_unavailable));
+                                    ToastUtils.showNetworkUnavailable(NoteEditActivity.this);
                                 }
                             }
                         });

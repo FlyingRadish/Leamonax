@@ -82,7 +82,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
 
     private void refreshHostSetting(boolean isCustomHost) {
         if (isCustomHost) {
-            mCustomHostBtn.setText("Use Leanote.com");
+            mCustomHostBtn.setText(R.string.use_leanote_host);
             mHostEt.setPivotY(0);
             mHostEt.animate()
                     .scaleY(1)
@@ -95,7 +95,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                     .setInterpolator(new AccelerateDecelerateInterpolator())
                     .start();
         } else {
-            mCustomHostBtn.setText("Use custom host");
+            mCustomHostBtn.setText(R.string.use_custom_host);
             mHostEt.setPivotY(0);
             mHostEt.animate()
                     .scaleY(0)
@@ -142,7 +142,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        ToastUtils.show(SignInActivity.this, "Network error");
+                        ToastUtils.showNetworkError(SignInActivity.this);
                         animateSignFinish();
                     }
 
@@ -155,7 +155,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                             startActivity(intent);
                             finish();
                         } else {
-                            ToastUtils.show(SignInActivity.this, "Wrong email or password");
+                            ToastUtils.show(SignInActivity.this, R.string.wron_email_or_password);
                         }
                     }
                 });

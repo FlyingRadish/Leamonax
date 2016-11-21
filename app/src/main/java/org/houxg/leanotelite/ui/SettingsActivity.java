@@ -69,7 +69,7 @@ public class SettingsActivity extends BaseActivity {
     @OnClick(R.id.ll_editor)
     void selectEditor() {
         new AlertDialog.Builder(this)
-                .setTitle("Choose editor")
+                .setTitle(R.string.choose_editor)
                 .setSingleChoiceItems(mEditors, AccountService.getCurrent().getDefaultEditor(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -87,10 +87,10 @@ public class SettingsActivity extends BaseActivity {
     @OnClick(R.id.ll_log_out)
     void clickedLogout() {
         new AlertDialog.Builder(this)
-                .setTitle("Log out")
-                .setMessage("Are you sure to log out?")
+                .setTitle(R.string.log_out)
+                .setMessage(R.string.are_your_sure_to_log_out)
                 .setCancelable(true)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -101,7 +101,7 @@ public class SettingsActivity extends BaseActivity {
                         finish();
                     }
                 })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -121,10 +121,10 @@ public class SettingsActivity extends BaseActivity {
         final EditText mUserNameEt = (EditText) view.findViewById(R.id.edit);
         mUserNameEt.setText(AccountService.getCurrent().getUserName());
         new AlertDialog.Builder(this)
-                .setTitle("Change username")
+                .setTitle(R.string.change_user_name)
                 .setView(view)
                 .setCancelable(true)
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -142,10 +142,10 @@ public class SettingsActivity extends BaseActivity {
         final EditText mOldPasswordEt = (EditText) view.findViewById(R.id.et_old_password);
         final EditText mNewPasswordEt = (EditText) view.findViewById(R.id.et_new_password);
         new AlertDialog.Builder(this)
-                .setTitle("Change password")
+                .setTitle(R.string.change_password)
                 .setView(view)
                 .setCancelable(true)
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -158,15 +158,15 @@ public class SettingsActivity extends BaseActivity {
     @OnClick(R.id.ll_clear)
     void clickedClearData() {
         new AlertDialog.Builder(this)
-                .setTitle("Clear data")
-                .setMessage("Are you sure to delete all notes and notebooks in this account?")
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.clear_data)
+                .setMessage(R.string.are_you_sure_to_delete_all_data_in_this_account)
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -203,7 +203,7 @@ public class SettingsActivity extends BaseActivity {
                 .subscribe(new Action1<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        ToastUtils.show(SettingsActivity.this, "finish");
+                        ToastUtils.show(SettingsActivity.this, R.string.clear_data_successful);
                     }
                 });
     }
@@ -220,7 +220,7 @@ public class SettingsActivity extends BaseActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        ToastUtils.show(SettingsActivity.this, "Network error");
+                        ToastUtils.showNetworkError(SettingsActivity.this);
                         mUserNameTv.setText(AccountService.getCurrent().getUserName());
                     }
 
@@ -232,7 +232,7 @@ public class SettingsActivity extends BaseActivity {
                             account.update();
                         } else {
                             mUserNameTv.setText(AccountService.getCurrent().getUserName());
-                            ToastUtils.show(SettingsActivity.this, "Change username failed");
+                            ToastUtils.show(SettingsActivity.this, R.string.change_user_name_failed);
                         }
                     }
                 });
@@ -250,13 +250,13 @@ public class SettingsActivity extends BaseActivity {
 
                     @Override
                     public void onError(Throwable e) {
-                        ToastUtils.show(SettingsActivity.this, "Change password failed");
+                        ToastUtils.showNetworkError(SettingsActivity.this);
                     }
 
                     @Override
                     public void onNext(BaseResponse baseResponse) {
                         if (!baseResponse.isOk()) {
-                            ToastUtils.show(SettingsActivity.this, "Change password failed");
+                            ToastUtils.show(SettingsActivity.this, R.string.change_password_failed);
                         }
                     }
                 });

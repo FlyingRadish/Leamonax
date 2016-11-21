@@ -5,10 +5,10 @@
     <item
         android:id="@+id/action_settings"
         app:showAsAction="always"
-        android:title="Settings"/>
+        android:title="@string/settings"/>
 
     <item
         android:id="@+id/action_save"
         app:showAsAction="always"
-        android:title="Save"/>
+        android:title="@string/save"/>
 </menu>
