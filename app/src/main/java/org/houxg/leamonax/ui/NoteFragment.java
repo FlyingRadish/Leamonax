@@ -32,6 +32,7 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.SyncEvent;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.DisplayUtils;
+import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
 import java.util.Locale;
@@ -48,6 +49,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
     private static final String TAG = "NoteFragment";
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
+    private static final String EXT_SHOULD_FETCH_NOTES = "ext_should_fetch_notes";
 
     public static final int RECENT_NOTES = -1;
 
@@ -64,8 +66,12 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     public NoteFragment() {
     }
 
-    public static NoteFragment newInstance() {
-        return new NoteFragment();
+    public static NoteFragment newInstance(boolean shouldFetchNotes) {
+        NoteFragment fragment = new NoteFragment();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(EXT_SHOULD_FETCH_NOTES, shouldFetchNotes);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Nullable
@@ -87,8 +93,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //TODO:check network
-                NoteSyncService.startServiceForNote(getActivity());
+                syncNotes();
             }
         });
 
@@ -108,12 +113,30 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         return view;
     }
 
+    private void syncNotes() {
+        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
+            ToastUtils.showNetworkUnavailable(getActivity());
+            return;
+        }
+        NoteSyncService.startServiceForNote(getActivity());
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         EventBus.getDefault().register(this);
         if (savedInstanceState == null) {
             mAdapter.loadFromLocal();
+            if (getArguments().getBoolean(EXT_SHOULD_FETCH_NOTES, false)) {
+                mSwipeRefresh.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.i(TAG, "fetch notes");
+                        mSwipeRefresh.setRefreshing(true);
+                        syncNotes();
+                    }
+                }, 200);
+            }
         }
         if (savedInstanceState != null) {
             mScrollPosition = savedInstanceState.getFloat(EXT_SCROLL_POSITION, 0);
@@ -147,10 +170,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
             mCurrentNotebookId = notebookLocalId;
             mAdapter.loadFromLocal(mCurrentNotebookId);
         }
-    }
-
-    public void loadNoteWithTag(String tag) {
-        mAdapter.loadFromLocal();
     }
 
     @Override

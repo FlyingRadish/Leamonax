@@ -87,7 +87,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white);
 
         if (savedInstanceState == null) {
-            mNoteFragment = NoteFragment.newInstance();
+            mNoteFragment = NoteFragment.newInstance(getIntent().getBooleanExtra(EXT_SHOULD_RELOAD, false));
             getFragmentManager().beginTransaction().add(R.id.container, mNoteFragment, TAG_NOTE_FRAGMENT).commit();
         } else {
             mNoteFragment = (NoteFragment) getFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);

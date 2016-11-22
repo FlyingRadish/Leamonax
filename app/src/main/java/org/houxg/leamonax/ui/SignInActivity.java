@@ -155,7 +155,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                             startActivity(intent);
                             finish();
                         } else {
-                            ToastUtils.show(SignInActivity.this, R.string.wron_email_or_password);
+                            ToastUtils.show(SignInActivity.this, R.string.email_or_password_incorrect);
                         }
                     }
                 });

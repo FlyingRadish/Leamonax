@@ -8,7 +8,7 @@ import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.network.ApiProvider;
 import org.houxg.leamonax.service.AccountService;
 
-public class LeaLaunchActivity extends Activity {
+public class LaunchActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,7 +17,7 @@ public class LeaLaunchActivity extends Activity {
         if (AccountService.isSignedIn()) {
             Account account = AccountService.getCurrent();
             ApiProvider.getInstance().init(account.getHost());
-            intent = new Intent(this, MainActivity.class);
+            intent = MainActivity.getOpenIntent(this, false);
         } else {
             intent = new Intent(this, SignInActivity.class);
         }

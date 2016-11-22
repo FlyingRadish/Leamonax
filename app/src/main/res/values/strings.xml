@@ -29,7 +29,7 @@
     <string name="change_password_failed">Change password failed</string>
     <string name="choose_notebook">Choose notebook</string>
     <string name="delete_note_failed">Delete note failed</string>
-    <string name="wron_email_or_password">Wrong email or password</string>
+    <string name="email_or_password_incorrect">Email or password is incorrect</string>
     <string name="network_error">Network error</string>
     <string name="untitled">Untitled</string>
     <string name="time_yesterday">Yesterday %s</string>
