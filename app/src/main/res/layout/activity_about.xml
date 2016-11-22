@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_about"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="org.houxg.leamonax.ui.AboutActivity">
+
+    <include layout="@layout/toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="32dp"
+                android:src="@drawable/logo" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/app_name"
+                android:textSize="16sp" />
+
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/version" />
+
+                <TextView
+                    android:id="@+id/tv_version"
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="1.0" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/license" />
+
+                <TextView
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GNU GENERAL PUBLIC LICENSE V3" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/thanks" />
+
+                <TextView
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Leanote" />
+
+                <TextView
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="https://material.io/icons/" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

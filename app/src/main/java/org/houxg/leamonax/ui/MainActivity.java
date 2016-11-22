@@ -14,7 +14,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -118,18 +117,8 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        } else if (item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
             if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
                 mDrawerLayout.closeDrawer(GravityCompat.START, true);
             } else {
@@ -250,6 +239,18 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         mNoteFragment.loadNoteFromLocal(NoteFragment.RECENT_NOTES);
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
         setTitle(getString(R.string.recent_notes));
+    }
+
+    @OnClick(R.id.rl_about)
+    void clickedAbout() {
+        Intent intent = new Intent(this, AboutActivity.class);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.rl_settings)
+    void clickedSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     @OnClick(R.id.rl_notebook)

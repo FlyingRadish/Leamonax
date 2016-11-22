@@ -55,4 +55,8 @@
     <string name="settings">Settings</string>
     <string name="save">Save</string>
     <string name="host_address_is_incorrect">Host address is incorrect</string>
+    <string name="thanks">Thanks</string>
+    <string name="license">License</string>
+    <string name="version">Version</string>
+    <string name="about">About</string>
 </resources>
