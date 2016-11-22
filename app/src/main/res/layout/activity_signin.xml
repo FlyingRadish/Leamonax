@@ -7,6 +7,7 @@
 
 
     <RelativeLayout
+        android:id="@+id/rl_fields"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -84,12 +85,14 @@
                 android:indeterminate="true" />
 
             <TextView
+                android:id="@+id/tv_forgot_password"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_sign_in"
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="4dp"
+                android:padding="8dp"
                 android:text="@string/forgot_password"
                 android:textColor="#EEEEEE" />
         </RelativeLayout>
@@ -102,6 +105,14 @@
             android:textSize="18sp"
             android:visibility="invisible" />
     </RelativeLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/rl_fields"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/logo" />
 
 
     <TextView

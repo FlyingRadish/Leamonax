@@ -2,6 +2,7 @@ package org.houxg.leamonax.ui;
 
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
@@ -32,6 +33,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     private static final String TAG = "SignInActivity";
 
     private static final String LEANOTE_HOST = "https://leanote.com";
+    private static final String FIND_PASSWORD = "/findPassword";
     private static final String EXT_IS_CUSTOM_HOST = "ext_is_custom_host";
     private static final String EXT_HOST = "ext_host";
 
@@ -75,6 +77,18 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
         mHostEt.setText(savedInstanceState.getString(EXT_HOST));
     }
 
+    @OnClick(R.id.tv_forgot_password)
+    void clickedForgotPassword() {
+        String url = getHost() + FIND_PASSWORD;
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        try {
+            startActivity(i);
+        } catch (Exception ex) {
+            ToastUtils.show(this, R.string.host_address_is_incorrect);
+        }
+    }
+
     @OnClick(R.id.tv_custom_host)
     void switchHost() {
         refreshHostSetting(!(boolean) mCustomHostBtn.getTag());
@@ -111,13 +125,15 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
         mCustomHostBtn.setTag(isCustomHost);
     }
 
+    private String getHost() {
+        return (boolean) mCustomHostBtn.getTag() ? mHostEt.getText().toString().trim() : LEANOTE_HOST;
+    }
 
     @OnClick(R.id.tv_sign_in)
     void signIn() {
         String email = mEmailEt.getText().toString();
         String password = mPasswordEt.getText().toString();
-        boolean isCustomHost = (boolean) mCustomHostBtn.getTag();
-        final String host = isCustomHost ? mHostEt.getText().toString().trim() : LEANOTE_HOST;
+        final String host = getHost();
         ApiProvider.getInstance().init(host);
         AccountService.login(email, password)
                 .doOnSubscribe(new Action0() {
