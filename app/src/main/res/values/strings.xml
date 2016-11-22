@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Leanote Lite</string>
+    <string name="app_name">Leamonax</string>
     <string name="network_is_unavailable">Network is unavailable</string>
     <string name="save_note_failed">Save note failed</string>
     <string name="sync_notes_failed">Sync notes failed</string>

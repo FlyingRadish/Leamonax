@@ -6,7 +6,7 @@
 
     <include layout="@layout/toolbar" />
 
-    <org.houxg.leanotelite.widget.LeaViewPager
+    <org.houxg.leamonax.widget.LeaViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

@@ -17,30 +17,30 @@
             style="@style/FormatButton"
             android:src="@drawable/ic_insert_photo_black_disable" />
 
-        <org.houxg.leanotelite.widget.ToggleImageButton
+        <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_link"
             style="@style/FormatButton"
             android:src="@drawable/ic_insert_link_black_disable" />
 
-        <org.houxg.leanotelite.widget.ToggleImageButton
+        <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_order_list"
             style="@style/FormatButton"
             app:checkedDrawable="@drawable/ic_format_list_bulleted_black_enable"
             app:uncheckedDrawable="@drawable/ic_format_list_bulleted_black_disable" />
 
-        <org.houxg.leanotelite.widget.ToggleImageButton
+        <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_unorder_list"
             style="@style/FormatButton"
             app:checkedDrawable="@drawable/ic_format_list_numbered_black_enable"
             app:uncheckedDrawable="@drawable/ic_format_list_numbered_black_disable" />
 
-        <org.houxg.leanotelite.widget.ToggleImageButton
+        <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_bold"
             style="@style/FormatButton"
             app:checkedDrawable="@drawable/ic_format_bold_black_enable"
             app:uncheckedDrawable="@drawable/ic_format_bold_black_disable" />
 
-        <org.houxg.leanotelite.widget.ToggleImageButton
+        <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_italic"
             style="@style/FormatButton"
             app:checkedDrawable="@drawable/ic_format_italic_black_enable"
@@ -57,7 +57,7 @@
             android:src="@drawable/ic_redo_black_disable" />
     </org.houxg.flexlayout.FlexLayout>
 
-    <org.houxg.leanotelite.widget.LeaWebView
+    <org.houxg.leamonax.widget.LeaWebView
         android:id="@+id/web_editor"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
