@@ -5,7 +5,7 @@
     <string name="sync_notes_failed">Sync notes failed</string>
     <string name="saving_note">Saving note</string>
     <string name="save_to_server">save to server</string>
-    <string name="revert">revert</string>
+    <string name="revert">Revert</string>
     <string name="reverting">Reverting</string>
     <string name="Edit">Edit</string>
     <string name="link">Link</string>

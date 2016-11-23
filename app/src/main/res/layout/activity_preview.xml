@@ -13,21 +13,21 @@
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar" />
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/rl_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="#fff"
+        android:gravity="center_vertical|end"
         android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:visibility="gone">
+        android:paddingStart="16dp">
 
         <TextView
             android:id="@+id/tv_revert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:minHeight="32dp"
             android:minWidth="48dp"
@@ -37,12 +37,13 @@
             android:id="@+id/tv_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/tv_revert"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:minHeight="32dp"
             android:minWidth="48dp"
-            android:text="@string/save_to_server" />
+            android:text="@string/save"
+            android:textColor="@color/colorAccent" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>
