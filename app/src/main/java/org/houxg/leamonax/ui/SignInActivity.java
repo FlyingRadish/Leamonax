@@ -40,6 +40,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     private static final String FIND_PASSWORD = "/findPassword";
     private static final String EXT_IS_CUSTOM_HOST = "ext_is_custom_host";
     private static final String EXT_HOST = "ext_host";
+    private static final String EXT_ACTION_PANEL_OFFSET_Y = "ext_host_et_height";
 
     @BindView(R.id.et_email)
     EditText mEmailEt;
@@ -62,23 +63,6 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     @BindView(R.id.rl_sign_up)
     View mSignUpPanel;
 
-    private Observer<Authentication> mSignInObserver = new Observer<Authentication>() {
-        @Override
-        public void onCompleted() {
-
-        }
-
-        @Override
-        public void onError(Throwable e) {
-
-        }
-
-        @Override
-        public void onNext(Authentication authentication) {
-
-        }
-    };
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,7 +70,21 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
         ButterKnife.bind(this);
         mEmailEt.addTextChangedListener(this);
         mPasswordEt.addTextChangedListener(this);
-        mCustomHostBtn.setTag(false);
+        mHostEt.setPivotY(0);
+
+        int actionPanelOffsetY = 0;
+        boolean isCustomHost = false;
+        String host = "";
+        if (savedInstanceState != null) {
+            isCustomHost = savedInstanceState.getBoolean(EXT_IS_CUSTOM_HOST);
+            actionPanelOffsetY = savedInstanceState.getInt(EXT_ACTION_PANEL_OFFSET_Y);
+            host = savedInstanceState.getString(EXT_HOST);
+        }
+        mCustomHostBtn.setTag(isCustomHost);
+        mActionPanel.setTag(actionPanelOffsetY);
+        mActionPanel.setY(actionPanelOffsetY);
+        mHostEt.setScaleY(isCustomHost ? 1 : 0);
+        mHostEt.setText(host);
     }
 
     @Override
@@ -94,14 +92,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
         super.onSaveInstanceState(outState);
         outState.putBoolean(EXT_IS_CUSTOM_HOST, (Boolean) mCustomHostBtn.getTag());
         outState.putString(EXT_HOST, mHostEt.getText().toString());
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        boolean isCustomHost = savedInstanceState.getBoolean(EXT_IS_CUSTOM_HOST);
-        refreshHostSetting(isCustomHost);
-        mHostEt.setText(savedInstanceState.getString(EXT_HOST));
+        outState.putInt(EXT_ACTION_PANEL_OFFSET_Y, (Integer) mActionPanel.getTag());
     }
 
     @OnClick(R.id.tv_forgot_password)
@@ -118,13 +109,10 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
 
     @OnClick(R.id.tv_custom_host)
     void switchHost() {
-        refreshHostSetting(!(boolean) mCustomHostBtn.getTag());
-    }
-
-    private void refreshHostSetting(boolean isCustomHost) {
+        boolean isCustomHost = !(boolean) mCustomHostBtn.getTag();
+        mCustomHostBtn.setTag(isCustomHost);
         if (isCustomHost) {
             mCustomHostBtn.setText(R.string.use_leanote_host);
-            mHostEt.setPivotY(0);
             mHostEt.animate()
                     .scaleY(1)
                     .setDuration(200)
@@ -134,10 +122,15 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                     .yBy(mHostEt.getHeight())
                     .setDuration(200)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mActionPanel.setTag(mHostEt.getHeight());
+                        }
+                    })
                     .start();
         } else {
             mCustomHostBtn.setText(R.string.use_custom_host);
-            mHostEt.setPivotY(0);
             mHostEt.animate()
                     .scaleY(0)
                     .setDuration(200)
@@ -147,9 +140,14 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                     .yBy(-mHostEt.getHeight())
                     .setDuration(200)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mActionPanel.setTag(0);
+                        }
+                    })
                     .start();
         }
-        mCustomHostBtn.setTag(isCustomHost);
     }
 
     private String getHost() {
