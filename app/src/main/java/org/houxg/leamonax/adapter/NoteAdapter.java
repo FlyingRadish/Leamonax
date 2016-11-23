@@ -16,8 +16,6 @@ import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.TimeUtils;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,42 +33,10 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         mListener = listener;
     }
 
-    public void loadFromLocal() {
-        mData = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
-        sortByUpdatedTime();
-        notifyDataSetChanged();
-    }
-
-    public void loadFromLocal(long notebookLocalId) {
-        mData = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), notebookLocalId);
-        sortByUpdatedTime();
-        updateNotebookMap();
-        notifyDataSetChanged();
-    }
-
     public void load(List<Note> source) {
         mData = source;
-        sortByUpdatedTime();
         updateNotebookMap();
         notifyDataSetChanged();
-    }
-
-    private void sortByUpdatedTime() {
-        Collections.sort(mData, new Comparator<Note>() {
-            @Override
-            public int compare(Note lhs, Note rhs) {
-                long lTime = lhs.getUpdatedTimeVal();
-                long rTime = rhs.getUpdatedTimeVal();
-                if (lTime > rTime) {
-                    return -1;
-                } else if (lTime < rTime) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-        updateNotebookMap();
     }
 
     @Override

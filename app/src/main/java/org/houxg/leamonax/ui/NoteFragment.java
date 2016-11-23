@@ -28,13 +28,17 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NoteAdapter;
 import org.houxg.leamonax.background.NoteSyncService;
+import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.SyncEvent;
+import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -58,6 +62,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     @BindView(R.id.swiperefresh)
     SwipeRefreshLayout mSwipeRefresh;
 
+    List<Note> mNotes;
     private NoteAdapter mAdapter;
 
     private long mCurrentNotebookId = RECENT_NOTES;
@@ -109,7 +114,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                 mScrollPosition = dy;
             }
         });
-
         return view;
     }
 
@@ -126,7 +130,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         super.onActivityCreated(savedInstanceState);
         EventBus.getDefault().register(this);
         if (savedInstanceState == null) {
-            mAdapter.loadFromLocal();
+            loadNoteFromLocal(RECENT_NOTES);
             if (getArguments().getBoolean(EXT_SHOULD_FETCH_NOTES, false)) {
                 mSwipeRefresh.postDelayed(new Runnable() {
                     @Override
@@ -165,11 +169,13 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     public void loadNoteFromLocal(long notebookLocalId) {
         if (notebookLocalId < 0) {
             mCurrentNotebookId = RECENT_NOTES;
-            mAdapter.loadFromLocal();
+            mNotes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
         } else {
             mCurrentNotebookId = notebookLocalId;
-            mAdapter.loadFromLocal(mCurrentNotebookId);
+            mNotes = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), notebookLocalId);
         }
+        Collections.sort(mNotes, new Note.UpdateTimeComparetor());
+        mAdapter.load(mNotes);
     }
 
     @Override
@@ -236,11 +242,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         Log.i(TAG, "RequestNotes rcv: isSucceed=" + event.isSucceed());
         if (isAdded()) {
             mSwipeRefresh.setRefreshing(false);
-            if (mCurrentNotebookId > 0) {
-                mAdapter.loadFromLocal(mCurrentNotebookId);
-            } else {
-                mAdapter.loadFromLocal();
-            }
+            loadNoteFromLocal(mCurrentNotebookId);
             if (!event.isSucceed()) {
                 ToastUtils.show(getActivity(), R.string.sync_notes_failed);
             }

@@ -13,6 +13,7 @@ import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.TimeUtils;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -238,13 +239,16 @@ public class Note extends BaseModel implements Serializable {
     }
 
     //TODO:delete this
-    public void setUpdatedTime(String v) {}
+    public void setUpdatedTime(String v) {
+    }
 
     //TODO:delete this
-    public void setCreatedTime(String v) {}
+    public void setCreatedTime(String v) {
+    }
 
     //TODO:delete this
-    public void setPublicTime(String publicTime) {}
+    public void setPublicTime(String publicTime) {
+    }
 
     @Override
     public String toString() {
@@ -275,9 +279,9 @@ public class Note extends BaseModel implements Serializable {
         return otherNote == null
                 || isChanged("title", title, otherNote.title)
                 || isChanged("content", content, otherNote.content)
-                || isChanged("notebookId" , noteBookId, otherNote.noteBookId)
+                || isChanged("notebookId", noteBookId, otherNote.noteBookId)
                 || isChanged("isMarkDown", isMarkDown, otherNote.isMarkDown)
-                || isChanged("tags" , tags, otherNote.tags)
+                || isChanged("tags", tags, otherNote.tags)
                 || isChanged("isBlog", isPublicBlog, otherNote.isPublicBlog);
     }
 
@@ -367,5 +371,20 @@ public class Note extends BaseModel implements Serializable {
 
     public String getMsg() {
         return msg;
+    }
+
+    public static class UpdateTimeComparetor implements Comparator<Note> {
+        @Override
+        public int compare(Note lhs, Note rhs) {
+            long lTime = lhs.getUpdatedTimeVal();
+            long rTime = rhs.getUpdatedTimeVal();
+            if (lTime > rTime) {
+                return -1;
+            } else if (lTime < rTime) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
     }
 }
