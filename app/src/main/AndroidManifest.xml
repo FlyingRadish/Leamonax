@@ -28,25 +28,26 @@
         </activity>
         <activity
             android:name=".ui.edit.NoteEditActivity"
-            android:label="Edit" />
+            android:label="@string/edit" />
         <activity
             android:name=".ui.NotePreviewActivity"
-            android:label="Preview" />
+            android:label="@string/preview" />
         <activity
             android:name=".ui.MainActivity"
-            android:label="Notes" />
+            android:label="@string/recent_notes" />
         <activity android:name=".ui.SignInActivity" />
         <activity
             android:name=".ui.SettingsActivity"
-            android:label="Settings" />
+            android:label="@string/settings" />
+
+        <activity android:name=".ui.AboutActivity"
+            android:label="@string/about"/>
 
         <service
             android:name=".background.NoteSyncService"
             android:enabled="true"
             android:exported="false"
-            android:label="NoteSyncService"></service>
-
-        <activity android:name=".ui.AboutActivity"></activity>
+            android:label="NoteSyncService" />
     </application>
 
 </manifest>

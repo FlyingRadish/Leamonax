@@ -5,6 +5,6 @@
     <item
         android:id="@+id/action_edit"
         app:showAsAction="always"
-        android:title="@string/Edit"/>
+        android:title="@string/edit"/>
 
 </menu>

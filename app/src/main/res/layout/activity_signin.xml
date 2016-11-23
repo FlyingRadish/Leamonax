@@ -15,87 +15,108 @@
 
         <EditText
             android:id="@+id/et_email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:background="#fff"
-            android:hint="@string/email"
-            android:padding="8dp"
-            android:textSize="18sp" />
+            style="@style/SignInEditText"
+            android:hint="@string/email" />
 
         <EditText
             android:id="@+id/et_password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/SignInEditText"
             android:layout_below="@id/et_email"
             android:layout_marginBottom="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:background="#fff"
             android:hint="@string/password"
-            android:inputType="textPassword"
-            android:padding="8dp"
-            android:textSize="18sp" />
+            android:inputType="textPassword" />
 
         <EditText
             android:id="@+id/et_custom_host"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/SignInEditText"
             android:layout_below="@id/et_password"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:background="#fff"
             android:hint="@string/host_address"
-            android:padding="8dp"
-            android:scaleY="0"
-            android:textSize="18sp" />
+            android:scaleY="0" />
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/ll_action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/et_password"
+            android:layout_marginTop="16dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tv_sign_in"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginEnd="32dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:background="#757575"
-                android:gravity="center"
-                android:padding="8dp"
-                android:text="@string/sign_in"
-                android:textColor="#EEEEEE"
-                android:textSize="18sp" />
+                android:orientation="horizontal"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp">
 
-            <ProgressBar
-                android:id="@+id/progress"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_alignBottom="@id/tv_sign_in"
-                android:layout_alignTop="@id/tv_sign_in"
-                android:layout_centerHorizontal="true"
-                android:alpha="0"
-                android:indeterminate="true" />
+                <RelativeLayout
+                    android:id="@+id/rl_sign_up"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/tv_sign_up"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="@color/colorAccent"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="Sign up"
+                        android:textColor="#EEEEEE"
+                        android:textSize="18sp" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_sign_up"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_centerInParent="true"
+                        android:alpha="0"
+                        android:indeterminate="true" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/tv_sign_in"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:background="#757575"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="@string/sign_in"
+                        android:textColor="#EEEEEE"
+                        android:textSize="18sp" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_sign_in"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_centerInParent="true"
+                        android:alpha="0"
+                        android:indeterminate="true" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_forgot_password"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_sign_in"
-                android:layout_centerHorizontal="true"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="4dp"
                 android:padding="8dp"
                 android:text="@string/forgot_password"
                 android:textColor="#EEEEEE" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <EditText
             android:layout_width="wrap_content"
@@ -113,7 +134,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
         android:src="@drawable/logo" />
-
 
     <TextView
         android:id="@+id/tv_custom_host"

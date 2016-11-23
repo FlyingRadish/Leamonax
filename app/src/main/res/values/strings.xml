@@ -7,7 +7,7 @@
     <string name="save_to_server">save to server</string>
     <string name="revert">Revert</string>
     <string name="reverting">Reverting</string>
-    <string name="Edit">Edit</string>
+    <string name="edit">Edit</string>
     <string name="link">Link</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
@@ -59,4 +59,5 @@
     <string name="license">License</string>
     <string name="version">Version</string>
     <string name="about">About</string>
+    <string name="preview">Preview</string>
 </resources>

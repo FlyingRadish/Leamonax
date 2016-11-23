@@ -12,6 +12,10 @@ import rx.Observable;
 
 public class AccountService {
 
+    public static Observable<BaseResponse> register(String email, String password) {
+        return RetrofitUtils.create(ApiProvider.getInstance().getAuthApi().register(email, password));
+    }
+
     public static Observable<Authentication> login(String email, String password) {
         return RetrofitUtils.create(ApiProvider.getInstance().getAuthApi().login(email, password));
     }
