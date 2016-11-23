@@ -230,6 +230,7 @@ public class SettingsActivity extends BaseActivity {
                             Account account = AccountService.getCurrent();
                             account.setUserName(username);
                             account.update();
+                            ToastUtils.show(SettingsActivity.this, R.string.change_user_name_successful);
                         } else {
                             mUserNameTv.setText(AccountService.getCurrent().getUserName());
                             ToastUtils.show(SettingsActivity.this, R.string.change_user_name_failed);
@@ -257,6 +258,8 @@ public class SettingsActivity extends BaseActivity {
                     public void onNext(BaseResponse baseResponse) {
                         if (!baseResponse.isOk()) {
                             ToastUtils.show(SettingsActivity.this, R.string.change_password_failed);
+                        } else {
+                            ToastUtils.show(SettingsActivity.this, R.string.change_password_successful);
                         }
                     }
                 });
