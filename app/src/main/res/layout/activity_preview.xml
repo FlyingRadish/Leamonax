@@ -21,7 +21,8 @@
         android:background="#fff"
         android:gravity="center_vertical|end"
         android:paddingEnd="16dp"
-        android:paddingStart="16dp">
+        android:paddingStart="16dp"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tv_revert"
