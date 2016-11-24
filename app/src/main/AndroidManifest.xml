@@ -48,6 +48,8 @@
             android:enabled="true"
             android:exported="false"
             android:label="NoteSyncService" />
+
+        <activity android:name=".ui.SearchActivity" />
     </application>
 
 </manifest>

@@ -62,4 +62,5 @@
     <string name="preview">Preview</string>
     <string name="change_password_successful">Change password successful</string>
     <string name="change_user_name_successful">Change user name successful</string>
+    <string name="search">Search</string>
 </resources>

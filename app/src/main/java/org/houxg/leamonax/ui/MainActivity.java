@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -117,6 +118,12 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -125,6 +132,9 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
                 mDrawerLayout.openDrawer(GravityCompat.START, true);
             }
             return true;
+        } else if (item.getItemId() == R.id.action_search) {
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

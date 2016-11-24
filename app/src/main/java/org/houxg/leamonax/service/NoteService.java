@@ -6,11 +6,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.raizlabs.android.dbflow.sql.language.SQLite;
+
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.NoteFile;
+import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.UpdateRe;
 import org.houxg.leamonax.network.ApiProvider;
@@ -488,5 +491,16 @@ public class NoteService {
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         RequestBody fileBody = RequestBody.create(MediaType.parse(mimeType), tempFile);
         return MultipartBody.Part.createFormData(String.format("FileDatas[%s]", noteFile.getLocalId()), tempFile.getName(), fileBody);
+    }
+
+    public static List<Note> searchNoteWithTitle(String keyword) {
+        keyword = String.format(Locale.US, "%%%s%%", keyword);
+        return SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.userId.eq(AccountService.getCurrent().getUserId()))
+                .and(Note_Table.title.like(keyword))
+                .and(Note_Table.isTrash.eq(false))
+                .and(Note_Table.isDeleted.eq(false))
+                .queryList();
     }
 }
