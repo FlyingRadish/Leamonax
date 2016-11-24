@@ -7,6 +7,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:actionMenuTextColor">@color/menu_text</item>
+
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_white</item>
     </style>
 
     <style name="SettingsStatus">

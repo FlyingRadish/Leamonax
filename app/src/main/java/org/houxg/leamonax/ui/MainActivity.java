@@ -51,7 +51,7 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends BaseActivity implements NotebookAdapter.NotebookAdapterListener {
 
     private static final String EXT_SHOULD_RELOAD = "ext_should_reload";
-    private static final String TAG_NOTE_FRAGMENT = "note_fragment";
+    private static final String TAG_NOTE_FRAGMENT = "tag_note_fragment";
 
     NoteFragment mNoteFragment;
 
@@ -129,6 +129,15 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void fetchInfo() {
         AccountService.getInfo(AccountService.getCurrent().getUserId())
                 .subscribeOn(Schedulers.io())
@@ -169,7 +178,6 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     public void onClickedNotebook(Notebook notebook) {
         mNoteFragment.loadNoteFromLocal(notebook.getId());
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
-        setTitle(notebook.getTitle());
     }
 
     @Override
@@ -238,7 +246,6 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     void showRecentNote() {
         mNoteFragment.loadNoteFromLocal(NoteFragment.RECENT_NOTES);
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
-        setTitle(getString(R.string.recent_notes));
     }
 
     @OnClick(R.id.rl_about)

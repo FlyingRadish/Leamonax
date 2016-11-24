@@ -3,6 +3,7 @@ package org.houxg.leamonax.service;
 
 import android.util.Log;
 
+import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.network.ApiProvider;
@@ -28,5 +29,10 @@ public class NotebookService {
         } else {
             throw new IllegalStateException(notebook.getMsg());
         }
+    }
+
+    public static String getTitle(long notebookLocalId) {
+        Notebook notebook = AppDataBase.getNotebookByLocalId(notebookLocalId);
+        return notebook != null ? notebook.getTitle() : "";
     }
 }

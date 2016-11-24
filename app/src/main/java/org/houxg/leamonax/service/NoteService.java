@@ -30,6 +30,8 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import rx.Observable;
+import rx.Subscriber;
 
 public class NoteService {
 
@@ -426,18 +428,29 @@ public class NoteService {
         return ApiProvider.getInstance().getNoteApi().update(requestBodyMap, fileBodies);
     }
 
-    public static void deleteNote(Note note) {
-        if (TextUtils.isEmpty(note.getNoteId())) {
-            AppDataBase.deleteNoteByLocalId(note.getId());
-        } else {
-            UpdateRe response = RetrofitUtils.excuteWithException(deleteNote(note.getNoteId(), note.getUsn()));
-            if (response.isOk()) {
-                AppDataBase.deleteNoteByLocalId(note.getId());
-                updateUsnIfNeed(response.getUsn());
-            } else {
-                throw new IllegalStateException(response.getMsg());
-            }
-        }
+    public static Observable<Void> deleteNote(final Note note) {
+        return Observable.create(
+                new Observable.OnSubscribe<Void>() {
+                    @Override
+                    public void call(Subscriber<? super Void> subscriber) {
+                        if (!subscriber.isUnsubscribed()) {
+                            if (TextUtils.isEmpty(note.getNoteId())) {
+                                AppDataBase.deleteNoteByLocalId(note.getId());
+                            } else {
+                                UpdateRe response = RetrofitUtils.excuteWithException(
+                                        ApiProvider.getInstance().getNoteApi().delete(note.getNoteId(), note.getUsn()));
+                                if (response.isOk()) {
+                                    AppDataBase.deleteNoteByLocalId(note.getId());
+                                    updateUsnIfNeed(response.getUsn());
+                                } else {
+                                    throw new IllegalStateException(response.getMsg());
+                                }
+                            }
+                            subscriber.onNext(null);
+                            subscriber.onCompleted();
+                        }
+                    }
+                });
     }
 
     private static void updateUsnIfNeed(int newUsn) {

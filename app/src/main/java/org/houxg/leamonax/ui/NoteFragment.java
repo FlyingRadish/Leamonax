@@ -4,14 +4,8 @@ package org.houxg.leamonax.ui;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
-import android.graphics.Canvas;
-import android.graphics.DashPathEffect;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v13.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,6 +30,7 @@ import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
+import org.houxg.leamonax.widget.DashDividerDecoration;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,9 +38,7 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Observable;
 import rx.Observer;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -206,17 +199,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     }
 
     private void deleteNote(final Note note) {
-        Observable.create(
-                new Observable.OnSubscribe<Void>() {
-                    @Override
-                    public void call(Subscriber<? super Void> subscriber) {
-                        if (!subscriber.isUnsubscribed()) {
-                            NoteService.deleteNote(note);
-                            subscriber.onNext(null);
-                            subscriber.onCompleted();
-                        }
-                    }
-                })
+        NoteService.deleteNote(note)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Void>() {
@@ -246,48 +229,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
             if (!event.isSucceed()) {
                 ToastUtils.show(getActivity(), R.string.sync_notes_failed);
             }
-        }
-    }
-
-    private static class DashDividerDecoration extends RecyclerView.ItemDecoration {
-
-        private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private Path mPath;
-
-        public DashDividerDecoration(int color, int dashGap, int dashWidth, int height) {
-            mPaint.setColor(color);
-            mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setStrokeWidth(height);
-            mPaint.setPathEffect(new DashPathEffect(new float[]{dashWidth, dashGap}, 0));
-            mPath = new Path();
-        }
-
-        @Override
-        public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-            super.onDraw(c, parent, state);
-            final int left = parent.getPaddingLeft();
-            final int right = parent.getWidth() - parent.getPaddingRight();
-            final int childCount = parent.getChildCount();
-            final int strokeWidth = (int) mPaint.getStrokeWidth();
-            for (int i = 0; i < childCount; i++) {
-                final View child = parent.getChildAt(i);
-                final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                        .getLayoutParams();
-                final int top = child.getBottom() + params.bottomMargin +
-                        Math.round(ViewCompat.getTranslationY(child));
-                int offsetY = top + strokeWidth / 2;
-
-                mPath.reset();
-                mPath.moveTo(left, offsetY);
-                mPath.lineTo(right, offsetY);
-                c.drawPath(mPath, mPaint);
-            }
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-            outRect.set(0, 0, 0, (int) mPaint.getStrokeWidth());
         }
     }
 }
