@@ -127,6 +127,7 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
             mNotes = NoteService.searchNoteWithTitle(keyword);
             Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         }
+        mAdapter.setHighlight(keyword);
         mAdapter.load(mNotes);
     }
 

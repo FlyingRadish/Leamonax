@@ -3,7 +3,10 @@ package org.houxg.leamonax.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,8 @@ import org.houxg.leamonax.utils.TimeUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,6 +33,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
     private List<Note> mData;
     private Map<String, String> mNotebookId2TitleMaps;
     private NoteAdapterListener mListener;
+    private Pattern mTitleHighlight;
 
     public NoteAdapter(NoteAdapterListener listener) {
         mListener = listener;
@@ -37,6 +43,14 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         mData = source;
         updateNotebookMap();
         notifyDataSetChanged();
+    }
+
+    public void setHighlight(String titleKeyWord) {
+        if (TextUtils.isEmpty(titleKeyWord)) {
+            mTitleHighlight = null;
+        } else {
+            mTitleHighlight = Pattern.compile(titleKeyWord, Pattern.CASE_INSENSITIVE);
+        }
     }
 
     @Override
@@ -60,7 +74,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         if (TextUtils.isEmpty(note.getTitle())) {
             holder.titleTv.setText(R.string.untitled);
         } else {
-            holder.titleTv.setText(note.getTitle());
+            holder.titleTv.setText(getHighlightedText(note.getTitle()));
         }
         holder.contentTv.setText(note.getContent());
         holder.notebookTv.setText(mNotebookId2TitleMaps.get(note.getNoteBookId()));
@@ -95,6 +109,19 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
                 return true;
             }
         });
+    }
+
+    private CharSequence getHighlightedText(String text) {
+        if (mTitleHighlight == null) {
+            return text;
+        }
+        SpannableStringBuilder builder = new SpannableStringBuilder(text);
+        Matcher matcher = mTitleHighlight.matcher(text);
+        int color = 0xFFFDD835;
+        while (matcher.find()) {
+            builder.setSpan(new BackgroundColorSpan(color), matcher.start(), matcher.end(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        }
+        return builder;
     }
 
     @Override
