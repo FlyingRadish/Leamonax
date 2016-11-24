@@ -32,6 +32,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Optional;
 
 public class EditorFragment extends Fragment implements Editor.EditorListener {
 
@@ -44,13 +45,22 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     private EditorFragmentListener mListener;
     private Editor mEditor;
 
-    @BindView(R.id.fl_tools)
+    @BindView(R.id.fl_container)
     View mToolContainer;
 
+    @Nullable
     @BindView(R.id.btn_bold)
     ToggleImageButton mBoldBtn;
+    @Nullable
     @BindView(R.id.btn_italic)
     ToggleImageButton mItalicBtn;
+    @Nullable
+    @BindView(R.id.btn_heading)
+    ToggleImageButton mHeadingBtn;
+    @Nullable
+    @BindView(R.id.btn_quote)
+    ToggleImageButton mQuoteBtn;
+
     @BindView(R.id.btn_order_list)
     ToggleImageButton mOrderListBtn;
     @BindView(R.id.btn_unorder_list)
@@ -92,19 +102,25 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_editor, container, false);
-        ButterKnife.bind(this, view);
+
 
         Bundle arguments = savedInstanceState == null ? getArguments() : savedInstanceState;
         mIsEditingEnabled = arguments.getBoolean(ARG_ENABLE_EDIT, false);
         boolean isMarkdown = arguments.getBoolean(ARG_IS_MARKDOWN, true);
 
-        mToolContainer.setVisibility(mIsEditingEnabled ? View.VISIBLE : View.GONE);
-
+        int formatRestId;
         if (isMarkdown) {
             mEditor = new MarkdownEditor(this);
+            formatRestId = R.layout.format_bar_markdown;
         } else {
             mEditor = new RichTextEditor(this);
+            formatRestId = R.layout.format_bar_richtext;
         }
+        ViewGroup formatBarContainer = (ViewGroup) view.findViewById(R.id.fl_container);
+        View formatBar = inflater.inflate(formatRestId, formatBarContainer, false);
+        formatBarContainer.addView(formatBar, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        ButterKnife.bind(this, view);
+        mToolContainer.setVisibility(mIsEditingEnabled ? View.VISIBLE : View.GONE);
         mEditor.init(mWebView);
         return view;
     }
@@ -191,14 +207,28 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
         mEditor.toggleUnorderList();
     }
 
+    @Optional
     @OnClick(R.id.btn_bold)
     void toggleBold() {
         mEditor.toggleBold();
     }
 
+    @Optional
     @OnClick(R.id.btn_italic)
     void toggleItalic() {
         mEditor.toggleItalic();
+    }
+
+    @Optional
+    @OnClick(R.id.btn_heading)
+    void toggleHeading() {
+        mEditor.toggleHeading();
+    }
+
+    @Optional
+    @OnClick(R.id.btn_quote)
+    void toggleQuote() {
+        mEditor.toggleQuote();
     }
 
     @OnClick(R.id.btn_undo)

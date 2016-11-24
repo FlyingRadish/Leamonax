@@ -57,6 +57,10 @@ public abstract class Editor {
 
     public abstract void toggleItalic();
 
+    public abstract void toggleQuote();
+
+    public abstract void toggleHeading();
+
     public interface EditorListener {
         void onPageLoaded();
         void onClickedLink(String title, String url);

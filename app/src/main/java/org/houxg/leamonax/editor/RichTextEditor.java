@@ -128,6 +128,16 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
         execJs("ZSSEditor.setItalic();");
     }
 
+    @Override
+    public void toggleQuote() {
+        execJs("ZSSEditor.setBlockquote();");
+    }
+
+    @Override
+    public void toggleHeading() {
+        execJs("ZSSEditor.setHeading();");
+    }
+
     private String appendPTag(String source) {
         String[] segments = source.split("\n\n");
         StringBuilder contentBuilder = new StringBuilder();

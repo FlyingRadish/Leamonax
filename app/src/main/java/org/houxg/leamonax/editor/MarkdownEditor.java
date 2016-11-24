@@ -115,4 +115,14 @@ public class MarkdownEditor extends Editor {
     public void toggleItalic() {
         execJs("ZSSEditor.setItalic();");
     }
+
+    @Override
+    public void toggleQuote() {
+        execJs("ZSSEditor.setBlockquote();");
+    }
+
+    @Override
+    public void toggleHeading() {
+        execJs("ZSSEditor.setHeading();");
+    }
 }
