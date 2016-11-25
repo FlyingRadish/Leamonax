@@ -32,6 +32,16 @@ public class TimeUtils {
                             return modified;
                         }
                     });
+            serverTime = StringUtils.replace(serverTime,
+                    "\\+\\d+:\\d+",
+                    "\\d+:\\d+",
+                    new StringUtils.Replacer() {
+                        @Override
+                        public String replaceWith(String original, Object... extraData) {
+                            String[] vals = original.split(":");
+                            return String.format(Locale.US, "%02d:%02d", Integer.valueOf(vals[0]), Integer.valueOf(vals[1]));
+                        }
+                    });
             Date date = mServerWithMillsFormat.parse(serverTime);
             return date.getTime();
         } catch (ParseException e) {
