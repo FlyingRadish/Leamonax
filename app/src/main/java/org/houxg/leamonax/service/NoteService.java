@@ -2,6 +2,7 @@ package org.houxg.leamonax.service;
 
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -303,9 +304,26 @@ public class NoteService {
         return true;
     }
 
-    public static Call<Note> addNote(Note note) {
-        List<MultipartBody.Part> fileBodies = new ArrayList<>();
+    private static Call<Note> addNote(Note note) {
+        Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(note);
+        List<MultipartBody.Part> fileBodies = handleFileBodies(note, requestBodyMap);
+        return ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
+    }
+    
+    private static Call<Note> updateNote(Note original, Note modified) {
+        Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modified);
+        requestBodyMap.put("NoteId", createPartFromString(original.getNoteId()));
+        requestBodyMap.put("Usn", createPartFromString(String.valueOf(original.getUsn())));
+        List<MultipartBody.Part> fileBodies = handleFileBodies(modified, requestBodyMap);
 
+        if (original.isTrash() != modified.isTrash()) {
+            requestBodyMap.put("IsTrash", createPartFromString(getBooleanString(modified.isTrash())));
+        }
+        return ApiProvider.getInstance().getNoteApi().update(requestBodyMap, fileBodies);
+    }
+
+    @NonNull
+    private static Map<String, RequestBody> generateCommonBodyMap(Note note) {
         Map<String, RequestBody> requestBodyMap = new HashMap<>();
         String content = note.getContent();
         if (note.isMarkDown()) {
@@ -320,7 +338,12 @@ public class NoteService {
         requestBodyMap.put("IsBlog", createPartFromString(getBooleanString(note.isPublicBlog())));
         requestBodyMap.put("CreatedTime", createPartFromString(TimeUtils.toServerTime(note.getCreatedTimeVal())));
         requestBodyMap.put("UpdatedTime", createPartFromString(TimeUtils.toServerTime(note.getUpdatedTimeVal())));
+        return requestBodyMap;
+    }
 
+    @NonNull
+    private static List<MultipartBody.Part> handleFileBodies(Note note, Map<String, RequestBody> requestBodyMap) {
+        List<MultipartBody.Part> fileBodies = new ArrayList<>();
         List<String> imageLocalIds;
         if (note.isMarkDown()) {
             imageLocalIds = getImagesFromContentForMD(note.getContent());
@@ -343,7 +366,7 @@ public class NoteService {
                 }
             }
         }
-        return ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
+        return fileBodies;
     }
 
     private static List<String> getImagesFromContentForRichText(String noteContent) {
@@ -376,59 +399,6 @@ public class NoteService {
                     }
                 });
         return localIds;
-    }
-
-    private static Call<Note> updateNote(Note original, Note modified) {
-        List<MultipartBody.Part> fileBodies = new ArrayList<>();
-
-        Map<String, RequestBody> requestBodyMap = new HashMap<>();
-        String noteId = original.getNoteId();
-        String content = modified.getContent();
-        if (modified.isMarkDown()) {
-            content = convertToServerImageLinkForMD(content);
-        } else {
-            content = convertToServerImageLinkForRichText(content);
-        }
-        requestBodyMap.put("NoteId", createPartFromString(noteId));
-        requestBodyMap.put("NotebookId", createPartFromString(modified.getNoteBookId()));
-        requestBodyMap.put("Usn", createPartFromString(String.valueOf(original.getUsn())));
-        requestBodyMap.put("Title", createPartFromString(modified.getTitle()));
-        requestBodyMap.put("Content", createPartFromString(content));
-        requestBodyMap.put("IsMarkdown", createPartFromString(getBooleanString(modified.isMarkDown())));
-        requestBodyMap.put("IsBlog", createPartFromString(getBooleanString(modified.isPublicBlog())));
-        requestBodyMap.put("UpdatedTime", createPartFromString(TimeUtils.toServerTime(System.currentTimeMillis())));
-
-        List<String> imageLocalIds;
-        if (modified.isMarkDown()) {
-            imageLocalIds = getImagesFromContentForMD(modified.getContent());
-        } else {
-            imageLocalIds = getImagesFromContentForRichText(modified.getContent());
-        }
-        AppDataBase.deleteFileExcept(modified.getId(), imageLocalIds);
-        List<NoteFile> files = AppDataBase.getAllRelatedFile(modified.getId());
-        if (CollectionUtils.isNotEmpty(files)) {
-            int size = files.size();
-            for (int index = 0; index < size; index++) {
-                NoteFile noteFile = files.get(index);
-                requestBodyMap.put(String.format("Files[%s][LocalFileId]", index), createPartFromString(noteFile.getLocalId()));
-                requestBodyMap.put(String.format("Files[%s][IsAttach]", index), createPartFromString(getBooleanString(noteFile.isAttach())));
-                requestBodyMap.put(String.format("Files[%s][FileId]", index), createPartFromString(StringUtils.notNullStr(noteFile.getServerId())));
-                boolean shouldUploadFile = TextUtils.isEmpty(noteFile.getServerId());
-                requestBodyMap.put(String.format("Files[%s][HasBody]", index), createPartFromString(getBooleanString(shouldUploadFile)));
-                if (shouldUploadFile) {
-                    fileBodies.add(createFilePart(noteFile));
-                }
-            }
-        }
-
-        if (!original.getNoteBookId().equals(modified.getNoteBookId())) {
-            requestBodyMap.put("NotebookId", createPartFromString(modified.getNoteBookId()));
-        }
-
-        if (original.isTrash() != modified.isTrash()) {
-            requestBodyMap.put("IsTrash", createPartFromString(getBooleanString(modified.isTrash())));
-        }
-        return ApiProvider.getInstance().getNoteApi().update(requestBodyMap, fileBodies);
     }
 
     public static Observable<Void> deleteNote(final Note note) {
