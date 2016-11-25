@@ -17,12 +17,17 @@ import android.view.ViewGroup;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
+import org.houxg.leamonax.model.Tag;
+import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteFileService;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.BaseActivity;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.LeaViewPager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -44,6 +49,8 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
 
     private EditorFragment mEditorFragment;
     private SettingFragment mSettingsFragment;
+    private List<Tag> mOriginalTags;
+    private List<Tag> mModifiedTags;
     private Note mOriginal;
     private Note mModified;
     private boolean mIsNewNote;
@@ -73,6 +80,8 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         mIsNewNote = getIntent().getBooleanExtra(EXT_IS_NEW_NOTE, false);
         mOriginal = AppDataBase.getNoteByLocalId(noteLocalId);
         mModified = AppDataBase.getNoteByLocalId(noteLocalId);
+        mOriginalTags = AppDataBase.getTagByNoteLocalId(noteLocalId);
+        mModifiedTags = AppDataBase.getTagByNoteLocalId(noteLocalId);
         setResult(RESULT_CANCELED);
     }
 
@@ -86,6 +95,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        //TODO:save note state
         outState.putLong(EXT_NOTE_LOCAL_ID, mModified.getId());
         outState.putString(TAG_EDITOR, mEditorFragment.getTag());
         outState.putString(TAG_SETTING, mSettingsFragment.getTag());
@@ -199,7 +209,17 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         mModified.setTitle(title);
         mModified.setContent(content);
         mModified.setNoteBookId(mSettingsFragment.getNotebookId());
-        mModified.setTags(mSettingsFragment.getTags());
+        List<String> tagTexts = mSettingsFragment.getTags();
+        mModifiedTags = new ArrayList<>();
+        for (String tagText : tagTexts) {
+            Tag tag = AppDataBase.getTagByText(tagText);
+            if (tag == null) {
+                tag = new Tag(AccountService.getCurrent().getUserId(), tagText);
+                long id = tag.insert();
+                tag.setId(id);
+            }
+            mModifiedTags.add(tag);
+        }
         mModified.setIsPublicBlog(mSettingsFragment.shouldPublic());
     }
 
@@ -240,7 +260,11 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     public void onFragmentInitialized() {
         mSettingsFragment.setNotebookId(mModified.getNoteBookId());
         mSettingsFragment.setShouldPublic(mModified.isPublicBlog());
-        mSettingsFragment.setTags(mModified.getTags());
+        List<String> tagTexts = new ArrayList<>();
+        for (Tag tag : mModifiedTags) {
+            tagTexts.add(tag.getText());
+        }
+        mSettingsFragment.setTags(tagTexts);
     }
 
     private class SectionAdapter extends FragmentPagerAdapter {

@@ -196,6 +196,10 @@ public class Note extends BaseModel implements Serializable {
         this.noteId = noteId;
     }
 
+    public List<String> getTagData() {
+        return tagData;
+    }
+
     public void updateTags() {
         if (CollectionUtils.isEmpty(tagData)) {
             tags = "";

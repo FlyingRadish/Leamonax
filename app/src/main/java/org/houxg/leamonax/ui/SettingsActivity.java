@@ -21,9 +21,13 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.BaseResponse;
 import org.houxg.leamonax.model.Note;
+import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Notebook_Table;
+import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
+import org.houxg.leamonax.model.Tag;
+import org.houxg.leamonax.model.Tag_Table;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.ToastUtils;
 
@@ -182,13 +186,22 @@ public class SettingsActivity extends BaseActivity {
                     @Override
                     public void call(Subscriber<? super Void> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
+                            Account currentUser = AccountService.getCurrent();
                             SQLite.delete()
                                     .from(Note.class)
-                                    .where(Note_Table.userId.eq(AccountService.getCurrent().getUserId()))
+                                    .where(Note_Table.userId.eq(currentUser.getUserId()))
                                     .execute();
                             SQLite.delete()
                                     .from(Notebook.class)
-                                    .where(Notebook_Table.userId.eq(AccountService.getCurrent().getUserId()))
+                                    .where(Notebook_Table.userId.eq(currentUser.getUserId()))
+                                    .execute();
+                            SQLite.delete()
+                                    .from(Tag.class)
+                                    .where(Tag_Table.userId.eq(currentUser.getUserId()))
+                                    .execute();
+                            SQLite.delete()
+                                    .from(RelationshipOfNoteTag.class)
+                                    .where(RelationshipOfNoteTag_Table.userId.eq(currentUser.getUserId()))
                                     .execute();
                             Account account = AccountService.getCurrent();
                             account.setLastUsn(0);

@@ -3,6 +3,8 @@ package org.houxg.leamonax.database;
 import android.util.Log;
 
 import com.raizlabs.android.dbflow.annotation.Database;
+import com.raizlabs.android.dbflow.sql.language.Join;
+import com.raizlabs.android.dbflow.sql.language.NameAlias;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.houxg.leamonax.model.Account;
@@ -13,11 +15,16 @@ import org.houxg.leamonax.model.NoteFile_Table;
 import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Notebook_Table;
+import org.houxg.leamonax.model.RelationshipOfNoteTag;
+import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
+import org.houxg.leamonax.model.Tag;
+import org.houxg.leamonax.model.Tag_Table;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+//TODO:upgrade to Ver.2, handle tags
 @Database(name = "leanote_db", version = 1)
 public class AppDataBase {
 
@@ -204,6 +211,23 @@ public class AppDataBase {
         return SQLite.select()
                 .from(Account.class)
                 .where(Account_Table.token.notEq(""))
+                .querySingle();
+    }
+
+    public static List<Tag> getTagByNoteLocalId(long noteLocalId) {
+        return SQLite.select()
+                .from(Tag.class).as("T")
+                .join(RelationshipOfNoteTag.class, Join.JoinType.INNER).as("R")
+                .on(Tag_Table.id.withTable(NameAlias.builder("T").build())
+                        .eq(RelationshipOfNoteTag_Table.tagLocalId.withTable(NameAlias.builder("R").build())))
+                .where(RelationshipOfNoteTag_Table.noteLocalId.withTable(NameAlias.builder("R").build()).eq(noteLocalId))
+                .queryList();
+    }
+
+    public static Tag getTagByText(String text) {
+        return SQLite.select()
+                .from(Tag.class)
+                .where(Tag_Table.text.eq(text))
                 .querySingle();
     }
 }

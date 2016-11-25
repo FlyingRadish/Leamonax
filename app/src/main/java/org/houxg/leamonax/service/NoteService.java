@@ -16,6 +16,10 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.NoteFile;
 import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
+import org.houxg.leamonax.model.RelationshipOfNoteTag;
+import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
+import org.houxg.leamonax.model.Tag;
+import org.houxg.leamonax.model.Tag_Table;
 import org.houxg.leamonax.model.UpdateRe;
 import org.houxg.leamonax.network.ApiProvider;
 import org.houxg.leamonax.utils.CollectionUtils;
@@ -83,6 +87,7 @@ public class NoteService {
                     Log.i(TAG, "content=" + remoteNote.getContent());
                     remoteNote.update();
                     handleFile(localId, remoteNote.getNoteFiles());
+                    handleTag(localId, remoteNote.getTagData());
                 }
             } else {
                 return false;
@@ -154,6 +159,55 @@ public class NoteService {
             excepts.add(local.getLocalId());
         }
         AppDataBase.deleteFileExcept(noteLocalId, excepts);
+    }
+
+    private static void handleTag(long noteLocalId, List<String> tags) {
+        List<Long> tagLocalIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(tags)) {
+            String currentUserId = AccountService.getCurrent().getUserId();
+            for (String tag : tags) {
+                if (TextUtils.isEmpty(tag)) {
+                    continue;
+                }
+                long tagLocalId;
+                Tag tagModel = SQLite.select()
+                        .from(Tag.class)
+                        .where(Tag_Table.text.eq(tag))
+                        .querySingle();
+                if (tagModel == null) {
+                    tagModel = new Tag(currentUserId, tag);
+                    tagLocalId = tagModel.insert();
+                } else {
+                    tagLocalId = tagModel.getId();
+                }
+
+                RelationshipOfNoteTag relationship = SQLite.select()
+                        .from(RelationshipOfNoteTag.class)
+                        .where(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
+                        .and(RelationshipOfNoteTag_Table.tagLocalId.eq(tagLocalId))
+                        .querySingle();
+                if (relationship == null) {
+                    relationship = new RelationshipOfNoteTag(noteLocalId, tagLocalId, currentUserId);
+                    relationship.insert();
+                }
+                tagLocalIds.add(tagLocalId);
+            }
+        }
+
+        if (CollectionUtils.isEmpty(tagLocalIds)) {
+            SQLite.delete()
+                    .from(RelationshipOfNoteTag.class)
+                    .where(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
+                    .async()
+                    .execute();
+        } else {
+            SQLite.delete()
+                    .from(RelationshipOfNoteTag.class)
+                    .where(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
+                    .and(RelationshipOfNoteTag_Table.tagLocalId.notIn(tagLocalIds.get(0), CollectionUtils.toPrimitive(tagLocalIds.subList(1, tagLocalIds.size()))))
+                    .async()
+                    .execute();
+        }
     }
 
     private static String convertToLocalImageLinkForRichText(long noteLocalId, String noteContent) {
@@ -300,6 +354,7 @@ public class NoteService {
             serverNote.setContent(convertToLocalImageLinkForRichText(localId, serverNote.getContent()));
         }
         handleFile(localId, serverNote.getNoteFiles());
+        handleTag(localId, serverNote.getTagData());
         serverNote.save();
         return true;
     }
@@ -309,7 +364,7 @@ public class NoteService {
         List<MultipartBody.Part> fileBodies = handleFileBodies(note, requestBodyMap);
         return ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
     }
-    
+
     private static Call<Note> updateNote(Note original, Note modified) {
         Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modified);
         requestBodyMap.put("NoteId", createPartFromString(original.getNoteId()));
@@ -338,6 +393,17 @@ public class NoteService {
         requestBodyMap.put("IsBlog", createPartFromString(getBooleanString(note.isPublicBlog())));
         requestBodyMap.put("CreatedTime", createPartFromString(TimeUtils.toServerTime(note.getCreatedTimeVal())));
         requestBodyMap.put("UpdatedTime", createPartFromString(TimeUtils.toServerTime(note.getUpdatedTimeVal())));
+
+        List<Tag> tags = AppDataBase.getTagByNoteLocalId(note.getId());
+
+        if (CollectionUtils.isNotEmpty(tags)) {
+            int size = tags.size();
+            for (int index = 0; index < size; index++) {
+                Tag tag = tags.get(index);
+                requestBodyMap.put(String.format("Tags[%s]", index), createPartFromString(tag.getText()));
+            }
+        }
+
         return requestBodyMap;
     }
 

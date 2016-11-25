@@ -19,7 +19,10 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.service.AccountService;
+import org.houxg.leamonax.utils.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -65,7 +68,21 @@ public class SettingFragment extends Fragment {
         }
     }
 
-    public void setTags(String tags) {
+    //TODO:input List<Tag>
+    public void setTags(List<String> tagData) {
+        String tags = "";
+        if (CollectionUtils.isNotEmpty(tagData)) {
+            StringBuilder tagBuilder = new StringBuilder();
+            int size = tagData.size();
+            int lastIndex = size - 1;
+            for (int i = 0; i < size; i++) {
+                tagBuilder.append(tagData.get(i));
+                if (i < lastIndex) {
+                    tagBuilder.append(",");
+                }
+            }
+            tags = tagBuilder.toString();
+        }
         mTagEt.setText(tags);
     }
 
@@ -91,8 +108,14 @@ public class SettingFragment extends Fragment {
         return mPublicSw.isChecked();
     }
 
-    public String getTags() {
-        return mTagEt.getText().toString();
+    //TODO:output List<Tag>
+    public List<String> getTags() {
+        String text = mTagEt.getText().toString();
+        if (TextUtils.isEmpty(text)) {
+            return new ArrayList<>();
+        } else {
+            return Arrays.asList(text.split(","));
+        }
     }
 
     @OnClick(R.id.ll_notebook)
