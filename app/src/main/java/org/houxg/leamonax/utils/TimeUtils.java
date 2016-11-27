@@ -1,18 +1,10 @@
 package org.houxg.leamonax.utils;
 
 
-import android.text.format.DateUtils;
-import android.util.Log;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 public class TimeUtils {
     public static final String TAG = "TimeUtils";
