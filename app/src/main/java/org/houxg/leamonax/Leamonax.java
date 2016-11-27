@@ -9,6 +9,8 @@ import com.flurry.android.FlurryAgent;
 import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 
+import net.danlew.android.joda.JodaTimeAndroid;
+
 import org.greenrobot.eventbus.EventBus;
 
 public class Leamonax extends Application {
@@ -33,5 +35,6 @@ public class Leamonax extends Application {
                 .installDefaultEventBus();
         FlowManager.init(new FlowConfig.Builder(this).build());
         Stetho.initializeWithDefaults(this);
+        JodaTimeAndroid.init(this);
     }
 }
