@@ -17,9 +17,7 @@ import org.houxg.leamonax.model.NoteFile;
 import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.RelationshipOfNoteTag;
-import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
 import org.houxg.leamonax.model.Tag;
-import org.houxg.leamonax.model.Tag_Table;
 import org.houxg.leamonax.model.UpdateRe;
 import org.houxg.leamonax.network.ApiProvider;
 import org.houxg.leamonax.utils.CollectionUtils;
@@ -87,7 +85,7 @@ public class NoteService {
                     Log.i(TAG, "content=" + remoteNote.getContent());
                     remoteNote.update();
                     handleFile(localId, remoteNote.getNoteFiles());
-                    handleTag(localId, remoteNote.getTagData());
+                    updateTagsToLocal(localId, remoteNote.getTagData());
                 }
             } else {
                 return false;
@@ -161,55 +159,6 @@ public class NoteService {
         AppDataBase.deleteFileExcept(noteLocalId, excepts);
     }
 
-    private static void handleTag(long noteLocalId, List<String> tags) {
-        List<Long> tagLocalIds = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(tags)) {
-            String currentUserId = AccountService.getCurrent().getUserId();
-            for (String tag : tags) {
-                if (TextUtils.isEmpty(tag)) {
-                    continue;
-                }
-                long tagLocalId;
-                Tag tagModel = SQLite.select()
-                        .from(Tag.class)
-                        .where(Tag_Table.text.eq(tag))
-                        .querySingle();
-                if (tagModel == null) {
-                    tagModel = new Tag(currentUserId, tag);
-                    tagLocalId = tagModel.insert();
-                } else {
-                    tagLocalId = tagModel.getId();
-                }
-
-                RelationshipOfNoteTag relationship = SQLite.select()
-                        .from(RelationshipOfNoteTag.class)
-                        .where(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
-                        .and(RelationshipOfNoteTag_Table.tagLocalId.eq(tagLocalId))
-                        .querySingle();
-                if (relationship == null) {
-                    relationship = new RelationshipOfNoteTag(noteLocalId, tagLocalId, currentUserId);
-                    relationship.insert();
-                }
-                tagLocalIds.add(tagLocalId);
-            }
-        }
-
-        if (CollectionUtils.isEmpty(tagLocalIds)) {
-            SQLite.delete()
-                    .from(RelationshipOfNoteTag.class)
-                    .where(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
-                    .async()
-                    .execute();
-        } else {
-            SQLite.delete()
-                    .from(RelationshipOfNoteTag.class)
-                    .where(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
-                    .and(RelationshipOfNoteTag_Table.tagLocalId.notIn(tagLocalIds.get(0), CollectionUtils.toPrimitive(tagLocalIds.subList(1, tagLocalIds.size()))))
-                    .async()
-                    .execute();
-        }
-    }
-
     private static String convertToLocalImageLinkForRichText(long noteLocalId, String noteContent) {
         return StringUtils.replace(noteContent,
                 "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>",
@@ -279,6 +228,7 @@ public class NoteService {
             note.setIsDirty(false);
             note.setContent(modifiedNote.getContent());
             handleFile(modifiedNote.getId(), note.getNoteFiles());
+            updateTagsToLocal(modifiedNote.getId(), note.getTagData());
             note.save();
             updateUsnIfNeed(note.getUsn());
         } else {
@@ -354,7 +304,7 @@ public class NoteService {
             serverNote.setContent(convertToLocalImageLinkForRichText(localId, serverNote.getContent()));
         }
         handleFile(localId, serverNote.getNoteFiles());
-        handleTag(localId, serverNote.getTagData());
+        updateTagsToLocal(localId, serverNote.getTagData());
         serverNote.save();
         return true;
     }
@@ -503,6 +453,43 @@ public class NoteService {
     public static Call<UpdateRe> deleteNote(String noteId, int usn) {
         return ApiProvider.getInstance().getNoteApi().delete(noteId, usn);
     }
+
+    public static void updateTagsToLocal(long noteLocalId, List<String> tags) {
+        String currentUid = AccountService.getCurrent().getUserId();
+        if (CollectionUtils.isEmpty(tags)) {
+            AppDataBase.deleteAllRelatedTags(noteLocalId, currentUid);
+            return;
+        }
+
+        List<Long> reservedIds = new ArrayList<>();
+        for (String tagText : tags) {
+            Tag tag = AppDataBase.getTagByText(tagText, currentUid);
+            long tagId;
+            long relationShipId;
+            RelationshipOfNoteTag relationShip;
+            if (tag == null) {
+                tag = new Tag(currentUid, tagText);
+                tagId = tag.insert();
+            } else {
+                tagId = tag.getId();
+            }
+
+            relationShip = AppDataBase.getRelationShip(noteLocalId, tagId, currentUid);
+            if (relationShip == null) {
+                relationShip = new RelationshipOfNoteTag(noteLocalId, tagId, currentUid);
+                relationShipId = relationShip.insert();
+            } else {
+                relationShipId = relationShip.getId();
+            }
+            reservedIds.add(relationShipId);
+        }
+        AppDataBase.deleteRelatedTags(noteLocalId,
+                currentUid,
+                reservedIds.get(0),
+                CollectionUtils.toPrimitive(reservedIds.subList(1, reservedIds.size()))
+        );
+    }
+
 
     private static RequestBody createPartFromString(String content) {
         return RequestBody.create(MediaType.parse(MULTIPART_FORM_DATA), content);

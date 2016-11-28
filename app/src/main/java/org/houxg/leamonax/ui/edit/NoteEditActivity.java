@@ -18,10 +18,10 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Tag;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteFileService;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.BaseActivity;
+import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.LeaViewPager;
@@ -49,10 +49,8 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
 
     private EditorFragment mEditorFragment;
     private SettingFragment mSettingsFragment;
-    private List<Tag> mOriginalTags;
-    private List<Tag> mModifiedTags;
-    private Note mOriginal;
-    private Note mModified;
+    private Wrapper mOriginal;
+    private Wrapper mModified;
     private boolean mIsNewNote;
 
     private LeaViewPager mPager;
@@ -78,10 +76,8 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
             return;
         }
         mIsNewNote = getIntent().getBooleanExtra(EXT_IS_NEW_NOTE, false);
-        mOriginal = AppDataBase.getNoteByLocalId(noteLocalId);
-        mModified = AppDataBase.getNoteByLocalId(noteLocalId);
-        mOriginalTags = AppDataBase.getTagByNoteLocalId(noteLocalId);
-        mModifiedTags = AppDataBase.getTagByNoteLocalId(noteLocalId);
+        mOriginal = new Wrapper(AppDataBase.getNoteByLocalId(noteLocalId));
+        mModified = new Wrapper(AppDataBase.getNoteByLocalId(noteLocalId));
         setResult(RESULT_CANCELED);
     }
 
@@ -96,7 +92,6 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //TODO:save note state
-        outState.putLong(EXT_NOTE_LOCAL_ID, mModified.getId());
         outState.putString(TAG_EDITOR, mEditorFragment.getTag());
         outState.putString(TAG_SETTING, mSettingsFragment.getTag());
     }
@@ -118,15 +113,16 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                                 finish();
                             }
                         })
-                        .subscribe(new Action1<Note>() {
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<Wrapper>() {
                             @Override
-                            public void call(Note note) {
-                                saveAsDraft(note);
+                            public void call(Wrapper wrapper) {
+                                saveAsDraft(wrapper);
                                 setResult(RESULT_OK);
                                 if (NetworkUtils.isNetworkAvailable(NoteEditActivity.this)) {
-                                    boolean isSucceed = NoteService.updateNote(AppDataBase.getNoteByLocalId(note.getId()));
+                                    boolean isSucceed = NoteService.updateNote(AppDataBase.getNoteByLocalId(wrapper.note.getId()));
                                     if (isSucceed) {
-                                        Note localNote = AppDataBase.getNoteByLocalId(note.getId());
+                                        Note localNote = AppDataBase.getNoteByLocalId(wrapper.note.getId());
                                         localNote.setIsDirty(false);
                                         localNote.save();
                                     } else {
@@ -158,34 +154,35 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                             NoteEditActivity.super.onBackPressed();
                         }
                     })
-                    .subscribe(new Action1<Note>() {
+                    .subscribe(new Action1<Wrapper>() {
                         @Override
-                        public void call(Note note) {
+                        public void call(Wrapper wrapper) {
                             setResult(RESULT_OK);
-                            Log.i(TAG, note.toString());
+                            Log.i(TAG, wrapper.toString());
 
-                            if (mIsNewNote && isTitleContentEmpty(note)) {
-                                Log.i(TAG, "remove empty note, id=" + note.getId());
-                                AppDataBase.deleteNoteByLocalId(note.getId());
+                            if (mIsNewNote && isTitleContentEmpty(wrapper.note)) {
+                                Log.i(TAG, "remove empty note, id=" + wrapper.note.getId());
+                                AppDataBase.deleteNoteByLocalId(wrapper.note.getId());
                             } else {
-                                saveAsDraft(note);
+                                saveAsDraft(wrapper);
                             }
                         }
                     });
         }
     }
 
-    private Observable<Note> filterUnchanged() {
+    private Observable<Wrapper> filterUnchanged() {
         return Observable.create(
-                new Observable.OnSubscribe<Note>() {
+                new Observable.OnSubscribe<Wrapper>() {
                     @Override
-                    public void call(Subscriber<? super Note> subscriber) {
+                    public void call(Subscriber<? super Wrapper> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             updateNote();
-                            if (mModified.isDirty()
-                                    || mModified.hasChanges(mOriginal)
-                                    || isLocalNote(mModified)
-                                    || isTitleContentEmpty(mModified)) {
+                            if (mModified.note.isDirty()
+                                    || mModified.note.hasChanges(mOriginal.note)
+                                    || isLocalNote(mModified.note)
+                                    || isTitleContentEmpty(mModified.note)
+                                    || !CollectionUtils.isTheSame(mOriginal.tags, mModified.tags)) {
                                 subscriber.onNext(mModified);
                             }
                             subscriber.onCompleted();
@@ -206,31 +203,25 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     private void updateNote() {
         String title = mEditorFragment.getTitle();
         String content = mEditorFragment.getContent();
-        mModified.setTitle(title);
-        mModified.setContent(content);
-        mModified.setNoteBookId(mSettingsFragment.getNotebookId());
+        mModified.note.setTitle(title);
+        mModified.note.setContent(content);
+        mModified.note.setNoteBookId(mSettingsFragment.getNotebookId());
         List<String> tagTexts = mSettingsFragment.getTags();
-        mModifiedTags = new ArrayList<>();
+        mModified.tags = new ArrayList<>();
         for (String tagText : tagTexts) {
-            Tag tag = AppDataBase.getTagByText(tagText);
-            if (tag == null) {
-                tag = new Tag(AccountService.getCurrent().getUserId(), tagText);
-                long id = tag.insert();
-                tag.setId(id);
-            }
-            mModifiedTags.add(tag);
+            mModified.tags.add(tagText);
         }
-        mModified.setIsPublicBlog(mSettingsFragment.shouldPublic());
+        mModified.note.setIsPublicBlog(mSettingsFragment.shouldPublic());
     }
 
-    private void saveAsDraft(Note note) {
-        Log.i(TAG, "saveAsDraft(), local id=" + note.getId());
-        Note noteFromDb = AppDataBase.getNoteByLocalId(note.getId());
-        noteFromDb.setContent(note.getContent());
-        noteFromDb.setTitle(note.getTitle());
-        noteFromDb.setNoteBookId(note.getNoteBookId());
-        noteFromDb.setTags(note.getTags());
-        noteFromDb.setIsPublicBlog(note.isPublicBlog());
+    private void saveAsDraft(Wrapper wrapper) {
+        Note modifiedNote = wrapper.note;
+        Log.i(TAG, "saveAsDraft(), local id=" + modifiedNote.getId());
+        Note noteFromDb = AppDataBase.getNoteByLocalId(modifiedNote.getId());
+        noteFromDb.setContent(modifiedNote.getContent());
+        noteFromDb.setTitle(modifiedNote.getTitle());
+        noteFromDb.setNoteBookId(modifiedNote.getNoteBookId());
+        noteFromDb.setIsPublicBlog(modifiedNote.isPublicBlog());
         noteFromDb.setIsDirty(true);
         long updateTime = System.currentTimeMillis();
         noteFromDb.setUpdatedTimeVal(updateTime);
@@ -238,11 +229,13 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
             noteFromDb.setCreatedTimeVal(updateTime);
         }
         noteFromDb.update();
+
+        NoteService.updateTagsToLocal(modifiedNote.getId(), wrapper.tags);
     }
 
     @Override
     public Uri createImage(String filePath) {
-        return NoteFileService.createImageFile(mModified.getId(), filePath);
+        return NoteFileService.createImageFile(mModified.note.getId(), filePath);
     }
 
     @Override
@@ -252,17 +245,17 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
 
     @Override
     public void onInitialized() {
-        mEditorFragment.setTitle(mModified.getTitle());
-        mEditorFragment.setContent(mModified.getContent());
+        mEditorFragment.setTitle(mModified.note.getTitle());
+        mEditorFragment.setContent(mModified.note.getContent());
     }
 
     @Override
     public void onFragmentInitialized() {
-        mSettingsFragment.setNotebookId(mModified.getNoteBookId());
-        mSettingsFragment.setShouldPublic(mModified.isPublicBlog());
+        mSettingsFragment.setNotebookId(mModified.note.getNoteBookId());
+        mSettingsFragment.setShouldPublic(mModified.note.isPublicBlog());
         List<String> tagTexts = new ArrayList<>();
-        for (Tag tag : mModifiedTags) {
-            tagTexts.add(tag.getText());
+        for (String tag : mModified.tags) {
+            tagTexts.add(tag);
         }
         mSettingsFragment.setTags(tagTexts);
     }
@@ -277,7 +270,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return EditorFragment.getNewInstance(mModified.isMarkDown(), true);
+                    return EditorFragment.getNewInstance(mModified.note.isMarkDown(), true);
                 case 1:
                     return SettingFragment.getNewInstance();
                 default:
@@ -303,6 +296,20 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         @Override
         public int getCount() {
             return 2;
+        }
+    }
+
+    private static class Wrapper {
+        Note note;
+        List<String> tags;
+
+        public Wrapper(Note note) {
+            this.note = note;
+            List<Tag> tags = AppDataBase.getTagByNoteLocalId(note.getId());
+            this.tags = new ArrayList<>();
+            for (Tag tag : tags) {
+                this.tags.add(tag.getText());
+            }
         }
     }
 }

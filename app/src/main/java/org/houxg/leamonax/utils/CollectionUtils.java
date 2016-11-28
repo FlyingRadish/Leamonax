@@ -26,4 +26,20 @@ public class CollectionUtils {
         }
         return array;
     }
+
+    public static boolean isTheSame(Collection a, Collection b) {
+        int sizeA = a == null ? 0 : a.size();
+        int sizeB = b == null ? 0 : b.size();
+        if (sizeA == sizeB && sizeA != 0) {
+            int matchCount = 0;
+            for (Object obj : a) {
+                if (b.contains(obj)) {
+                    matchCount++;
+                }
+            }
+            return matchCount == b.size();
+        } else {
+            return false;
+        }
+    }
 }

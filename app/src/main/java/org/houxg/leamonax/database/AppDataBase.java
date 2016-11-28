@@ -30,38 +30,6 @@ public class AppDataBase {
 
     private static final String TAG = "AppDataBase";
 
-    public static void updateNoteSettings(long localId, String notebookId, String tags, boolean isBlog) {
-        Note note = getNoteByLocalId(localId);
-        if (note == null) {
-            Log.i(TAG, "updateNoteSettings(), note not found");
-            return;
-        }
-        note.setNoteBookId(notebookId);
-        note.setIsPublicBlog(isBlog);
-        note.setTags(tags);
-        note.save();
-    }
-
-    public static void updateNoteTitle(long localId, String title) {
-        Note note = getNoteByLocalId(localId);
-        if (note == null) {
-            Log.i(TAG, "updateNote(), note not found");
-            return;
-        }
-        note.setTitle(title);
-        note.save();
-    }
-
-    public static void updateNoteContent(long localId, String content) {
-        Note note = getNoteByLocalId(localId);
-        if (note == null) {
-            Log.i(TAG, "updateNote(), note not found");
-            return;
-        }
-        note.setContent(content);
-        note.save();
-    }
-
     public static void deleteNoteByLocalId(long localId) {
         SQLite.delete().from(Note.class)
                 .where(Note_Table.id.eq(localId))
@@ -152,23 +120,6 @@ public class AppDataBase {
                 .queryList();
     }
 
-    public static List<String> getAllNotebookTitles(String userId) {
-        List<String> titles = new ArrayList<>();
-        List<Notebook> notebooks = getAllNotebook(userId);
-        for (Notebook notebook : notebooks) {
-            titles.add(notebook.getTitle());
-        }
-        return titles;
-    }
-
-    public static List<Notebook> getNoteisBlogList(String userId) {
-        return SQLite.select()
-                .from(Notebook.class)
-                .where(Note_Table.userId.eq(userId))
-                .and(Note_Table.isBlog.eq(true))
-                .queryList();
-    }
-
     public static List<NoteFile> getAllRelatedFile(long noteLocalId) {
         return SQLite.select()
                 .from(NoteFile.class)
@@ -224,10 +175,39 @@ public class AppDataBase {
                 .queryList();
     }
 
-    public static Tag getTagByText(String text) {
+    public static RelationshipOfNoteTag getRelationShip(long noteLocalId, long tagId, String userId) {
+        return SQLite.select()
+                .from(RelationshipOfNoteTag.class)
+                .where(RelationshipOfNoteTag_Table.userId.eq(userId))
+                .and(RelationshipOfNoteTag_Table.tagLocalId.eq(tagId))
+                .and(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
+                .querySingle();
+    }
+
+    public static Tag getTagByText(String text, String userId) {
         return SQLite.select()
                 .from(Tag.class)
-                .where(Tag_Table.text.eq(text))
+                .where(Tag_Table.userId.eq(userId))
+                .and(Tag_Table.text.eq(text))
                 .querySingle();
+    }
+
+    public static void deleteAllRelatedTags(long noteLocalId, String userId) {
+        SQLite.delete()
+                .from(RelationshipOfNoteTag.class)
+                .where(RelationshipOfNoteTag_Table.userId.eq(userId))
+                .and(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
+                .async()
+                .execute();
+    }
+
+    public static void deleteRelatedTags(long noteLocalId, String userId, long firstReservedId, long... reservedIds) {
+        SQLite.delete()
+                .from(RelationshipOfNoteTag.class)
+                .where(RelationshipOfNoteTag_Table.userId.eq(userId))
+                .and(RelationshipOfNoteTag_Table.noteLocalId.eq(noteLocalId))
+                .and(RelationshipOfNoteTag_Table.id.notIn(firstReservedId, reservedIds))
+                .async()
+                .execute();
     }
 }

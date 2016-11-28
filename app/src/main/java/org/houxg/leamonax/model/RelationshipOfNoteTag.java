@@ -31,4 +31,16 @@ public class RelationshipOfNoteTag extends BaseModel {
         this.tagLocalId = tagLocalId;
         this.userId = userId;
     }
+
+    public long getId() {
+        return id;
+    }
+
+    public long getNoteLocalId() {
+        return noteLocalId;
+    }
+
+    public long getTagLocalId() {
+        return tagLocalId;
+    }
 }

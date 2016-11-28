@@ -148,14 +148,6 @@ public class Note extends BaseModel implements Serializable {
         this.title = title;
     }
 
-    public String getTags() {
-        return tags;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
-
     public boolean isMarkDown() {
         return isMarkDown;
     }
