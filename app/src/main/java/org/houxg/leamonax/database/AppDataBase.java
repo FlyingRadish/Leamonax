@@ -210,4 +210,11 @@ public class AppDataBase {
                 .async()
                 .execute();
     }
+
+    public static List<Tag> getAllTags(String userId) {
+        return SQLite.select()
+                .from(Tag.class)
+                .where(Tag_Table.userId.eq(userId))
+                .queryList();
+    }
 }
