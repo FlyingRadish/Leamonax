@@ -29,7 +29,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NotebookAdapter;
-import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
@@ -243,8 +242,6 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     void clickedFab() {
         Account account = AccountService.getCurrent();
         Note newNote = new Note();
-        Notebook notebook = AppDataBase.getRecentNoteBook(account.getUserId());
-        newNote.setNoteBookId(notebook.getNotebookId());
         newNote.setUserId(account.getUserId());
         newNote.setIsMarkDown(account.getDefaultEditor() == Account.EDITOR_MARKDOWN);
         newNote.save();

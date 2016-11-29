@@ -12,6 +12,11 @@ android {
         versionCode 7
         versionName "1.2.0"
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
     buildTypes {
         release {
             minifyEnabled false
