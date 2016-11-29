@@ -20,15 +20,18 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteFileService;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.BaseActivity;
+import org.houxg.leamonax.utils.DialogDisplayer;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.LeaViewPager;
 
 import rx.Observable;
+import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 //TODO: hide action bar
@@ -102,29 +105,49 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         switch (item.getItemId()) {
             case R.id.action_save:
                 filterUnchanged()
-                        .doOnCompleted(new Action0() {
-                            @Override
-                            public void call() {
-                                finish();
-                            }
-                        })
-                        .subscribe(new Action1<Note>() {
+                        .doOnNext(new Action1<Note>() {
                             @Override
                             public void call(Note note) {
                                 saveAsDraft(note);
                                 setResult(RESULT_OK);
-                                if (NetworkUtils.isNetworkAvailable(NoteEditActivity.this)) {
-                                    boolean isSucceed = NoteService.updateNote(AppDataBase.getNoteByLocalId(note.getId()));
-                                    if (isSucceed) {
-                                        Note localNote = AppDataBase.getNoteByLocalId(note.getId());
-                                        localNote.setIsDirty(false);
-                                        localNote.save();
-                                    } else {
-                                        ToastUtils.show(NoteEditActivity.this, R.string.save_note_failed);
-                                    }
-                                } else {
-                                    ToastUtils.showNetworkUnavailable(NoteEditActivity.this);
+                                NetworkUtils.checkNetwork();
+                            }
+                        })
+                        .flatMap(new Func1<Note, Observable<Long>>() {
+                            @Override
+                            public Observable<Long> call(Note note) {
+                                return uploadToServer(note.getId());
+                            }
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe(new Action0() {
+                            @Override
+                            public void call() {
+                                DialogDisplayer.showProgress(NoteEditActivity.this, R.string.saving_note);
+                            }
+                        })
+                        .subscribe(new Observer<Long>() {
+                            @Override
+                            public void onCompleted() {
+                                DialogDisplayer.dismissProgress();
+                                finish();
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                DialogDisplayer.dismissProgress();
+                                ToastUtils.show(NoteEditActivity.this, e.getMessage());
+                                if (e instanceof NetworkUtils.NetworkUnavailableException) {
+                                    finish();
                                 }
+                            }
+
+                            @Override
+                            public void onNext(Long noteLocalId) {
+                                Note localNote = AppDataBase.getNoteByLocalId(noteLocalId);
+                                localNote.setIsDirty(false);
+                                localNote.save();
                             }
                         });
                 return true;
@@ -133,6 +156,20 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private Observable<Long> uploadToServer(final long noteLocalId) {
+       return Observable.create(
+                new Observable.OnSubscribe<Long>() {
+                    @Override
+                    public void call(Subscriber<? super Long> subscriber) {
+                        if (!subscriber.isUnsubscribed()) {
+                            NoteService.updateNote(noteLocalId);
+                            subscriber.onNext(noteLocalId);
+                            subscriber.onCompleted();
+                        }
+                    }
+                });
     }
 
     @Override

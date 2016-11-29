@@ -1,6 +1,9 @@
 package org.houxg.leamonax.utils;
 
 
+import org.houxg.leamonax.Leamonax;
+import org.houxg.leamonax.R;
+
 import java.io.IOException;
 
 import retrofit2.Call;
@@ -50,10 +53,10 @@ public class RetrofitUtils {
             if (response.isSuccessful()) {
                 return response.body();
             } else {
-                throw new IllegalStateException("response not successful");
+                throw new IllegalStateException(Leamonax.getContext().getString(R.string.network_error));
             }
         } catch (IOException e) {
-            throw new IllegalStateException(e.getCause());
+            throw new IllegalStateException(Leamonax.getContext().getString(R.string.network_error));
         }
     }
 }

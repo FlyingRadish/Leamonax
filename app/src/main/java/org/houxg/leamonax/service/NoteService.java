@@ -205,19 +205,18 @@ public class NoteService {
                 }, noteLocalId);
     }
 
-    public static boolean updateNote(final Note modifiedNote) {
+    public static void updateNote(final long noteLocalId) {
+        Note localNote = AppDataBase.getNoteByLocalId(noteLocalId);
+        NoteService.updateNote(localNote);
+    }
+
+    private static void updateNote(final Note modifiedNote) throws IllegalStateException {
         Note note;
         if (modifiedNote.getUsn() == 0) {
-            note = RetrofitUtils.excute(addNote(modifiedNote));
+            note = RetrofitUtils.excuteWithException(addNote(modifiedNote));
         } else {
-            Note remoteNote = RetrofitUtils.excute(getNoteByServerId(modifiedNote.getNoteId()));
-            if (remoteNote == null) {
-                return false;
-            }
-            note = RetrofitUtils.excute(updateNote(remoteNote, modifiedNote));
-        }
-        if (note == null) {
-            return false;
+            Note remoteNote = RetrofitUtils.excuteWithException(getNoteByServerId(modifiedNote.getNoteId()));
+            note = RetrofitUtils.excuteWithException(updateNote(remoteNote, modifiedNote));
         }
         if (note.isOk()) {
             note.setId(modifiedNote.getId());
@@ -228,9 +227,8 @@ public class NoteService {
             note.save();
             updateUsnIfNeed(note.getUsn());
         } else {
-            throw new IllegalArgumentException(note.getMsg());
+            throw new IllegalStateException(note.getMsg());
         }
-        return true;
     }
 
     private static String convertToServerImageLinkForMD(String noteContent) {
@@ -309,7 +307,7 @@ public class NoteService {
         List<MultipartBody.Part> fileBodies = handleFileBodies(note, requestBodyMap);
         return ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
     }
-    
+
     private static Call<Note> updateNote(Note original, Note modified) {
         Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modified);
         requestBodyMap.put("NoteId", createPartFromString(original.getNoteId()));

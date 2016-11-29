@@ -5,6 +5,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import org.houxg.leamonax.Leamonax;
+import org.houxg.leamonax.R;
+
 public class NetworkUtils {
 
     private static NetworkInfo getActiveNetworkInfo(Context context) {
@@ -22,5 +25,17 @@ public class NetworkUtils {
     public static boolean isNetworkAvailable(Context context) {
         NetworkInfo info = getActiveNetworkInfo(context);
         return (info != null && info.isConnected());
+    }
+
+    public static void checkNetwork() throws NetworkUnavailableException {
+        if (!isNetworkAvailable(Leamonax.getContext())) {
+            throw new NetworkUnavailableException();
+        }
+    }
+
+    public static class NetworkUnavailableException extends IllegalStateException {
+        public NetworkUnavailableException() {
+            super(Leamonax.getContext().getResources().getString(R.string.network_is_unavailable));
+        }
     }
 }

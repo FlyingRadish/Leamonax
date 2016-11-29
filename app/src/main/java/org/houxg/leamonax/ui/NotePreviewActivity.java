@@ -16,6 +16,7 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.edit.EditorFragment;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
+import org.houxg.leamonax.utils.DialogDisplayer;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
@@ -23,6 +24,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
+import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -95,16 +97,14 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
 
     @OnClick(R.id.tv_save)
     void push() {
-        if (!NetworkUtils.isNetworkAvailable(this)) {
-            ToastUtils.showNetworkUnavailable(this);
-            return;
-        }
         Observable.create(
-                new Observable.OnSubscribe<Boolean>() {
+                new Observable.OnSubscribe<Long>() {
                     @Override
-                    public void call(Subscriber<? super Boolean> subscriber) {
+                    public void call(Subscriber<? super Long> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(NoteService.updateNote(AppDataBase.getNoteByLocalId(mNote.getId())));
+                            NetworkUtils.checkNetwork();
+                            NoteService.updateNote(mNote.getId());
+                            subscriber.onNext(mNote.getId());
                             subscriber.onCompleted();
                         }
                     }
@@ -114,26 +114,27 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
-                        showProgress(getString(R.string.saving_note));
+                        DialogDisplayer.showProgress(NotePreviewActivity.this, R.string.saving_note);
                     }
                 })
-                .doOnCompleted(new Action0() {
+                .subscribe(new Observer<Long>() {
                     @Override
-                    public void call() {
-                        dismissProgress();
+                    public void onCompleted() {
+                        DialogDisplayer.dismissProgress();
                     }
-                })
-                .subscribe(new Action1<Boolean>() {
+
                     @Override
-                    public void call(Boolean isSucceed) {
-                        if (isSucceed) {
-                            mNote = AppDataBase.getNoteByLocalId(mNote.getId());
-                            mNote.setIsDirty(false);
-                            mNote.save();
-                            refresh();
-                        } else {
-                            ToastUtils.show(NotePreviewActivity.this, R.string.save_note_failed);
-                        }
+                    public void onError(Throwable e) {
+                        DialogDisplayer.dismissProgress();
+                        ToastUtils.show(NotePreviewActivity.this, e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(Long aLong) {
+                        mNote = AppDataBase.getNoteByLocalId(mNote.getId());
+                        mNote.setIsDirty(false);
+                        mNote.save();
+                        refresh();
                     }
                 });
     }
@@ -159,13 +160,13 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
-                        showProgress(getString(R.string.reverting));
+                        DialogDisplayer.showProgress(NotePreviewActivity.this, R.string.reverting);
                     }
                 })
                 .doOnCompleted(new Action0() {
                     @Override
                     public void call() {
-                        dismissProgress();
+                        DialogDisplayer.dismissProgress();
                     }
                 })
                 .subscribe(new Action1<Boolean>() {
@@ -178,18 +179,6 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                     }
                 });
 
-    }
-
-    private void showProgress(String message) {
-        dismissProgress();
-        mProgressDialog = ProgressDialog.show(NotePreviewActivity.this, "", message, false);
-    }
-
-    private void dismissProgress() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
-        }
     }
 
     @Override
