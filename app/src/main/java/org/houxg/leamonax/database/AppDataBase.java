@@ -1,11 +1,16 @@
 package org.houxg.leamonax.database;
 
+import android.database.Cursor;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.raizlabs.android.dbflow.annotation.Database;
+import com.raizlabs.android.dbflow.annotation.Migration;
 import com.raizlabs.android.dbflow.sql.language.Join;
 import com.raizlabs.android.dbflow.sql.language.NameAlias;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.raizlabs.android.dbflow.sql.migration.BaseMigration;
+import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
 
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Account_Table;
@@ -25,10 +30,55 @@ import java.util.Collection;
 import java.util.List;
 
 //TODO:upgrade to Ver.2, handle tags
-@Database(name = "leanote_db", version = 1)
+@Database(name = "leanote_db", version = 2)
 public class AppDataBase {
 
     private static final String TAG = "AppDataBase";
+
+    @Migration(version = 2, database = AppDataBase.class)
+    public static class UpdateTag extends BaseMigration {
+
+        @Override
+        public void migrate(DatabaseWrapper database) {
+            Cursor cursor = SQLite.select()
+                    .from(Note.class)
+                    .where(Note_Table.tags.notEq(""))
+                    .query(database);
+            if (cursor == null) {
+                return;
+            }
+            int idIndex = cursor.getColumnIndex("id");
+            int tagIndex = cursor.getColumnIndex("tags");
+            int uidIndex = cursor.getColumnIndex("userId");
+            while (cursor.moveToNext()) {
+                String tag = cursor.getString(tagIndex);
+                String uid = cursor.getString(uidIndex);
+                long noteLocalId = cursor.getLong(idIndex);
+                String[] tagTexts = tag.split(",");
+                for (String tagText : tagTexts) {
+                    tagText = tagText.trim();
+                    if (TextUtils.isEmpty(tagText)) {
+                        continue;
+                    }
+                    Tag tagModel =  SQLite.select()
+                            .from(Tag.class)
+                            .where(Tag_Table.userId.eq(uid))
+                            .and(Tag_Table.text.eq(tag))
+                            .querySingle(database);
+                    long tagId;
+                    if (tagModel == null) {
+                        tagModel = new Tag(uid, tagText);
+                        tagModel.insert(database);
+                    }
+                    tagId = tagModel.getId();
+
+                    RelationshipOfNoteTag relationship = new RelationshipOfNoteTag(noteLocalId, tagId, uid);
+                    relationship.insert(database);
+                }
+            }
+            cursor.close();
+        }
+    }
 
     public static void deleteNoteByLocalId(long localId) {
         SQLite.delete().from(Note.class)
