@@ -51,10 +51,10 @@ public class AppDataBase {
             int tagIndex = cursor.getColumnIndex("tags");
             int uidIndex = cursor.getColumnIndex("userId");
             while (cursor.moveToNext()) {
-                String tag = cursor.getString(tagIndex);
+                String originalTagText = cursor.getString(tagIndex);
                 String uid = cursor.getString(uidIndex);
                 long noteLocalId = cursor.getLong(idIndex);
-                String[] tagTexts = tag.split(",");
+                String[] tagTexts = originalTagText.split(",");
                 for (String tagText : tagTexts) {
                     tagText = tagText.trim();
                     if (TextUtils.isEmpty(tagText)) {
@@ -63,7 +63,7 @@ public class AppDataBase {
                     Tag tagModel =  SQLite.select()
                             .from(Tag.class)
                             .where(Tag_Table.userId.eq(uid))
-                            .and(Tag_Table.text.eq(tag))
+                            .and(Tag_Table.text.eq(tagText))
                             .querySingle(database);
                     long tagId;
                     if (tagModel == null) {
