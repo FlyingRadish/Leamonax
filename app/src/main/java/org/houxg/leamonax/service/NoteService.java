@@ -454,13 +454,15 @@ public class NoteService {
 
     public static void updateTagsToLocal(long noteLocalId, List<String> tags) {
         String currentUid = AccountService.getCurrent().getUserId();
-        if (CollectionUtils.isEmpty(tags)) {
-            AppDataBase.deleteAllRelatedTags(noteLocalId, currentUid);
-            return;
+        if (tags == null) {
+            tags = new ArrayList<>();
         }
 
         List<Long> reservedIds = new ArrayList<>();
         for (String tagText : tags) {
+            if (TextUtils.isEmpty(tagText)) {
+                continue;
+            }
             Tag tag = AppDataBase.getTagByText(tagText, currentUid);
             long tagId;
             long relationShipId;
@@ -481,11 +483,15 @@ public class NoteService {
             }
             reservedIds.add(relationShipId);
         }
-        AppDataBase.deleteRelatedTags(noteLocalId,
-                currentUid,
-                reservedIds.get(0),
-                CollectionUtils.toPrimitive(reservedIds.subList(1, reservedIds.size()))
-        );
+        if (CollectionUtils.isEmpty(reservedIds)) {
+            AppDataBase.deleteAllRelatedTags(noteLocalId, currentUid);
+        } else {
+            AppDataBase.deleteRelatedTags(noteLocalId,
+                    currentUid,
+                    reservedIds.get(0),
+                    CollectionUtils.toPrimitive(reservedIds.subList(1, reservedIds.size()))
+            );
+        }
     }
 
 
