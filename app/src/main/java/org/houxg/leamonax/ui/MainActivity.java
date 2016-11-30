@@ -29,10 +29,12 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NotebookAdapter;
+import org.houxg.leamonax.adapter.TagAdapter;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.SyncEvent;
+import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
@@ -48,7 +50,7 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends BaseActivity implements NotebookAdapter.NotebookAdapterListener {
+public class MainActivity extends BaseActivity implements NotebookAdapter.NotebookAdapterListener, TagAdapter.TagAdapterListener {
 
     private static final String EXT_SHOULD_RELOAD = "ext_should_reload";
     private static final String TAG_NOTE_FRAGMENT = "tag_note_fragment";
@@ -69,6 +71,10 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     View mNotebookTriangle;
     @BindView(R.id.rl_notebook_list)
     View mNotebookPanel;
+    @BindView(R.id.rv_tag)
+    RecyclerView mTagRv;
+    @BindView(R.id.iv_tag_triangle)
+    View mTagTriangle;
 
     public static Intent getOpenIntent(Context context, boolean shouldReload) {
         Intent intent = new Intent(context, MainActivity.class);
@@ -91,23 +97,36 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         } else {
             mNoteFragment = (NoteFragment) getFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);
         }
-
-        mNotebookRv.setLayoutManager(new LinearLayoutManager(this));
-        NotebookAdapter adapter = new NotebookAdapter();
-        adapter.setListener(this);
-        mNotebookRv.setAdapter(adapter);
-        adapter.init();
         mEmailTv.setText(AccountService.getCurrent().getEmail());
-        mNotebookTriangle.setTag(false);
+        initNotebookPanel();
+        initTagPanel();
+
         refreshInfo();
         fetchInfo();
         EventBus.getDefault().register(this);
     }
 
+    private void initTagPanel() {
+        mTagRv.setLayoutManager(new LinearLayoutManager(this));
+        TagAdapter tagAdapter = new TagAdapter();
+        tagAdapter.setListener(this);
+        mTagRv.setAdapter(tagAdapter);
+        mTagTriangle.setTag(false);
+    }
+
+    private void initNotebookPanel() {
+        mNotebookRv.setLayoutManager(new LinearLayoutManager(this));
+        NotebookAdapter notebookAdapter = new NotebookAdapter();
+        notebookAdapter.setListener(this);
+        mNotebookRv.setAdapter(notebookAdapter);
+        notebookAdapter.refresh();
+        mNotebookTriangle.setTag(false);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        ((NotebookAdapter) mNotebookRv.getAdapter()).reload();
+        ((NotebookAdapter) mNotebookRv.getAdapter()).refresh();
     }
 
     @Override
@@ -185,7 +204,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
 
     @Override
     public void onClickedNotebook(Notebook notebook) {
-        mNoteFragment.loadNoteFromLocal(notebook.getId());
+        mNoteFragment.loadFromNotebook(notebook.getId());
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
     }
 
@@ -233,7 +252,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
 
                     @Override
                     public void onNext(Void isSucceed) {
-                        ((NotebookAdapter) mNotebookRv.getAdapter()).reload();
+                        ((NotebookAdapter) mNotebookRv.getAdapter()).refresh();
                     }
                 });
     }
@@ -251,7 +270,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
 
     @OnClick(R.id.rl_recent_notes)
     void showRecentNote() {
-        mNoteFragment.loadNoteFromLocal(NoteFragment.RECENT_NOTES);
+        mNoteFragment.loadRecentNotes();
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
     }
 
@@ -271,25 +290,44 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     void toggleNotebook() {
         boolean shouldShowNotebook = (boolean) mNotebookTriangle.getTag();
         shouldShowNotebook = !shouldShowNotebook;
-        if (shouldShowNotebook) {
-            mNotebookTriangle.animate()
-                    .rotation(180)
+        animateTriangle(mNotebookTriangle, shouldShowNotebook);
+        mNotebookPanel.setVisibility(shouldShowNotebook ? View.VISIBLE : View.GONE);
+        mNotebookTriangle.setTag(shouldShowNotebook);
+    }
+
+    @OnClick(R.id.rl_tag)
+    void toggleTag() {
+        boolean shouldShowTag = (boolean) mTagTriangle.getTag();
+        shouldShowTag = !shouldShowTag;
+        animateTriangle(mTagTriangle, shouldShowTag);
+        ((TagAdapter) mTagRv.getAdapter()).toggle();
+        mTagTriangle.setTag(shouldShowTag);
+    }
+
+    private void animateTriangle(View triangle, boolean isOpen) {
+        if (isOpen) {
+            triangle.animate()
+                    .rotation(-180)
                     .setDuration(200)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
                     .start();
         } else {
-            mNotebookTriangle.animate()
+            triangle.animate()
                     .rotation(0)
                     .setDuration(200)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
                     .start();
         }
-        mNotebookPanel.setVisibility(shouldShowNotebook ? View.VISIBLE : View.GONE);
-        mNotebookTriangle.setTag(shouldShowNotebook);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(SyncEvent event) {
-        ((NotebookAdapter) mNotebookRv.getAdapter()).reload();
+        ((NotebookAdapter) mNotebookRv.getAdapter()).refresh();
+    }
+
+    @Override
+    public void onClickedTag(Tag tag) {
+        mNoteFragment.loadFromTag(tag.getText());
+        mDrawerLayout.closeDrawer(GravityCompat.START, true);
     }
 }

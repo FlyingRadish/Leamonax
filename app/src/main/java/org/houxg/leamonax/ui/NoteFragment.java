@@ -48,7 +48,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
     private static final String EXT_SHOULD_FETCH_NOTES = "ext_should_fetch_notes";
 
-    public static final int RECENT_NOTES = -1;
+    Mode mCurrentMode = Mode.RECENT_NOTES;
 
     @BindView(R.id.recycler_view)
     RecyclerView mNoteListView;
@@ -58,7 +58,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     List<Note> mNotes;
     private NoteAdapter mAdapter;
 
-    private long mCurrentNotebookId = RECENT_NOTES;
     private float mScrollPosition;
 
     public NoteFragment() {
@@ -123,7 +122,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         super.onActivityCreated(savedInstanceState);
         EventBus.getDefault().register(this);
         if (savedInstanceState == null) {
-            loadNoteFromLocal(RECENT_NOTES);
+            refreshNotes();
             if (getArguments().getBoolean(EXT_SHOULD_FETCH_NOTES, false)) {
                 mSwipeRefresh.postDelayed(new Runnable() {
                     @Override
@@ -144,7 +143,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     public void onResume() {
         super.onResume();
         mNoteListView.scrollTo(0, (int) mScrollPosition);
-        loadNoteFromLocal(mCurrentNotebookId);
+        refreshNotes();
     }
 
     @Override
@@ -159,13 +158,33 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         EventBus.getDefault().unregister(this);
     }
 
-    public void loadNoteFromLocal(long notebookLocalId) {
-        if (notebookLocalId < 0) {
-            mCurrentNotebookId = RECENT_NOTES;
-            mNotes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
-        } else {
-            mCurrentNotebookId = notebookLocalId;
-            mNotes = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), notebookLocalId);
+    public void loadRecentNotes() {
+        mCurrentMode = Mode.RECENT_NOTES;
+        refreshNotes();
+    }
+
+    public void loadFromNotebook(long notebookId) {
+        mCurrentMode = Mode.NOTEBOOK;
+        mCurrentMode.notebookId = notebookId;
+        refreshNotes();
+    }
+
+    public void loadFromTag(String tagText) {
+        mCurrentMode = Mode.TAG;
+        mCurrentMode.tagText = tagText;
+        refreshNotes();
+    }
+
+    private void refreshNotes() {
+        switch (mCurrentMode) {
+            case RECENT_NOTES:
+                mNotes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
+                break;
+            case NOTEBOOK:
+                mNotes = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), mCurrentMode.notebookId);
+                break;
+            case TAG:
+                mNotes = AppDataBase.getNotesByTagText(mCurrentMode.tagText, AccountService.getCurrent().getUserId());
         }
         Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         mAdapter.load(mNotes);
@@ -225,10 +244,27 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         Log.i(TAG, "RequestNotes rcv: isSucceed=" + event.isSucceed());
         if (isAdded()) {
             mSwipeRefresh.setRefreshing(false);
-            loadNoteFromLocal(mCurrentNotebookId);
+            refreshNotes();
             if (!event.isSucceed()) {
                 ToastUtils.show(getActivity(), R.string.sync_notes_failed);
             }
+        }
+    }
+
+    private enum Mode {
+        RECENT_NOTES,
+        NOTEBOOK,
+        TAG;
+
+        long notebookId;
+        String tagText;
+
+        public void setNotebookId(long notebookId) {
+            this.notebookId = notebookId;
+        }
+
+        public void setTagText(String tagText) {
+            this.tagText = tagText;
         }
     }
 }

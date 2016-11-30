@@ -9,6 +9,7 @@ import com.raizlabs.android.dbflow.annotation.Migration;
 import com.raizlabs.android.dbflow.sql.language.Join;
 import com.raizlabs.android.dbflow.sql.language.NameAlias;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.raizlabs.android.dbflow.sql.language.property.IProperty;
 import com.raizlabs.android.dbflow.sql.migration.BaseMigration;
 import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
 
@@ -113,6 +114,14 @@ public class AppDataBase {
                 .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
                 .queryList();
+    }
+
+    public static List<Note> getNotesByTagText(String tagText, String userId) {
+        Tag tag = getTagByText(tagText, userId);
+        if (tag == null) {
+            return new ArrayList<>();
+        }
+        return getNotesByTagId(tag.getId());
     }
 
     public static List<Note> getAllNotes(String userId) {
@@ -222,6 +231,21 @@ public class AppDataBase {
                 .on(Tag_Table.id.withTable(NameAlias.builder("T").build())
                         .eq(RelationshipOfNoteTag_Table.tagLocalId.withTable(NameAlias.builder("R").build())))
                 .where(RelationshipOfNoteTag_Table.noteLocalId.withTable(NameAlias.builder("R").build()).eq(noteLocalId))
+                .queryList();
+    }
+
+    public static List<Note> getNotesByTagId(long tagId) {
+        IProperty[] properties = Note_Table.ALL_COLUMN_PROPERTIES;
+        NameAlias nameAlias = NameAlias.builder("N").build();
+        for (int i = 0; i < properties.length; i++) {
+            properties[i] = properties[i].withTable(nameAlias);
+        }
+        return SQLite.select(properties)
+                .from(Note.class).as("N")
+                .join(RelationshipOfNoteTag.class, Join.JoinType.INNER).as("R")
+                .on(Tag_Table.id.withTable(NameAlias.builder("N").build())
+                        .eq(RelationshipOfNoteTag_Table.noteLocalId.withTable(NameAlias.builder("R").build())))
+                .where(RelationshipOfNoteTag_Table.tagLocalId.withTable(NameAlias.builder("R").build()).eq(tagId))
                 .queryList();
     }
 

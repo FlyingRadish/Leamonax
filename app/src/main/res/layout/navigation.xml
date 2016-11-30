@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="240dp"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_gravity="start"
     android:background="@color/navigation"
     android:clickable="true"
@@ -32,19 +32,19 @@
 
             <TextView
                 android:id="@+id/tv_user_name"
-                tools:text="exercitation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondary_text_light"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                tools:text="exercitation" />
 
             <TextView
                 android:id="@+id/tv_email"
-                tools:text="quis@incididunt.com"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondary_text_light"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                tools:text="quis@incididunt.com" />
 
         </LinearLayout>
 
@@ -89,16 +89,17 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_folder" />
+            android:src="@drawable/ic_folder"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginStart="48dp"
+            android:layout_marginStart="0dp"
             android:fontFamily="sans-serif-medium"
-            android:text="Notebooks"
+            android:text="@string/notebooks"
             android:textColor="@color/hint_text_light"
             android:textSize="14sp" />
 
@@ -127,9 +128,56 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/rl_tag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_tag_book"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="0dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/tags"
+            android:textColor="@color/hint_text_light"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/iv_tag_triangle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_triangle" />
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_tag"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="8dp" />
+
+    <include layout="@layout/divider" />
+
+    <RelativeLayout
         android:id="@+id/rl_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:padding="16dp">
 
         <ImageView

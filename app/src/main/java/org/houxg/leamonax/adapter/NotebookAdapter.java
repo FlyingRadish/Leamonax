@@ -25,7 +25,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     private static final int TYPE_NOTEBOOK = 46;
     private static final int TYPE_ADD = 735;
 
-    private Stack<String> mStack;
+    private Stack<String> mStack = new Stack<>();
     private List<Notebook> mData;
     private NotebookAdapterListener mListener;
 
@@ -33,21 +33,15 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         mListener = listener;
     }
 
-    public void init() {
-        mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
-        mStack = new Stack<>();
-        notifyDataSetChanged();
-    }
-
-    public void reload() {
+    public void refresh() {
         if (mStack.isEmpty()) {
-            init();
+            mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
         } else {
             Notebook parent = mData.get(0);
             mData = AppDataBase.getChildNotebook(mStack.peek(), AccountService.getCurrent().getUserId());
             mData.add(0, parent);
-            notifyDataSetChanged();
         }
+        notifyDataSetChanged();
     }
 
     private String getCurrentParentId() {
