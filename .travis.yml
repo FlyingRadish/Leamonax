@@ -1,6 +1,6 @@
 language: android
 dk:
-    - openjdk7
+    - openjdk8
 android:
   components:
   - build-tools-24.0.2
