@@ -1,14 +1,13 @@
 language: android
-dk:
+jdk:
     - openjdk8
 android:
   components:
+  - platform-tools
   - build-tools-24.0.2
   - android-24
-  - extra-google-google_play_services
   - extra-google-m2repository
   - extra-android-m2repository
-  - addon-google_apis-google-19
 env:
   global:
   - secure: "OfsWYKZNmdw2glXD6A7+z4K1mmL1iRadKS30ze3SicloaoPJVdVfBta1ps+uMFPYRSzUIw6LPsORxmomOqxN0SoD78HDwgA+c0AITD9lnG7p1M5uPpwGMPxrA/Kx2wL3wTmet41hF7JUuLLM8RuurKkNtx0dKaBtSKetpkFdRUGO2CwklermSVWbwhGyUtE+E8pDpB+PYjdN2e9fkl7v82r9YmSPJUsdtA5oya0OZPuzU2paAYmu2stJ70j9q4wvnnzzpNlv9n3dl6GDTO1VkDRHq4xIX6d2g36z2NzTPvJuj8OfBe1B4Lx4gpUU7CChzC9sbeQdBGyeDhwuTDxEvjBFms8On+PBwSBw87ciywShSeNEtSvCUBO1eF9DEEdbdp0AI2WcsKhNXFVPBPmLNfwlQOcAGWml+DQZpKIraaGdLEnkRMNGHtybGDXpKK4qaT3gPtgTsPGF8cZct1RqJYXA0ZkJ0QzmOYfyw8K6JECGZkAZB83Nqf6jKR8euMSEKo4gyMl9mJy/0W5HGXbo9oM/mFIh/kfiTkR3JYFh5V9GgDMrcB8vQlrqc5rWfnxStyQw3nRw+GYlN5L9AdSv9eea2MtEyt2QQ/KK9Wok31WqQG0Fn1C2Mfdu0tLXOgnwdJ+wu9VNrNTLMBWSklFRUWQPOxXvP78G0Gc5Ra6Dt/c="
