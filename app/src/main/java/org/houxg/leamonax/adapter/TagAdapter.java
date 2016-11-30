@@ -59,7 +59,7 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.TagHolder> {
     public void onBindViewHolder(TagHolder holder, int position) {
         final Tag tag = mData.get(position);
         holder.titleTv.setText(tag.getText());
-        holder.titleTv.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mListener != null) {

@@ -167,6 +167,7 @@
                 android:id="@+id/ll_clear"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
                 android:orientation="vertical">
 
                 <TextView

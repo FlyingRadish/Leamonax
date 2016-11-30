@@ -56,7 +56,8 @@
         android:id="@+id/rl_recent_notes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -82,6 +83,7 @@
         android:id="@+id/rl_notebook"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:padding="16dp">
 
         <ImageView
@@ -131,6 +133,7 @@
         android:id="@+id/rl_tag"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:padding="16dp">
 
         <ImageView
@@ -178,7 +181,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -203,7 +207,8 @@
         android:id="@+id/rl_about"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground">
 
         <ImageView
             android:layout_width="wrap_content"
