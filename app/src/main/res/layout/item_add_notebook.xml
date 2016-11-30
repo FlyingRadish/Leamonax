@@ -2,34 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:background="?android:attr/selectableItemBackground"
     android:orientation="horizontal">
 
-    <View
-        android:id="@+id/placeholder"
-        android:layout_width="12dp"
-        android:layout_height="wrap_content" />
-
-    <TextView
+    <ImageView
         android:id="@+id/navigator"
         android:layout_width="36dp"
         android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
-        android:text="+"
-        android:textColor="#333"
-        android:textSize="18sp" />
+        android:layout_gravity="start|center_vertical"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:scaleType="center"
+        android:src="@drawable/ic_add_note_book" />
 
     <TextView
         android:id="@+id/tv_title"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:gravity="center_vertical|start"
+        android:fontFamily="sans-serif-medium"
         android:paddingBottom="8dp"
-        android:paddingEnd="8dp"
+        android:gravity="center_vertical"
         android:paddingTop="8dp"
         android:text="@string/add_notebook"
         android:textColor="@color/primary_text_light"
-        android:textSize="16sp" />
+        android:textSize="14sp" />
 
 </LinearLayout>

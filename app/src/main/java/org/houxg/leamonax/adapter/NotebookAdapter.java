@@ -1,10 +1,12 @@
 package org.houxg.leamonax.adapter;
 
 
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.houxg.leamonax.R;
@@ -91,7 +93,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 //        boolean hasChild = hasChild(notebookId);
         holder.placeholder.setVisibility(isSuperOrRoot ? View.GONE : View.VISIBLE);
 //        holder.navigator.setVisibility(hasChild ? View.VISIBLE : View.INVISIBLE);
-        holder.navigator.setText(isSuper ? "-" : "+");
+        holder.navigator.setImageResource(isSuper ? R.drawable.ic_expanding : R.drawable.ic_expandable);
         holder.navigator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,9 +177,10 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     static class NotebookHolder extends RecyclerView.ViewHolder {
         View itemView;
         @BindView(R.id.navigator)
-        TextView navigator;
+        ImageView navigator;
         @BindView(R.id.tv_title)
         TextView titleTv;
+        @Nullable
         @BindView(R.id.placeholder)
         View placeholder;
 
