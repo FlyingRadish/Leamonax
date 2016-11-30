@@ -17,6 +17,14 @@ apply plugin: 'com.neenbedankt.android-apt'
 def dbflow_version = "4.0.0-beta2"
 
 android {
+    signingConfigs {
+        config {
+            keyAlias System.getenv('KEY_ALIAS')
+            keyPassword System.getenv('KEY_PWD')
+            storeFile file(projectDir.absolutePath + '/houxg-leamonax.jks')
+            storePassword System.getenv('KEYSTORE_PWD')
+        }
+    }
     compileSdkVersion 24
     buildToolsVersion "24.0.2"
     defaultConfig {
@@ -41,6 +49,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 
