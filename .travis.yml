@@ -1,0 +1,35 @@
+language: android
+jdk:
+    - oraclejdk8
+android:
+  components:
+    - tools
+    - platform-tools
+    - build-tools-25.0.1
+    - android-24
+    - extra-google-m2repository
+    - extra-android-m2repository
+  licenses:
+    - 'android-sdk-preview-license-.+'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
+env:
+  global:
+  - secure: "OfsWYKZNmdw2glXD6A7+z4K1mmL1iRadKS30ze3SicloaoPJVdVfBta1ps+uMFPYRSzUIw6LPsORxmomOqxN0SoD78HDwgA+c0AITD9lnG7p1M5uPpwGMPxrA/Kx2wL3wTmet41hF7JUuLLM8RuurKkNtx0dKaBtSKetpkFdRUGO2CwklermSVWbwhGyUtE+E8pDpB+PYjdN2e9fkl7v82r9YmSPJUsdtA5oya0OZPuzU2paAYmu2stJ70j9q4wvnnzzpNlv9n3dl6GDTO1VkDRHq4xIX6d2g36z2NzTPvJuj8OfBe1B4Lx4gpUU7CChzC9sbeQdBGyeDhwuTDxEvjBFms8On+PBwSBw87ciywShSeNEtSvCUBO1eF9DEEdbdp0AI2WcsKhNXFVPBPmLNfwlQOcAGWml+DQZpKIraaGdLEnkRMNGHtybGDXpKK4qaT3gPtgTsPGF8cZct1RqJYXA0ZkJ0QzmOYfyw8K6JECGZkAZB83Nqf6jKR8euMSEKo4gyMl9mJy/0W5HGXbo9oM/mFIh/kfiTkR3JYFh5V9GgDMrcB8vQlrqc5rWfnxStyQw3nRw+GYlN5L9AdSv9eea2MtEyt2QQ/KK9Wok31WqQG0Fn1C2Mfdu0tLXOgnwdJ+wu9VNrNTLMBWSklFRUWQPOxXvP78G0Gc5Ra6Dt/c="
+  - secure: "gsQIdAF0HiseNOY8wrY1ROXuQOZX/MJ9w6pym4xW5mvYFDKYAq7kZ0b9+Qzc8RVg354ITqTZQWRAOj/a7uc6RJI/NqdKZwzp6QdVCP1wZfRAyDO9S5r7ZLRG1HQo/g67MTRfuPwzPdNrEsrmxV70CMIX7o/u/0II/GBpMgTrPeRWhV+WQ+c0N9abD+w2fvYVa7qPzhb/VL6aCcZfXnyEudmPO9yK/a57mWnOGFbXAKTjmo3luxITtU5/SNghtH3tlgkRqgNknZGp1ac42Q1kNjNQppe7Lpugn12pZDlUUBa2HfIxoV9AqhyWcJx0AFTXfW+LKuICQWPGg/v1lkbFE28o9ImI5EOfA11wzviJ2frBQvhn5gKD4hJiLqhM0qBxdJEKvuVwC7zvbxV3b+czXNpQrpEebI2/7OaN3cLfD8lWGKl2ZZ8v7DRbUjS7AcQG+WVa+o6x9AxHcnX5EL+NHfPghoRXG+nx0DwoiHWq0amW1pI6j61UF5gNY39b9AjLdk0p2GI+nY3wt5zP/uk1Lu6kx2a1ByX7zn/ggvMIMxX/DYh3PDILkhbW1VsRG5NuDjvHBs7htgiep6xr4GlewZ5fYZQOSKJTbQ3Gpx5uwzy/WqevK8x1I75XoPRl/p4RJLOs/F2SA1LQ564dXjOevRAirT3Iu99RzbwPrlo3aRE="
+  - secure: "j0z+KlR5qsR2cFcMc2oGuz1s6Bfmjvp9E2u1l5+dkSWnC0wUQ4eVa/i6b9447vEVWWiIWqtDKIL4IOOa1jQE2s0uRgBDXGIIvkcbqjf5FtaQRVq66RclcaGT7N1eMncG5z5RTDN0XrQx0vJKshNTpdiVqwHxWri0fzOekJCE8ITvLmLzAaet2YjNkXZ6qb6FVzahPlXRVJQxon8NcqcPwPPalpHjcp/2MgrNWL8E60xhbrJ2MR8lpszxotnyykOukXvonKiwOI/JhXUug6EJ3g6+yHmPswFpnHGTaKbeMJTl6ZJ3zdu2SLY9rouAttQV9UarCArMl6QzDqiKp5jSazErcHvmz+fVFu8g8Guo0yHVF4banI0eh2UKc/WaiBfqzPrgJuoxg2GExwD0t5lcLYoT6LeC7+3hJ3Uhqb93I7vWNYakzN5LlKutLHSi0aebzUK5Enuik8pjVC4UeuUiI41f48gYGii9NTPpLXkaw0NM08XWlNgJnFMt6q9MYRHSoKQSLoT718af9GQcbFUj6FFhwnCkIjnWazJfNy1qvdsCP+iryE/+whCBtgWMqv9zKWIu4L2PKlGJMczQbZjRMAiuptFpmWbZmVcOpQ9r6l4vSytsrlmxDgqyMPtKqExucZQxDxd+oGlLM/mlVWzSRR66sBJK+Na+aYoWnQmdi08="
+before_install:
+  - openssl aes-256-cbc -K $encrypted_b01ea2ce46cf_key -iv $encrypted_b01ea2ce46cf_iv -in houxg-leamonax.jks.enc -out houxg-leamonax.jks -d
+script:
+  - ./gradlew assembleRelease
+before_deploy:
+  - mv app/build/outputs/apk/app-release.apk app/build/outputs/apk/Leamonax.apk
+deploy:
+  provider: releases
+  api_key:
+    secure: AvjO+zmlXU8tAXzOBKLE2NrXV0I4sQegnUDgdiVkSB/DEFRm9S/YIHw95l4txbska9nLWFeGQaYEN4vHs5xp4sA0/bslU0YGhe20GMAKsLPcxRswctt3CCEpWbHYujYz8kl/wXPjFXOG/7vv2TAckCmPTUCUGtuBZGZtmkamLkrgTrou/jbwZbEOd6ORdX2EV0Pa3uwodA8ELIe51+AOkibFXl3+hxXl9OsmwdGgWBW4XbcgK32uWuFah/LuCEU7llI828gLjQu2TlE04mH4r3DHZuxybHrUgWKy5PyKgejXf8txvu4QBVwzO27ZhrQO5HqAQcS4tNayg9HHDFG9/0+VgBwYHP1VKrKDL7wHxOfIZ2C4sqp5Fiqg/J8kkeeX1waQryr/oOsEUHih+jBYIKweBwGw0Q66pK6C0R6xvDwX9waGws0p05nrWoVekUx8a9DG3z2DWUOKbVxMXX0zVwS+GLdYzj5ye4X5EBpAXnQyCQYuRbpyRLB9p9mvrFOFnmXU/J3UH4Kzp5JPoBe1bTVZ3l56PyxYR7fd5vqpqAY9dKLqpdwY3cOD62ph+VL+nmUwp8Jh9BNwGtOP/JibcBmBkxcbxNJAwe3cq/6dqt/UGl53Hk2GYF2bcoAmpcypQVpKBxI6g8DvOwigLvdcozkNZJKcxVoHrDm0Ziozu88=
+  file: app/build/outputs/apk/Leamonax.apk
+  skip_cleanup: true
+  on:
+    repo: houxg/Leamonax
+    tags: true

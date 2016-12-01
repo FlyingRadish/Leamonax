@@ -2,8 +2,8 @@ apply plugin: 'com.android.library'
 version = "1.2.0" // 版本号
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '24.0.2'
+    compileSdkVersion 24
+    buildToolsVersion '25.0.1'
     resourcePrefix "imgsel"
 
     defaultConfig {
