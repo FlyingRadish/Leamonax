@@ -11,4 +11,5 @@ public interface OnJsEditorStateChangedListener {
     void onMediaTapped(String mediaId, String url, JSONObject meta, String uploadStatus);
     void onLinkTapped(String url, String title);
     void onGetHtmlResponse(Map<String, String> responseArgs);
+    void onFormatChanged(String name, String value);
 }

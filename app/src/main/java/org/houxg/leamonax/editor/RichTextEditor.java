@@ -36,7 +36,8 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
         mWebView.setWebViewClient(new EditorClient());
         mWebView.setWebChromeClient(new WebChromeClient());
         mWebView.addJavascriptInterface(new JsCallbackHandler(this), JS_CALLBACK_HANDLER);
-        mWebView.loadUrl("file:///android_asset/android-editor.html");
+        mWebView.addJavascriptInterface(new QuillCallbackHandler(this), JS_CALLBACK_HANDLER);
+        mWebView.loadUrl("file:///android_asset/RichTextEditor/editor.html");
     }
 
     private void execJs(final String script) {
@@ -51,11 +52,9 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public void setEditingEnabled(boolean enabled) {
         if (enabled) {
-            execJs("ZSSEditor.getField('zss_field_title').enableEditing();");
-            execJs("ZSSEditor.getField('zss_field_content').enableEditing();");
+            execJs("quill.enable();");
         } else {
-            execJs("ZSSEditor.getField('zss_field_title').disableEditing();");
-            execJs("ZSSEditor.getField('zss_field_content').disableEditing();");
+            execJs("quill.disable();");
         }
     }
 
@@ -71,12 +70,12 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void setContent(String content) {
-        execJs(String.format(Locale.US, "ZSSEditor.getField('zss_field_content').setHTML('%s');", HtmlUtils.escapeHtml(content)));
+        execJs(String.format(Locale.US, "quill.pasteHTML('%s');", HtmlUtils.escapeHtml(content)));
     }
 
     @Override
     public String getContent() {
-        String content = HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "ZSSEditor.getField('zss_field_content').getHTML();"));
+        String content = HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "quill.root.innerHTML;"));
         if (!TextUtils.isEmpty(content)) {
             content = appendPTag(content);
         }
@@ -100,42 +99,43 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void redo() {
-        execJs("ZSSEditor.redo();");
+        execJs("quill.history.redo();");
     }
 
     @Override
     public void undo() {
-        execJs("ZSSEditor.undo();");
+        execJs("quill.history.undo();");
     }
 
     @Override
     public void toggleOrderList() {
-        execJs("ZSSEditor.setOrderedList();");
+        execJs("quill.format('list', 'ordered');");
     }
 
     @Override
     public void toggleUnorderList() {
-        execJs("ZSSEditor.setUnorderedList();");
+        execJs("quill.format('list', 'bullet');");
     }
 
     @Override
     public void toggleBold() {
-        execJs("ZSSEditor.setBold();");
+        execJs("quill.format('bold', true);");
     }
 
     @Override
     public void toggleItalic() {
-        execJs("ZSSEditor.setItalic();");
+        execJs("quill.format('italic', true);");
+//        execJs("quill.format('list', false);");
     }
 
     @Override
     public void toggleQuote() {
-        execJs("ZSSEditor.setBlockquote();");
+        execJs("quill.format('blockquote', true);");
     }
 
     @Override
     public void toggleHeading() {
-        execJs("ZSSEditor.setHeading();");
+        execJs("quill.format('header', 1);");
     }
 
     private String appendPTag(String source) {
@@ -156,7 +156,6 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void onDomLoaded() {
-        execJs("ZSSEditor.getField('zss_field_content').setMultiline('true');");
         Log.i(TAG, "onDomLoaded");
     }
 
@@ -199,5 +198,27 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public void onGetHtmlResponse(Map<String, String> responseArgs) {
         Log.i(TAG, "onSelectionChanged(), data=" + new Gson().toJson(responseArgs));
+    }
+
+    @Override
+    public void onFormatChanged(String name, String value) {
+        switch (name) {
+            case "bold":
+                mListener.onStyleChanged(Style.BOLD, Boolean.valueOf(value));
+                break;
+            case "italic":
+                mListener.onStyleChanged(Style.ITALIC, Boolean.valueOf(value));
+                break;
+            case "list":
+                if (value.equals("null")) {
+                    mListener.onStyleChanged(Style.UNORDER_LIST, false);
+                    mListener.onStyleChanged(Style.ORDER_LIST, false);
+                } else if (value.equals("\"ordered\"")) {
+                    mListener.onStyleChanged(Style.ORDER_LIST, true);
+                } else if (value.equals("\"bullet\"")) {
+                    mListener.onStyleChanged(Style.UNORDER_LIST, true);
+                }
+                break;
+        }
     }
 }
