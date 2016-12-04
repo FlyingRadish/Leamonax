@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ import org.houxg.leamonax.utils.DialogUtils;
 import org.houxg.leamonax.widget.ToggleImageButton;
 
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -288,6 +290,69 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                     case UNORDER_LIST:
                         mUnorderListBtn.setChecked(enabled);
                         break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onCursorChanged(int index, final Map<Editor.Style, Boolean> formatStatus) {
+        mBoldBtn.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mBoldBtn != null) {
+                    mBoldBtn.setChecked(false);
+                }
+                if (mItalicBtn != null) {
+                    mItalicBtn.setChecked(false);
+                }
+                mOrderListBtn.setChecked(false);
+                mUnorderListBtn.setChecked(false);
+                if (mQuoteBtn != null) {
+                    mQuoteBtn.setChecked(false);
+                }
+                for (Map.Entry<Editor.Style, Boolean> entry : formatStatus.entrySet()) {
+                    boolean enabled = entry.getValue();
+                    switch (entry.getKey()) {
+                        case BOLD:
+                            mBoldBtn.setChecked(enabled);
+                            break;
+                        case ITALIC:
+                            mItalicBtn.setChecked(enabled);
+                            break;
+                        case ORDER_LIST:
+                            mOrderListBtn.setChecked(enabled);
+                            break;
+                        case UNORDER_LIST:
+                            mUnorderListBtn.setChecked(enabled);
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onFormatsChanged(final Map<Editor.Style, Boolean> formatStatus) {
+        mBoldBtn.post(new Runnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<Editor.Style, Boolean> entry : formatStatus.entrySet()) {
+                    boolean enabled = entry.getValue();
+                    switch (entry.getKey()) {
+                        case BOLD:
+                            mBoldBtn.setChecked(enabled);
+                            break;
+                        case ITALIC:
+                            mItalicBtn.setChecked(enabled);
+                            break;
+                        case ORDER_LIST:
+                            mOrderListBtn.setChecked(enabled);
+                            break;
+                        case UNORDER_LIST:
+                            mUnorderListBtn.setChecked(enabled);
+                            break;
+                    }
                 }
             }
         });

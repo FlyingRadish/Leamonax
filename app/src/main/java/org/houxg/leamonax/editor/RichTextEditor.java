@@ -34,7 +34,7 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
         mWebView.setScrollBarStyle(SCROLLBARS_OUTSIDE_OVERLAY);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new EditorClient());
-        mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.setWebChromeClient(new EditorChromeClient());
         mWebView.addJavascriptInterface(new JsCallbackHandler(this), JS_CALLBACK_HANDLER);
         mWebView.addJavascriptInterface(new QuillCallbackHandler(this), JS_CALLBACK_HANDLER);
         mWebView.loadUrl("file:///android_asset/RichTextEditor/editor.html");
@@ -109,33 +109,33 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void toggleOrderList() {
-        execJs("quill.format('list', 'ordered');");
+        execJs("toggleOrderedList();");
     }
 
     @Override
     public void toggleUnorderList() {
-        execJs("quill.format('list', 'bullet');");
+        execJs("toggleBulletList();");
     }
 
     @Override
     public void toggleBold() {
-        execJs("quill.format('bold', true);");
+        execJs("toggleBold();");
     }
 
     @Override
     public void toggleItalic() {
-        execJs("quill.format('italic', true);");
+        execJs("toggleItalic();");
 //        execJs("quill.format('list', false);");
     }
 
     @Override
     public void toggleQuote() {
-        execJs("quill.format('blockquote', true);");
+        execJs("toggleQuote();");
     }
 
     @Override
     public void toggleHeading() {
-        execJs("quill.format('header', 1);");
+        execJs("toggleHeader();");
     }
 
     private String appendPTag(String source) {
@@ -201,24 +201,12 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     }
 
     @Override
-    public void onFormatChanged(String name, String value) {
-        switch (name) {
-            case "bold":
-                mListener.onStyleChanged(Style.BOLD, Boolean.valueOf(value));
-                break;
-            case "italic":
-                mListener.onStyleChanged(Style.ITALIC, Boolean.valueOf(value));
-                break;
-            case "list":
-                if (value.equals("null")) {
-                    mListener.onStyleChanged(Style.UNORDER_LIST, false);
-                    mListener.onStyleChanged(Style.ORDER_LIST, false);
-                } else if (value.equals("\"ordered\"")) {
-                    mListener.onStyleChanged(Style.ORDER_LIST, true);
-                } else if (value.equals("\"bullet\"")) {
-                    mListener.onStyleChanged(Style.UNORDER_LIST, true);
-                }
-                break;
-        }
+    public void onFormatChanged(Map<Style, Boolean> formatStatus) {
+        mListener.onFormatsChanged(formatStatus);
+    }
+
+    @Override
+    public void onCursorChanged(int index, Map<Style, Boolean> formatStatus) {
+        mListener.onCursorChanged(index, formatStatus);
     }
 }
