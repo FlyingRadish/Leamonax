@@ -59,12 +59,12 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void setTitle(String title) {
-        execJs(String.format(Locale.US, "ZSSEditor.getField('zss_field_title').setPlainText('%s');", HtmlUtils.escapeHtml(title)));
+        execJs(String.format(Locale.US, "setTitle('%s');", HtmlUtils.escapeHtml(title)));
     }
 
     @Override
     public String getTitle() {
-        return HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "ZSSEditor.getField('zss_field_title').getHTML();"));
+        return HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "getTitle();"));
     }
 
     @Override

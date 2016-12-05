@@ -313,6 +313,9 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                 if (mQuoteBtn != null) {
                     mQuoteBtn.setChecked(false);
                 }
+                if (mHeadingBtn != null) {
+                    mHeadingBtn.setChecked(false);
+                }
                 for (Map.Entry<Editor.Style, Boolean> entry : formatStatus.entrySet()) {
                     boolean enabled = entry.getValue();
                     switch (entry.getKey()) {
