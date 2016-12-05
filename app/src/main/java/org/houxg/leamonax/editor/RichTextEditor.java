@@ -83,7 +83,7 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void insertImage(String title, String url) {
-        execJs(String.format(Locale.US, "ZSSEditor.insertImage('%s', '%s');", url, title));
+        execJs(String.format(Locale.US, "insertImage('%s', '%s');", title, url));
     }
 
     @Override

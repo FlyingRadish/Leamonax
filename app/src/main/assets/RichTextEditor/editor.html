@@ -100,6 +100,13 @@
             quill.disable();
         }
 
+        function insertImage(title, url) {
+            var range = quill.getSelection();
+            if (range) {
+                quill.insertEmbed(range.index, 'image', url);
+            }
+        }
+
         function insertLink(title, url) {
             var range = quill.getSelection();
             if (range) {
@@ -108,7 +115,5 @@
                     {'link':url});
             }
         }
-
-        quill.pasteHTML('<p><h2>LEANOTE, NOT JUST A NOTEPAD!&nbsp;&nbsp;</h2>\nWelcome to Leanote!&nbsp; Features:\n<ul>\n\t<li>Geek paradise:&nbsp;Wanna Markdown? We support it!</li>\n\t<li>Private notebook: Organize your knowledge &amp; Snap every moment</li>\n\t<li>Awesome blog: Create unique themes &amp; Share your ideas</li>\n\t<li>Collaboration: Learn together with your friends</li>\n\t<li>...</li>\n</ul>\nRelated links:\n<ul>\n\t<li>Help us improve at&nbsp;<a href=\"https://github.com/leanote\" target=\"_blank\" data-mce-href=\"https://github.com/leanote\">GitHub</a></li>\n\t<li><a href=\"http://leanote.leanote.com/post/Leanote-manual-project\" target=\"_blank\" data-mce-href=\"http://leanote.leanote.com/post/Leanote-manual-project\">How to use Leanote</a></li>\n\t<li><a href=\"http://app.leanote.com\" target=\"_blank\" data-mce-href=\"http://app.leanote.com\">Leanote App</a></li>\n\t<li><a href=\"http://bbs.leanote.com\" target=\"_blank\" data-mce-href=\"http://bbs.leanote.com\">Discussion</a></li>\n\t<li>QQ Group: 326073529</li>\n</ul>\nAny questions, please feel free to email us: <a href=\"mailto:leanote@leanote.com\" data-mce-href=\"mailto:leanote@leanote.com\">leanote@leanote.com</a></p><p><hr></p><p><h2>LEANOTE, 不只是笔记！&nbsp;</h2>\n欢迎来到Leanote! Leanote特性: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;\n<ul>\n\t<li>笔记: Leanote是一个笔记, 你可以用它来管理自己的知识.</li>\n\t<li>博客:&nbsp;将笔记公开,&nbsp;Leanote成为你的博客, 并且有多款博客主题供您安装.</li>\n\t<li>分享协作:&nbsp;你也可以将知识分享给你的好友.</li>\n\t<li>两款编辑器, 支持Markdown, 代码高亮.</li>\n\t<li>桌面端三大平台全覆盖!</li>\n\t<li>写作模式.</li>\n\t<li>....</li>\n</ul>\n相关链接:\n<ul>\n\t<li>帮助我们改善Leanote&nbsp;<a href=\"https://github.com/leanote\" target=\"_blank\" data-mce-href=\"https://github.com/leanote\">GitHub</a></li>\n\t<li><a href=\"http://leanote.leanote.com/post/Leanote-manual-project\" target=\"_blank\" data-mce-href=\"http://leanote.leanote.com/post/Leanote-manual-project\">Leanote教程</a></li>\n\t<li><a href=\"http://app.leanote.com\" target=\"_blank\" data-mce-href=\"http://app.leanote.com\">客户端</a></li>\n\t<li><a href=\"http://bbs.leanote.com\" target=\"_blank\" data-mce-href=\"http://bbs.leanote.com\">社区</a></li>\n\t<li>QQ 群: 326073529</li>\n</ul>\n任何问题, 欢迎发送邮件至 <a href=\"mailto:leanote@leanote.com\" data-mce-href=\"mailto:leanote@leanote.com\">leanote@leanote.com</a></p>');
 	</script>
 </html>
