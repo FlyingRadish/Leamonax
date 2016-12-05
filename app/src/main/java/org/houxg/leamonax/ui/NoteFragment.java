@@ -30,7 +30,7 @@ import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
-import org.houxg.leamonax.widget.DashDividerDecoration;
+import org.houxg.leamonax.widget.DividerDecoration;
 
 import java.util.Collections;
 import java.util.List;
@@ -79,11 +79,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(container.getContext());
         mNoteListView.setLayoutManager(layoutManager);
         mNoteListView.setItemAnimator(new DefaultItemAnimator());
-
-        int dashGap = DisplayUtils.dp2px(container.getContext(), 4);
-        int dashWidth = DisplayUtils.dp2px(container.getContext(), 8);
-        int height = DisplayUtils.dp2px(container.getContext(), 1);
-        mNoteListView.addItemDecoration(new DashDividerDecoration(0xffa0a0a0, dashGap, dashWidth, height));
+        mNoteListView.addItemDecoration(new DividerDecoration(DisplayUtils.dp2px(container.getContext(), 8)));
         mAdapter = new NoteAdapter(this);
         mNoteListView.setAdapter(mAdapter);
 
