@@ -77,7 +77,7 @@ public class SettingFragment extends Fragment {
         mTagEt.setAdapter(arrayAdapter);
         mTagEt.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
-        final int tagPadding = DisplayUtils.dp2px(container.getContext(), 2);
+        final int tagPadding = DisplayUtils.dp2px(2);
         mTagEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

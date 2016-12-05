@@ -79,7 +79,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(container.getContext());
         mNoteListView.setLayoutManager(layoutManager);
         mNoteListView.setItemAnimator(new DefaultItemAnimator());
-        mNoteListView.addItemDecoration(new DividerDecoration(DisplayUtils.dp2px(container.getContext(), 8)));
+        mNoteListView.addItemDecoration(new DividerDecoration(DisplayUtils.dp2px(8)));
         mAdapter = new NoteAdapter(this);
         mNoteListView.setAdapter(mAdapter);
 

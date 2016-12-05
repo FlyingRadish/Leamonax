@@ -58,9 +58,9 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         mNoteListView.setLayoutManager(layoutManager);
         mNoteListView.setItemAnimator(new DefaultItemAnimator());
 
-        int dashGap = DisplayUtils.dp2px(this, 4);
-        int dashWidth = DisplayUtils.dp2px(this, 8);
-        int height = DisplayUtils.dp2px(this, 1);
+        int dashGap = DisplayUtils.dp2px(4);
+        int dashWidth = DisplayUtils.dp2px(8);
+        int height = DisplayUtils.dp2px(1);
         mNoteListView.addItemDecoration(new DashDividerDecoration(0xffa0a0a0, dashGap, dashWidth, height));
         mAdapter = new NoteAdapter(this);
         mNoteListView.setAdapter(mAdapter);

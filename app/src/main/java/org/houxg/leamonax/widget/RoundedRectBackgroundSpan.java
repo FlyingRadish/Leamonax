@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.text.style.ReplacementSpan;
 
-import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.utils.DisplayUtils;
 
 public class RoundedRectBackgroundSpan extends ReplacementSpan {
@@ -34,7 +33,7 @@ public class RoundedRectBackgroundSpan extends ReplacementSpan {
     @Override
     public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
         mTempRect.set(x, top, x + paint.measureText(text, start, end) + padding * 2, bottom);
-        float offsetY = DisplayUtils.dp2px(Leamonax.getContext(), 2);
+        float offsetY = DisplayUtils.dp2px(2);
         mTempRect.offset(0, -offsetY);
         int textColor = paint.getColor();
         paint.setColor(mColor);
