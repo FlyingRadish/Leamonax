@@ -88,7 +88,7 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void insertLink(String title, String url) {
-        execJs(String.format(Locale.US, "ZSSEditor.insertLink('%s', '%s');", url, title));
+        execJs(String.format(Locale.US, "insertLink('%s', '%s');", title, url));
     }
 
     @Override
