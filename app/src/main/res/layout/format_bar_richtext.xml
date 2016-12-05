@@ -42,8 +42,8 @@
         <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_heading"
             style="@style/FormatButton"
-            app:checkedDrawable="@drawable/ic_heading_enable"
-            app:uncheckedDrawable="@drawable/ic_heading_disable" />
+            app:checkedDrawable="@drawable/ic_header_richtext_enable"
+            app:uncheckedDrawable="@drawable/ic_header_richtext_disable" />
 
         <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_unorder_list"

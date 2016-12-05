@@ -69,7 +69,7 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void setContent(String content) {
-        execJs(String.format(Locale.US, "quill.pasteHTML('%s');", HtmlUtils.escapeHtml(content)));
+        execJs(String.format(Locale.US, "quill.pasteHTML('%s', 'silent');", HtmlUtils.escapeHtml(content)));
     }
 
     @Override

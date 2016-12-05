@@ -331,6 +331,11 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                         case BLOCK_QUOTE:
                             mQuoteBtn.setChecked(enabled);
                             break;
+                        case HEADER:
+                            if (mHeadingBtn != null) {
+                                mHeadingBtn.setChecked(enabled);
+                            }
+                            break;
                     }
                 }
             }
@@ -356,6 +361,11 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                             break;
                         case UNORDER_LIST:
                             mUnorderListBtn.setChecked(enabled);
+                            break;
+                        case HEADER:
+                            if (mHeadingBtn != null) {
+                                mHeadingBtn.setChecked(enabled);
+                            }
                             break;
                     }
                 }

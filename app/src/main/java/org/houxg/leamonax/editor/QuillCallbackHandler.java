@@ -78,6 +78,9 @@ public class QuillCallbackHandler {
                 case "blockquote":
                     formatStatusMap.put(Editor.Style.BLOCK_QUOTE, getBoolean((Boolean) format.getValue()));
                     break;
+                case "header":
+                    Double headerLevel = ((Double)format.getValue());
+                    formatStatusMap.put(Editor.Style.HEADER, headerLevel != null && headerLevel > 0);
             }
         }
         return formatStatusMap;

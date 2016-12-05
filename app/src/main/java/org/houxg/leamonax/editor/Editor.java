@@ -21,7 +21,8 @@ public abstract class Editor {
         ITALIC,
         ORDER_LIST,
         UNORDER_LIST,
-        BLOCK_QUOTE;
+        HEADER,
+        BLOCK_QUOTE
     }
 
     protected EditorListener mListener;
