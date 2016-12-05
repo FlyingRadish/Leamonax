@@ -2,16 +2,12 @@ package org.houxg.leamonax.editor;
 
 
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class QuillCallbackHandler {
@@ -78,6 +74,9 @@ public class QuillCallbackHandler {
                     break;
                 case "italic":
                     formatStatusMap.put(Editor.Style.ITALIC, getBoolean((Boolean) format.getValue()));
+                    break;
+                case "blockquote":
+                    formatStatusMap.put(Editor.Style.BLOCK_QUOTE, getBoolean((Boolean) format.getValue()));
                     break;
             }
         }

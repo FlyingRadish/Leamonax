@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.BoolRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -290,6 +289,9 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                     case UNORDER_LIST:
                         mUnorderListBtn.setChecked(enabled);
                         break;
+                    case BLOCK_QUOTE:
+                        mQuoteBtn.setChecked(enabled);
+                        break;
                 }
             }
         });
@@ -325,6 +327,9 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                             break;
                         case UNORDER_LIST:
                             mUnorderListBtn.setChecked(enabled);
+                            break;
+                        case BLOCK_QUOTE:
+                            mQuoteBtn.setChecked(enabled);
                             break;
                     }
                 }

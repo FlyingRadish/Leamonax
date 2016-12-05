@@ -4,7 +4,6 @@ package org.houxg.leamonax.editor;
 import android.annotation.SuppressLint;
 import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
 import com.google.gson.Gson;
@@ -52,9 +51,9 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public void setEditingEnabled(boolean enabled) {
         if (enabled) {
-            execJs("quill.enable();");
+            execJs("enable();");
         } else {
-            execJs("quill.disable();");
+            execJs("disable();");
         }
     }
 
@@ -125,7 +124,6 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public void toggleItalic() {
         execJs("toggleItalic();");
-//        execJs("quill.format('list', false);");
     }
 
     @Override

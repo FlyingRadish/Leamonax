@@ -20,9 +20,8 @@ public abstract class Editor {
         BOLD,
         ITALIC,
         ORDER_LIST,
-        UNORDER_LIST;
-
-        public boolean isEnabled;
+        UNORDER_LIST,
+        BLOCK_QUOTE;
     }
 
     protected EditorListener mListener;

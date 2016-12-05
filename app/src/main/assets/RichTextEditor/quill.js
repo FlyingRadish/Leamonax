@@ -8782,7 +8782,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'sanitize',
 	    value: function sanitize(url) {
-	      return (0, _link.sanitize)(url, ['http', 'https', 'data']) ? url : '//:0';
+	      return (0, _link.sanitize)(url, ['http', 'https', 'data', 'file']) ? url : '//:0';
 	    }
 	  }, {
 	    key: 'value',
