@@ -83,9 +83,9 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(Activity context) {
         super.onAttach(context);
-        if (getActivity() instanceof EditorFragmentListener) {
+        if (context instanceof EditorFragmentListener) {
             mListener = (EditorFragmentListener) getActivity();
         } else {
             throw new IllegalArgumentException("Current activity is not the EditorFragmentListener");
@@ -102,8 +102,6 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_editor, container, false);
-
-
         Bundle arguments = savedInstanceState == null ? getArguments() : savedInstanceState;
         mIsEditingEnabled = arguments.getBoolean(ARG_ENABLE_EDIT, false);
         boolean isMarkdown = arguments.getBoolean(ARG_IS_MARKDOWN, true);
@@ -122,6 +120,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
         ButterKnife.bind(this, view);
         mToolContainer.setVisibility(mIsEditingEnabled ? View.VISIBLE : View.GONE);
         mEditor.init(mWebView);
+        mListener.onInitialized();
         return view;
     }
 
