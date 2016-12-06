@@ -8,6 +8,7 @@ import android.webkit.JavascriptInterface;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class QuillCallbackHandler {
@@ -27,17 +28,17 @@ public class QuillCallbackHandler {
         if (mListener == null) {
             return;
         }
-        Map<Editor.Style, Boolean> formatStatusMap = parseFormats(formats);
+        Map<Editor.Style, Object> formatStatusMap = parseFormats(formats);
         mListener.onFormatChanged(formatStatusMap);
     }
 
     @JavascriptInterface
-    public void onCusorChanged(int index, String formats) {
-        Log.i(TAG, "onCusorChanged(), index=" + index + ", formats=" + formats);
+    public void onCursorChanged(int index, String formats) {
+        Log.i(TAG, "onCursorChanged(), index=" + index + ", formats=" + formats);
         if (mListener == null) {
             return;
         }
-        Map<Editor.Style, Boolean> formatStatusMap = parseFormats(formats);
+        Map<Editor.Style, Object> formatStatusMap = parseFormats(formats);
         mListener.onCursorChanged(index, formatStatusMap);
     }
 
@@ -47,14 +48,22 @@ public class QuillCallbackHandler {
         if (mListener == null) {
             return;
         }
-        Map<Editor.Style, Boolean> formatStatusMap = parseFormats(formats);
+        Map<Editor.Style, Object> formatStatusMap = parseFormats(formats);
         mListener.onCursorChanged(index, formatStatusMap);
     }
 
+    @JavascriptInterface
+    public void gotoLink(String title, String link) {
+        if (mListener == null) {
+            return;
+        }
+        mListener.gotoLink(title, link);
+    }
+
     @NonNull
-    private Map<Editor.Style, Boolean> parseFormats(String formats) {
+    private Map<Editor.Style, Object> parseFormats(String formats) {
         Map<String, Object> formatsMap = mGson.fromJson(formats, Map.class);
-        Map<Editor.Style, Boolean> formatStatusMap = new HashMap<>();
+        Map<Editor.Style, Object> formatStatusMap = new HashMap<>();
         for (Map.Entry<String, Object> format : formatsMap.entrySet()) {
             switch (format.getKey()) {
                 case "bold":
@@ -81,6 +90,14 @@ public class QuillCallbackHandler {
                 case "header":
                     Double headerLevel = ((Double)format.getValue());
                     formatStatusMap.put(Editor.Style.HEADER, headerLevel != null && headerLevel > 0);
+                    break;
+                case "link":
+                    Object linkValue = format.getValue();
+                    if (!(linkValue instanceof String) && !(linkValue instanceof List)){
+                        linkValue = null;
+                    }
+                    formatStatusMap.put(Editor.Style.LINK, linkValue);
+                    break;
             }
         }
         return formatStatusMap;

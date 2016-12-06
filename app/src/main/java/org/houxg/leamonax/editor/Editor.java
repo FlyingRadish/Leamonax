@@ -22,6 +22,7 @@ public abstract class Editor {
         ORDER_LIST,
         UNORDER_LIST,
         HEADER,
+        LINK,
         BLOCK_QUOTE
     }
 
@@ -65,12 +66,19 @@ public abstract class Editor {
 
     public abstract void toggleHeading();
 
+    public void clearLink() {}
+
+    public String getSelection() {
+        return null;
+    }
+
     public interface EditorListener {
         void onPageLoaded();
         void onClickedLink(String title, String url);
+        void gotoLink(String title, String url);
         void onStyleChanged(Style style, boolean enabled);
-        void onCursorChanged(int index, Map<Style, Boolean> formatStatus);
-        void onFormatsChanged(Map<Style, Boolean> formatStatus);
+        void onCursorChanged(int index, Map<Style, Object> formatStatus);
+        void onFormatsChanged(Map<Style, Object> formatStatus);
     }
 
     protected class EditorClient extends WebViewClient {

@@ -65,7 +65,8 @@
         <org.houxg.leamonax.widget.ToggleImageButton
             android:id="@+id/btn_link"
             style="@style/FormatButton"
-            android:src="@drawable/ic_insert_link_black_disable" />
+            app:checkedDrawable="@drawable/ic_insert_link_black_enable"
+            app:uncheckedDrawable="@drawable/ic_insert_link_black_disable" />
 
     </LinearLayout>
 

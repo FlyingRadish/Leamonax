@@ -28,7 +28,7 @@
 			for (var i = 0; i < delta.ops.length; i++) {
 				var operation  = delta.ops[i];
 				if (operation.hasOwnProperty('attributes')) {
-						nativeCallbackHandler.onFormatChanged(JSON.stringify(operation['attributes']));
+					nativeCallbackHandler.onFormatChanged(JSON.stringify(operation['attributes']));
 				}
 			}
 		});
@@ -90,7 +90,7 @@
             if (range) {
                 if (range.length == 0) {
                     var formats = quill.getFormat();
-                    nativeCallbackHandler.onCusorChanged(range.index, JSON.stringify(formats))
+                    nativeCallbackHandler.onCursorChanged(range.index, JSON.stringify(formats))
                 } else {
                     var text = quill.getText(range.index, range.length);
                     nativeCallbackHandler.onHighlighted(range.index, range.length, JSON.stringify(quill.getFormat(range.index, range.length)))
@@ -98,14 +98,26 @@
             }
         }
 
+        function clickHandeler(e) {
+            var target = e.target;
+            if (target.tagName === 'A') {
+                var link = target.getAttribute('href');
+                var title = target.innerHTML;
+                e.preventDefault();
+                nativeCallbackHandler.gotoLink(title, link);
+            }
+        }
+
         function enable() {
             document.addEventListener("selectionchange", selectionChangeHandler, false);
+            document.removeEventListener("click", clickHandeler, false);
             quill.enable();
             titleDiv.setAttribute("contenteditable", true);
         }
 
         function disable() {
             document.removeEventListener("selectionchange", selectionChangeHandler, false);
+            document.addEventListener("click", clickHandeler, false);
             quill.disable();
             titleDiv.setAttribute("contenteditable", false);
         }
@@ -132,6 +144,20 @@
 
         function setTitle(title) {
             return titleDiv.innerHTML = title;
+        }
+
+        function getSelection() {
+            var range = quill.getSelection();
+            if (range) {
+                var length = range.length;
+                if (length > 0) {
+                    return quill.getText(range.index, range.length);
+                } else {
+                    return "";
+                }
+            } else {
+                return "";
+            }
         }
 	</script>
 </html>

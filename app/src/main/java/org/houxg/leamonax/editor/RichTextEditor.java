@@ -82,6 +82,11 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     }
 
     @Override
+    public String getSelection() {
+        return new JsRunner().get(mWebView, "getSelection();");
+    }
+
+    @Override
     public void insertImage(String title, String url) {
         execJs(String.format(Locale.US, "insertImage('%s', '%s');", title, url));
     }
@@ -93,7 +98,12 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void updateLink(String title, String url) {
-        execJs(String.format(Locale.US, "ZSSEditor.updateLink('%s', '%s');", url, title));
+        execJs(String.format(Locale.US, "quill.format('link', '%s');", url));
+    }
+
+    @Override
+    public void clearLink() {
+        execJs("quill.format('link', null);");
     }
 
     @Override
@@ -194,17 +204,22 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     }
 
     @Override
+    public void gotoLink(String title, String url) {
+        mListener.gotoLink(title, url);
+    }
+
+    @Override
     public void onGetHtmlResponse(Map<String, String> responseArgs) {
         Log.i(TAG, "onSelectionChanged(), data=" + new Gson().toJson(responseArgs));
     }
 
     @Override
-    public void onFormatChanged(Map<Style, Boolean> formatStatus) {
+    public void onFormatChanged(Map<Style, Object> formatStatus) {
         mListener.onFormatsChanged(formatStatus);
     }
 
     @Override
-    public void onCursorChanged(int index, Map<Style, Boolean> formatStatus) {
+    public void onCursorChanged(int index, Map<Style, Object> formatStatus) {
         mListener.onCursorChanged(index, formatStatus);
     }
 }
