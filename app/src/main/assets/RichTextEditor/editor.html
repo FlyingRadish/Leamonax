@@ -21,7 +21,10 @@
 		var nativeCallbackHandler;
         var titleDiv = document.getElementById('title');
 		var options = {
-            theme: 'bubble'
+            theme: 'bubble',
+            modules: {
+                toolbar:false
+            }
 		};
         var quill = new Quill('#content', options);
 		quill.on('text-change', function(delta, oldDelta, source) {
