@@ -39,7 +39,7 @@ public class CollectionUtils {
             }
             return matchCount == b.size();
         } else {
-            return false;
+            return sizeA == 0;
         }
     }
 }
