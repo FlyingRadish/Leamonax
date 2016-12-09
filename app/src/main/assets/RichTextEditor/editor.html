@@ -160,6 +160,12 @@
         if (listState) {
             result.push(listState);
         }
+        var reg = RegExp('^h[1-6]$');
+        result.reduce(function (previousValue, currentValue, index, array) {
+            if (reg.test(currentValue)) {
+              array[index] = 'header';
+            }
+        }, null);
         console.log(result);
         nativeCallbackHandler.onCursorChanged(JSON.stringify(result));
     }
