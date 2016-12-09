@@ -2,9 +2,7 @@ package org.houxg.leamonax.editor;
 
 
 import android.annotation.SuppressLint;
-import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
 import com.google.gson.Gson;
@@ -34,9 +32,9 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
         mWebView.setScrollBarStyle(SCROLLBARS_OUTSIDE_OVERLAY);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new EditorClient());
-        mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.setWebChromeClient(new EditorChromeClient());
         mWebView.addJavascriptInterface(new JsCallbackHandler(this), JS_CALLBACK_HANDLER);
-        mWebView.loadUrl("file:///android_asset/android-editor.html");
+        mWebView.loadUrl("file:///android_asset/RichTextEditor/editor.html");
     }
 
     private void execJs(final String script) {
@@ -51,46 +49,42 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public void setEditingEnabled(boolean enabled) {
         if (enabled) {
-            execJs("ZSSEditor.getField('zss_field_title').enableEditing();");
-            execJs("ZSSEditor.getField('zss_field_content').enableEditing();");
+            execJs("enable();");
         } else {
-            execJs("ZSSEditor.getField('zss_field_title').disableEditing();");
-            execJs("ZSSEditor.getField('zss_field_content').disableEditing();");
+            execJs("disable()");
         }
     }
 
     @Override
     public void setTitle(String title) {
-        execJs(String.format(Locale.US, "ZSSEditor.getField('zss_field_title').setPlainText('%s');", HtmlUtils.escapeHtml(title)));
+        execJs(String.format(Locale.US, "setTitle('%s');", HtmlUtils.escapeHtml(title)));
     }
 
     @Override
     public String getTitle() {
-        return HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "ZSSEditor.getField('zss_field_title').getHTML();"));
+        return HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "getTitle();"));
     }
 
     @Override
     public void setContent(String content) {
-        execJs(String.format(Locale.US, "ZSSEditor.getField('zss_field_content').setHTML('%s');", HtmlUtils.escapeHtml(content)));
+        execJs(String.format(Locale.US, "tinyMCE.editors[0].setContent('%s');", HtmlUtils.escapeHtml(content)));
     }
 
     @Override
     public String getContent() {
-        String content = HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "ZSSEditor.getField('zss_field_content').getHTML();"));
-        if (!TextUtils.isEmpty(content)) {
-            content = appendPTag(content);
-        }
+        String content = HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "tinyMCE.editors[0].getContent();"));
+        content = content.replaceAll("\\n", "");
         return content;
     }
 
     @Override
     public void insertImage(String title, String url) {
-        execJs(String.format(Locale.US, "ZSSEditor.insertImage('%s', '%s');", url, title));
+        execJs(String.format(Locale.US, "insertImage('%s');", url));
     }
 
     @Override
     public void insertLink(String title, String url) {
-        execJs(String.format(Locale.US, "ZSSEditor.insertLink('%s', '%s');", url, title));
+        execJs(String.format(Locale.US, "formatLink('%s');", url));
     }
 
     @Override
@@ -100,59 +94,43 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void redo() {
-        execJs("ZSSEditor.redo();");
+        execJs("tinyMCE.editors[0].undoManager.redo();");
     }
 
     @Override
     public void undo() {
-        execJs("ZSSEditor.undo();");
+        execJs("tinyMCE.editors[0].undoManager.undo();");
     }
 
     @Override
     public void toggleOrderList() {
-        execJs("ZSSEditor.setOrderedList();");
+        execJs("toggleOrderedList();");
     }
 
     @Override
     public void toggleUnorderList() {
-        execJs("ZSSEditor.setUnorderedList();");
+        execJs("toggleBulletList();");
     }
 
     @Override
     public void toggleBold() {
-        execJs("ZSSEditor.setBold();");
+        execJs("toggleBold();");
     }
 
     @Override
     public void toggleItalic() {
-        execJs("ZSSEditor.setItalic();");
+        execJs("toggleItalic();");
     }
 
     @Override
     public void toggleQuote() {
-        execJs("ZSSEditor.setBlockquote();");
+        execJs("toggleBlockquote();");
     }
 
     @Override
     public void toggleHeading() {
-        execJs("ZSSEditor.setHeading();");
+        execJs("toggleHeader();");
     }
-
-    private String appendPTag(String source) {
-        String[] segments = source.split("\n\n");
-        StringBuilder contentBuilder = new StringBuilder();
-        if (segments.length > 0) {
-            for (String segment : segments) {
-                contentBuilder.append("<p>");
-                contentBuilder.append(segment);
-                contentBuilder.append("</p>");
-            }
-            return contentBuilder.toString();
-        } else {
-            return source;
-        }
-    }
-
 
     @Override
     public void onDomLoaded() {

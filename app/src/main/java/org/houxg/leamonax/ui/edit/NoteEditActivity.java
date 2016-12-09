@@ -215,7 +215,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                         if (!subscriber.isUnsubscribed()) {
                             updateNote();
                             if (mModified.note.isDirty()
-                                    || mModified.note.hasChanges(mOriginal.note)
+                                    || mOriginal.note.hasChanges(mModified.note)
                                     || isLocalNote(mModified.note)
                                     || isTitleContentEmpty(mModified.note)
                                     || !CollectionUtils.isTheSame(mOriginal.tags, mModified.tags)) {

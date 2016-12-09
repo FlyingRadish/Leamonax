@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RichTextEditor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="./tinymce/tinymce.min.js"></script>
+
+</head>
+
+<body>
+    <div contenteditable="true" id="title"></div>
+    <hr>
+    <form method="post">
+        <div id="content"></div>
+    </form>
+</body>
+
+<script type="text/javascript">
+    var titleDiv = document.getElementById('title');
+    var nativeCallbackHandler = {};
+    nativeCallbackHandler.onFormatChange = function (format, msg) {
+        console.log(format, msg);
+    }
+
+    function getTitle() {
+        return titleDiv.innerHTML;
+    }
+
+    function setTitle(title) {
+        return titleDiv.innerHTML = title;
+    }
+    tinymce.init({
+        selector: 'div#content',
+        remove_trailing_brs: false,
+        element_format: 'html',
+        allow_unsafe_link_target: true,
+        plugins: "lists",
+        // toolbar: false,
+        // menubar: false,
+        inline: true
+    });
+
+    function toggleBold() {
+        tinyMCE.editors[0].formatter.toggle('bold');
+        var currentState = tinyMCE.editors[0].formatter.match('bold');
+        nativeCallbackHandler.onFormatChange('bold', currentState);
+    }
+
+    function toggleBlockquote() {
+        tinyMCE.editors[0].formatter.toggle('blockquote');
+        var currentState = tinyMCE.editors[0].formatter.match('blockquote');
+        nativeCallbackHandler.onFormatChange('blockquote', currentState);
+    }
+
+    function toggleHeader() {
+        var currentHeader = getCurrentHeader();
+        if (currentHeader) {
+            var currentVal = parseInt(currentHeader.substr(1));
+            var newVal = (currentVal + 1) % 7;
+            if (newVal) {
+                tinyMCE.editors[0].formatter.apply('h' + newVal);
+            } else {
+                tinyMCE.editors[0].formatter.remove(currentHeader);
+            }
+        } else {
+            tinyMCE.editors[0].formatter.apply('h1');
+        }
+        currentHeader = getCurrentHeader();
+        nativeCallbackHandler.onFormatChange('header', currentHeader);
+    }
+
+    function getCurrentHeader() {
+        var intrestFormats = [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6'
+        ];
+        var result = tinyMCE.editors[0].formatter.matchAll(intrestFormats);
+        if (result) {
+            return result[0];
+        } else {
+            return "";
+        }
+    }
+
+    function toggleItalic() {
+        tinyMCE.editors[0].formatter.toggle('italic');
+        var currentState = tinyMCE.editors[0].formatter.match('italic');
+        nativeCallbackHandler.onFormatChange('italic', currentState);
+    }
+
+    function toggleBulletList() {
+        tinyMCE.editors[0].execCommand("InsertUnorderedList", false)
+        var listState = getListState();
+        nativeCallbackHandler.onFormatChange('bullet', listState && listState.toLowerCase() === 'ul');
+    }
+
+    function toggleOrderedList() {
+        tinyMCE.editors[0].execCommand("InsertOrderedList", false)
+        var listState = getListState();
+        nativeCallbackHandler.onFormatChange('bullet', listState && listState.toLowerCase() === 'ol');
+    }
+
+    function insertImage(src) {
+        tinyMCE.editors[0].insertContent('<img src="' + src + '" alt=""/>');
+    }
+
+    function formatLink(url) {
+        tinyMCE.editors[0].formatter.apply('link', {
+            href: url
+        });
+    }
+
+    function removeLink(title, url) {
+        tinyMCE.editors[0].formatter.remove('link');
+    }
+
+    function enable() {
+        document.addEventListener("selectionchange", selectionChangeHandler, false);
+        document.removeEventListener("click", clickHandeler, false);
+        tinyMCE.editors[0].setMode('design');
+        titleDiv.setAttribute("contenteditable", true);
+    }
+
+    function disable() {
+        document.removeEventListener("selectionchange", selectionChangeHandler, false);
+        document.addEventListener("click", clickHandeler, false);
+        tinyMCE.editors[0].setMode('readonly');
+        titleDiv.setAttribute("contenteditable", false);
+    }
+
+    function clickHandeler(e) {
+        var target = e.target;
+        if (target.tagName === 'A') {
+            var link = target.getAttribute('href');
+            var title = target.innerHTML;
+            e.preventDefault();
+            nativeCallbackHandler.gotoLink(title, link);
+        }
+    }
+
+    function selectionChangeHandler() {
+        var intrestFormats = ['bold',
+            'italic',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'blockquote',
+            'link'
+        ];
+        var result = tinyMCE.editors[0].formatter.matchAll(intrestFormats);
+        listState = getListState();
+        if (listState) {
+            result.push(listState);
+        }
+        console.log(result);
+        nativeCallbackHandler.onCursorChanged(JSON.stringify(result));
+    }
+
+    function getListState() {
+        var node = tinyMCE.editors[0].selection.getNode()
+        var parents = tinymce.dom.DomQuery(node).parents();
+        var lists = tinyMCE.util.Tools.grep(parents, isNodeList);
+        if (lists.length > 0) {
+            return lists[0].nodeName.toLowerCase();
+        } else {
+            return "";
+        }
+    }
+
+    function isNodeList(node) {
+        return node && (/^(OL|UL|DL)$/).test(node.nodeName) && isChildOfBody(node);
+    }
+
+    function isChildOfBody(elm) {
+        return tinyMCE.editors[0].$.contains(tinyMCE.editors[0].getBody(), elm);
+    }
+</script>
+
+</html>
