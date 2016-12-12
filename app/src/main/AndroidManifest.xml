@@ -50,6 +50,11 @@
             android:label="NoteSyncService" />
 
         <activity android:name=".ui.SearchActivity" />
+
+        <activity
+            android:name="ru.bartwell.exfilepicker.ExFilePickerActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/ExFilePickerThemeDark" />
     </application>
 
 </manifest>
