@@ -3,6 +3,7 @@ package org.houxg.leamonax.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -10,6 +11,7 @@ import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import org.houxg.leamonax.R;
@@ -34,6 +36,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
     private Map<String, String> mNotebookId2TitleMaps;
     private NoteAdapterListener mListener;
     private Pattern mTitleHighlight;
+    private WebView mInvisiableWebview;
 
     public NoteAdapter(NoteAdapterListener listener) {
         mListener = listener;
@@ -76,7 +79,15 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         } else {
             holder.titleTv.setText(getHighlightedText(note.getTitle()));
         }
-        holder.contentTv.setText(note.getContent());
+        if (note.isMarkDown()) {
+            holder.contentTv.setText(note.getContent());
+        } else {
+            Spanned spannedContent = Html.fromHtml(note.getContent());
+            String contentStr = spannedContent.toString();
+            contentStr = contentStr.replaceAll("\\n\\n+", "\n");
+            holder.contentTv.setText(contentStr);
+        }
+
         holder.notebookTv.setText(mNotebookId2TitleMaps.get(note.getNoteBookId()));
         long updateTime = note.getUpdatedTimeVal();
         Context context = holder.updateTimeTv.getContext();
