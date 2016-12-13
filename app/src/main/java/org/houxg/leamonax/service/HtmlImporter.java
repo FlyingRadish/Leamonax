@@ -2,57 +2,62 @@ package org.houxg.leamonax.service;
 
 
 import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.model.Note;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okio.BufferedSink;
-import okio.BufferedSource;
 import okio.Okio;
 import okio.Source;
 
 public class HtmlImporter {
 
+    private boolean mShouldRemoveAttributes = false;
+    private static final String NORMAL_TAGS = "a, img, ul, ol, div, p, br, h1, h2, h3, h4, h5, h6, i, b, del, ins, sub, sup, blockquote, code, pre";
+    private Document.OutputSettings mOutPutSettings = new Document.OutputSettings()
+            .prettyPrint(true)
+            .charset("UTF-8")
+            .syntax(Document.OutputSettings.Syntax.html);
+
+
+    public void setPureContent(boolean isPureContent) {
+        mShouldRemoveAttributes = isPureContent;
+    }
 
     public Note from(File file) {
-        String html;
-        try {
-            BufferedSource source = Okio.buffer(Okio.source(file));
-            html = source.readUtf8();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-        Log.i("will", "html=" + html);
-        if (TextUtils.isEmpty(html)) {
-            return null;
-        }
-
         Note note = new Note();
         String name = file.getName();
         note.setTitle(name.substring(0, name.lastIndexOf(".html")));
         note.setUserId(AccountService.getCurrent().getUserId());
         note.insert();
 
-        Document document = Jsoup.parse(html);
+        Document document;
+        try {
+            document = Jsoup.parse(file, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
         Elements imgs = document.select("img");
         File parentFile = file.getParentFile();
         for (Element imgNode : imgs) {
             String imgPath = imgNode.attr("src");
             Log.i("will", "img src=" + imgPath);
             File imageFile = new File(parentFile, imgPath);
-            if (imageFile.isFile() && isImage(imageFile.getAbsolutePath())) {
+            if (imageFile.isFile()) {
                 try {
                     String cacheName = new ObjectId().toString() + "." + getExtension(imageFile.getName());
                     File targetFile = new File(Leamonax.getContext().getCacheDir(), cacheName);
@@ -65,46 +70,66 @@ public class HtmlImporter {
 
                     Uri noteFile = NoteFileService.createImageFile(note.getId(), targetFile.getAbsolutePath());
                     imgNode.attr("src", noteFile.toString());
-                } catch (FileNotFoundException e) {
-                    Log.w("will", "image file not exist");
-                    e.printStackTrace();
-                    continue;
                 } catch (IOException e) {
                     e.printStackTrace();
-                    continue;
                 }
             }
         }
-        Document.OutputSettings settings = new Document.OutputSettings();
-        settings.prettyPrint(true)
-                .charset("UTF-8")
-                .syntax(Document.OutputSettings.Syntax.html);
-        document.outputSettings(settings);
-        String output = document.body().outerHtml();
-        Log.i("will", "output=" + output);
-        Log.i("will", "output=" + document.body().children().outerHtml());
+
+        if (mShouldRemoveAttributes) {
+            for (Element element : document.body().select(NORMAL_TAGS)) {
+                removeElementsAttributes(element);
+                addClass(element);
+            }
+        }
+
+        document.outputSettings(mOutPutSettings);
+        String output = document.body().children().outerHtml();
         note.setContent(output);
         long time = System.currentTimeMillis();
         note.setCreatedTimeVal(time);
         note.setUpdatedTimeVal(time);
+        note.setIsDirty(true);
         note.update();
-        Log.i("will", "output note=" + note.getId());
         return note;
     }
 
-    private boolean isLocalPath(String path) {
-        return true;
+    private void addClass(Element element) {
+        switch (element.nodeName()) {
+            case "pre":
+                if (!element.hasClass("ace-tomorrow")) {
+                    element.addClass("ace-tomorrow");
+                }
+                break;
+        }
     }
 
-    private boolean isImage(String path) {
-        switch (getExtension(path)) {
-            case "png":
-            case "jpg":
-            case "jpeg":
-            case "bmp":
-                return true;
+    private void removeElementsAttributes(Element element) {
+        List<String> removeAttributes = new ArrayList<>();
+        Attributes attributes = element.attributes();
+        for (Attribute attr : attributes) {
+            if (shouldRemoveAttr(attr.getKey(), element.nodeName())) {
+                removeAttributes.add(attr.getKey());
+            }
+        }
+
+        for (String key : removeAttributes) {
+            attributes.remove(key);
+        }
+    }
+
+    private boolean shouldRemoveAttr(String attr, String nodeName) {
+        switch (nodeName) {
+            case "img":
+                return !("src".equals(attr)
+                        || "alt".equals(attr));
+            case "a":
+                return !("href".equals(attr));
+            case "style":
+            case "script":
+                return !("type".equals(attr));
             default:
-                return false;
+                return true;
         }
     }
 

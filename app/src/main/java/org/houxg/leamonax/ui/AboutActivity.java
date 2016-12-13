@@ -96,6 +96,7 @@ public class AboutActivity extends BaseActivity {
                 if (object.count > 0) {
                     // Here is object contains selected files names and path
                     HtmlImporter importer = new HtmlImporter();
+                    importer.setPureContent(true);
                     importer.from(new File(object.path + object.names.get(0)));
                 }
             }
