@@ -76,6 +76,12 @@ public class HtmlImporter {
             }
         }
 
+        if (mShouldRemoveAttributes) {
+            for (Element element : document.body().select(NORMAL_TAGS)) {
+                removeElementsAttributes(element);
+            }
+        }
+
         for (Element preElement : document.body().select("pre")) {
             Elements children = preElement.children();
             if (children.size() == 1 && "code".equals(children.first().nodeName())) {
@@ -83,13 +89,15 @@ public class HtmlImporter {
                 String codeHtml = codeElement.html();
                 codeElement.remove();
                 preElement.html(codeHtml);
-            }
-        }
 
-        if (mShouldRemoveAttributes) {
-            for (Element element : document.body().select(NORMAL_TAGS)) {
-                removeElementsAttributes(element);
-                addClass(element);
+                preElement.addClass("ace-tomorrow");
+                removeClassLike(preElement, "brush:\\w+");
+                //to be compatible with desktop app, https://github.com/leanote/desktop-app/issues/192
+                if (codeHtml.matches("&lt;.+&gt;")) {
+                    preElement.addClass("brush:html");
+                } else {
+                    preElement.addClass("brush:convert");
+                }
             }
         }
 
@@ -104,16 +112,11 @@ public class HtmlImporter {
         return note;
     }
 
-    private void addClass(Element element) {
-        switch (element.nodeName().toLowerCase()) {
-            case "pre":
-                if (!element.hasClass("ace-tomorrow")) {
-                    element.addClass("ace-tomorrow");
-                }
-                if (!element.hasClass("brush:html")) {
-                    element.addClass("brush:html");
-                }
-                break;
+    private void removeClassLike(Element element, String regex) {
+        for (String cls : element.classNames()) {
+            if (cls.matches(regex)) {
+                element.removeClass(cls);
+            }
         }
     }
 
