@@ -28,6 +28,7 @@ import org.houxg.leamonax.utils.DialogUtils;
 import org.houxg.leamonax.widget.ToggleImageButton;
 
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -281,15 +282,43 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                     case ITALIC:
                         mItalicBtn.setChecked(enabled);
                         break;
-                    case ORDER_LIST:
+                    case ORDERED_LIST:
                         mOrderListBtn.setChecked(enabled);
                         break;
-                    case UNORDER_LIST:
+                    case BULLET_LIST:
                         mUnorderListBtn.setChecked(enabled);
                         break;
                 }
             }
         });
+    }
+
+    @Override
+    public void onStyleChanged(final Editor.Style style, final boolean enabled, final Object data) {
+        mBoldBtn.post(new Runnable() {
+            @Override
+            public void run() {
+                switch (style) {
+                    case BOLD:
+                        mBoldBtn.setChecked(enabled);
+                        break;
+                    case ITALIC:
+                        mItalicBtn.setChecked(enabled);
+                        break;
+                    case ORDERED_LIST:
+                        mOrderListBtn.setChecked(enabled);
+                        break;
+                    case BULLET_LIST:
+                        mUnorderListBtn.setChecked(enabled);
+                        break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onCursorChanged(Map<Editor.Style, Object> enabledFormats) {
+
     }
 
     public interface EditorFragmentListener {

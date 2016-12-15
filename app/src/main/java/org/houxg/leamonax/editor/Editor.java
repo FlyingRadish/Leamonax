@@ -12,13 +12,18 @@ import android.webkit.WebViewClient;
 
 import org.houxg.leamonax.service.NoteFileService;
 
+import java.util.Map;
+
 public abstract class Editor {
 
     public enum Style {
         BOLD,
         ITALIC,
-        ORDER_LIST,
-        UNORDER_LIST
+        BULLET_LIST,
+        ORDERED_LIST,
+        BLOCKQUOTE,
+        HEADER,
+        LINK
     }
 
     protected EditorListener mListener;
@@ -65,6 +70,8 @@ public abstract class Editor {
         void onPageLoaded();
         void onClickedLink(String title, String url);
         void onStyleChanged(Style style, boolean enabled);
+        void onStyleChanged(Style style, boolean enabled, Object data);
+        void onCursorChanged(Map<Style, Object> enabledFormats);
     }
 
     protected class EditorClient extends WebViewClient {

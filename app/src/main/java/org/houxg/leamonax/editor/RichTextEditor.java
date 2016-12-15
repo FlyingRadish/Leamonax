@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static android.view.View.SCROLLBARS_OUTSIDE_OVERLAY;
 
-public class RichTextEditor extends Editor implements OnJsEditorStateChangedListener {
+public class RichTextEditor extends Editor implements OnJsEditorStateChangedListener, TinnyMceCallback.TinnyMceListener {
 
     private static final String TAG = "RichTextEditor";
     private static final String JS_CALLBACK_HANDLER = "nativeCallbackHandler";
@@ -33,7 +33,7 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new EditorClient());
         mWebView.setWebChromeClient(new EditorChromeClient());
-        mWebView.addJavascriptInterface(new JsCallbackHandler(this), JS_CALLBACK_HANDLER);
+        mWebView.addJavascriptInterface(new TinnyMceCallback(this), JS_CALLBACK_HANDLER);
         mWebView.loadUrl("file:///android_asset/RichTextEditor/editor.html");
     }
 
@@ -155,10 +155,10 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
                     mListener.onStyleChanged(Style.ITALIC, entry.getValue());
                     break;
                 case "orderedList":
-                    mListener.onStyleChanged(Style.ORDER_LIST, entry.getValue());
+                    mListener.onStyleChanged(Style.ORDERED_LIST, entry.getValue());
                     break;
                 case "unorderedList":
-                    mListener.onStyleChanged(Style.UNORDER_LIST, entry.getValue());
+                    mListener.onStyleChanged(Style.BULLET_LIST, entry.getValue());
                     break;
             }
         }
@@ -177,5 +177,20 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     @Override
     public void onGetHtmlResponse(Map<String, String> responseArgs) {
         Log.i(TAG, "onSelectionChanged(), data=" + new Gson().toJson(responseArgs));
+    }
+
+    @Override
+    public void onFormatChanged(Style format, boolean isEnabled, Object data) {
+        mListener.onStyleChanged(Style.BULLET_LIST, isEnabled, data);
+    }
+
+    @Override
+    public void gotoLink(String url) {
+
+    }
+
+    @Override
+    public void onCursorChanged(Map<Style, Object> enabledFormats) {
+        
     }
 }
