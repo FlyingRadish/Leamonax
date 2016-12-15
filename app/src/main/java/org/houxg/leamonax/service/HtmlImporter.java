@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import okio.BufferedSink;
 import okio.Okio;
@@ -93,7 +94,7 @@ public class HtmlImporter {
                 preElement.addClass("ace-tomorrow");
                 removeClassLike(preElement, "brush:\\w+");
                 //to be compatible with desktop app, https://github.com/leanote/desktop-app/issues/192
-                if (codeHtml.matches("&lt;.+&gt;")) {
+                if (Pattern.compile("&lt;.+&gt;").matcher(codeHtml).find()) {
                     preElement.addClass("brush:html");
                 } else {
                     preElement.addClass("brush:convert");
