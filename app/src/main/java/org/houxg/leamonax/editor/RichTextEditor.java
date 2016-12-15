@@ -2,20 +2,16 @@ package org.houxg.leamonax.editor;
 
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.webkit.WebView;
 
-import com.google.gson.Gson;
-
 import org.houxg.leamonax.utils.HtmlUtils;
-import org.json.JSONObject;
 
 import java.util.Locale;
 import java.util.Map;
 
 import static android.view.View.SCROLLBARS_OUTSIDE_OVERLAY;
 
-public class RichTextEditor extends Editor implements OnJsEditorStateChangedListener, TinnyMceCallback.TinnyMceListener {
+public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceListener {
 
     private static final String TAG = "RichTextEditor";
     private static final String JS_CALLBACK_HANDLER = "nativeCallbackHandler";
@@ -89,7 +85,7 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
 
     @Override
     public void updateLink(String title, String url) {
-        execJs(String.format(Locale.US, "ZSSEditor.updateLink('%s', '%s');", url, title));
+        execJs(String.format(Locale.US, "formatLink('%s');", url));
     }
 
     @Override
@@ -133,64 +129,27 @@ public class RichTextEditor extends Editor implements OnJsEditorStateChangedList
     }
 
     @Override
-    public void onDomLoaded() {
-        execJs("ZSSEditor.getField('zss_field_content').setMultiline('true');");
-        Log.i(TAG, "onDomLoaded");
+    public void removeLink() {
+        execJs("removeLink()");
     }
 
     @Override
-    public void onSelectionChanged(Map<String, String> selectionArgs) {
-        Log.i(TAG, "onSelectionChanged(), data=" + new Gson().toJson(selectionArgs));
+    public String getSelection() {
+        return new JsRunner().get(mWebView, "getSelectedContent()");
     }
 
     @Override
-    public void onSelectionStyleChanged(Map<String, Boolean> changeSet) {
-        Log.i(TAG, "onSelectionStyleChanged(), data=" + new Gson().toJson(changeSet));
-        for (Map.Entry<String, Boolean> entry : changeSet.entrySet()) {
-            switch (entry.getKey()) {
-                case "bold":
-                    mListener.onStyleChanged(Style.BOLD, entry.getValue());
-                    break;
-                case "italic":
-                    mListener.onStyleChanged(Style.ITALIC, entry.getValue());
-                    break;
-                case "orderedList":
-                    mListener.onStyleChanged(Style.ORDERED_LIST, entry.getValue());
-                    break;
-                case "unorderedList":
-                    mListener.onStyleChanged(Style.BULLET_LIST, entry.getValue());
-                    break;
-            }
-        }
+    public void onFormatChanged(Map<Format, Object> formats) {
+        mListener.onFormatChanged(formats);
     }
 
     @Override
-    public void onMediaTapped(String mediaId, String url, JSONObject meta, String uploadStatus) {
+    public void linkTo(String url) {
+        mListener.linkTo(url);
     }
 
     @Override
-    public void onLinkTapped(String url, String title) {
-        Log.i(TAG, "onLinkTapped(), title=" + title + ", url=" + url);
-        mListener.onClickedLink(title, url);
-    }
-
-    @Override
-    public void onGetHtmlResponse(Map<String, String> responseArgs) {
-        Log.i(TAG, "onSelectionChanged(), data=" + new Gson().toJson(responseArgs));
-    }
-
-    @Override
-    public void onFormatChanged(Style format, boolean isEnabled, Object data) {
-        mListener.onStyleChanged(Style.BULLET_LIST, isEnabled, data);
-    }
-
-    @Override
-    public void gotoLink(String url) {
-
-    }
-
-    @Override
-    public void onCursorChanged(Map<Style, Object> enabledFormats) {
-        
+    public void onCursorChanged(Map<Format, Object> enabledFormats) {
+        mListener.onCursorChanged(enabledFormats);
     }
 }

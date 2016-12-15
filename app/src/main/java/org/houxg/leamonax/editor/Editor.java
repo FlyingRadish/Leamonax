@@ -16,7 +16,7 @@ import java.util.Map;
 
 public abstract class Editor {
 
-    public enum Style {
+    public enum Format {
         BOLD,
         ITALIC,
         BULLET_LIST,
@@ -66,12 +66,19 @@ public abstract class Editor {
 
     public abstract void toggleHeading();
 
+    public void removeLink() {}
+
+    public String getSelection() {
+        return "";
+    }
+
     public interface EditorListener {
         void onPageLoaded();
         void onClickedLink(String title, String url);
-        void onStyleChanged(Style style, boolean enabled);
-        void onStyleChanged(Style style, boolean enabled, Object data);
-        void onCursorChanged(Map<Style, Object> enabledFormats);
+        void onStyleChanged(Format style, boolean enabled);
+        void onFormatChanged(Map<Format, Object> enabledFormats);
+        void onCursorChanged(Map<Format, Object> enabledFormats);
+        void linkTo(String url);
     }
 
     protected class EditorClient extends WebViewClient {
@@ -123,10 +130,8 @@ public abstract class Editor {
 
         @Override
         public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-            Log.i(TAG, String.format("console: id=%s, line=%d, level=%s, message=%s",
-                    consoleMessage.sourceId(),
+            Log.i(TAG, String.format("line=%d, msg=%s",
                     consoleMessage.lineNumber(),
-                    consoleMessage.messageLevel(),
                     consoleMessage.message()));
             return true;
         }

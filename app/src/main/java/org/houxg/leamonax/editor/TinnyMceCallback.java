@@ -1,5 +1,7 @@
 package org.houxg.leamonax.editor;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 import com.google.gson.Gson;
@@ -9,68 +11,77 @@ import java.util.Map;
 
 public class TinnyMceCallback {
 
+    private static final String TAG = "TinnyMceCallback";
+
     private TinnyMceListener mListener;
     private Gson mGson = new Gson();
 
-    public TinnyMceCallback(TinnyMceListener mListener) {
+    TinnyMceCallback(TinnyMceListener mListener) {
         this.mListener = mListener;
     }
 
-    public interface TinnyMceListener {
-        void onFormatChanged(Editor.Style format, boolean isEnabled, Object data);
+    interface TinnyMceListener {
+        void onFormatChanged(Map<Editor.Format, Object> formats);
 
-        void gotoLink(String url);
+        void linkTo(String url);
 
-        void onCursorChanged(Map<Editor.Style, Object> enabledFormats);
+        void onCursorChanged(Map<Editor.Format, Object> enabledFormats);
     }
 
     @JavascriptInterface
-    public void onFormatChanged(String format, boolean isEnabled, Object data) {
+    public void onFormatChanged(String data) {
         if (mListener != null) {
-            Editor.Style formatEnume = parseFormat(format);
-            mListener.onFormatChanged(formatEnume, isEnabled, data);
+            Map<Editor.Format, Object> format = parseFormat(data);
+            mListener.onFormatChanged(format);
         }
     }
 
     @JavascriptInterface
-    void gotoLink(String url) {
+    public void linkTo(String url) {
         if (mListener != null) {
-            mListener.gotoLink(url);
+            mListener.linkTo(url);
         }
     }
 
     @JavascriptInterface
-    void onCursorChanged(String data) {
+    public void onCursorChanged(String data) {
+        Log.i(TAG, data);
         if (mListener == null) {
             return;
         }
-        Map<String, Object> formats = mGson.fromJson(data, Map.class);
-        Map<Editor.Style, Object> enabledFormats = new HashMap<>();
-        for (Map.Entry<String, Object> format : formats.entrySet()) {
-            Editor.Style formatEnume = parseFormat(format.getKey());
-            if (formatEnume != null) {
-                enabledFormats.put(formatEnume, format.getValue());
-            }
-        }
+        Map<Editor.Format, Object> enabledFormats = parseFormat(data);
         mListener.onCursorChanged(enabledFormats);
     }
 
-    private Editor.Style parseFormat(String formatName) {
-        switch (formatName) {
+    @NonNull
+    private Map<Editor.Format, Object> parseFormat(String data) {
+        Map<String, Object> formats = mGson.fromJson(data, Map.class);
+        Map<Editor.Format, Object> enabledFormats = new HashMap<>();
+        for (Map.Entry<String, Object> format : formats.entrySet()) {
+            Editor.Format formatEnum = stringToFormat(format.getKey());
+            if (formatEnum != null) {
+                enabledFormats.put(formatEnum, format.getValue());
+            }
+        }
+        return enabledFormats;
+    }
+
+    private static Editor.Format stringToFormat(String val) {
+        switch (val) {
             case "bold":
-                return Editor.Style.BOLD;
+                return Editor.Format.BOLD;
             case "italic":
-                return Editor.Style.ITALIC;
+                return Editor.Format.ITALIC;
             case "ul":
-                return Editor.Style.BULLET_LIST;
+                return Editor.Format.BULLET_LIST;
             case "ol":
-                return Editor.Style.ORDERED_LIST;
+                return Editor.Format.ORDERED_LIST;
             case "blockquote":
-                return Editor.Style.BLOCKQUOTE;
+                return Editor.Format.BLOCKQUOTE;
             case "header":
-                return Editor.Style.HEADER;
+                return Editor.Format.HEADER;
             case "link":
-                return Editor.Style.LINK;
+                return Editor.Format.LINK;
             default:
                 return null;
         }

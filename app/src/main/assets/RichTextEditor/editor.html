@@ -5,11 +5,13 @@
     <title>RichTextEditor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <script src="./tinymce/tinymce.min.js"></script>
-
+    <style type="text/css">
+        .without-border {outline: 0px solid transparent;}
+    </style>
 </head>
 
 <body>
-    <div contenteditable="true" id="title"></div>
+    <div class="without-border" contenteditable="true" id="title"></div>
     <hr>
     <form method="post">
         <div id="content"></div>
@@ -18,10 +20,6 @@
 
 <script type="text/javascript">
     var titleDiv = document.getElementById('title');
-    var nativeCallbackHandler = {};
-    nativeCallbackHandler.onFormatChange = function (format, msg) {
-        console.log(format, msg);
-    }
 
     function getTitle() {
         return titleDiv.innerHTML;
@@ -36,21 +34,21 @@
         element_format: 'html',
         allow_unsafe_link_target: true,
         plugins: "lists",
-        // toolbar: false,
-        // menubar: false,
+        toolbar: false,
+        menubar: false,
         inline: true
     });
 
     function toggleBold() {
         tinyMCE.editors[0].formatter.toggle('bold');
         var currentState = tinyMCE.editors[0].formatter.match('bold');
-        nativeCallbackHandler.onFormatChange('bold', currentState);
+        nativeCallbackHandler.onFormatChange(JSON.stringify({bold : currentState}));
     }
 
     function toggleBlockquote() {
         tinyMCE.editors[0].formatter.toggle('blockquote');
         var currentState = tinyMCE.editors[0].formatter.match('blockquote');
-        nativeCallbackHandler.onFormatChange('blockquote', currentState);
+        nativeCallbackHandler.onFormatChange(JSON.stringify({blockquote:currentState}));
     }
 
     function toggleHeader() {
@@ -67,7 +65,7 @@
             tinyMCE.editors[0].formatter.apply('h1');
         }
         currentHeader = getCurrentHeader();
-        nativeCallbackHandler.onFormatChange('header', currentHeader);
+        nativeCallbackHandler.onFormatChange(JSON.stringify({header: currentHeader}));
     }
 
     function getCurrentHeader() {
@@ -87,22 +85,28 @@
         }
     }
 
+    function getSelectedContent() {
+        return tinyMCE.editors[0].selection.getContent();
+    }
+
     function toggleItalic() {
         tinyMCE.editors[0].formatter.toggle('italic');
         var currentState = tinyMCE.editors[0].formatter.match('italic');
-        nativeCallbackHandler.onFormatChange('italic', currentState);
+        nativeCallbackHandler.onFormatChange(JSON.stringify({italic: currentState}));
     }
 
     function toggleBulletList() {
         tinyMCE.editors[0].execCommand("InsertUnorderedList", false)
         var listState = getListState();
-        nativeCallbackHandler.onFormatChange('bullet', listState && listState.toLowerCase() === 'ul');
+        listState = listState.toLowerCase() === 'ul';
+        nativeCallbackHandler.onFormatChange(JSON.stringify({bullet: listState}));
     }
 
     function toggleOrderedList() {
         tinyMCE.editors[0].execCommand("InsertOrderedList", false)
         var listState = getListState();
-        nativeCallbackHandler.onFormatChange('bullet', listState && listState.toLowerCase() === 'ol');
+        listState = listState.toLowerCase() === 'ol';
+        nativeCallbackHandler.onFormatChange(JSON.stringify({ordered: listState}));
     }
 
     function insertImage(src) {
@@ -113,11 +117,12 @@
         tinyMCE.editors[0].formatter.apply('link', {
             href: url
         });
-        //TODO:call nativeCallbackHandler
+        nativeCallbackHandler.onFormatChange(JSON.stringify({link: url}));
     }
 
     function removeLink(title, url) {
         tinyMCE.editors[0].formatter.remove('link');
+        nativeCallbackHandler.onFormatChange(JSON.stringify({link: null}));
     }
 
     function enable() {
@@ -140,7 +145,7 @@
             var link = target.getAttribute('href');
             var title = target.innerHTML;
             e.preventDefault();
-            nativeCallbackHandler.gotoLink(title, link);
+            nativeCallbackHandler.linkTo(link);
         }
     }
 
@@ -162,13 +167,27 @@
             result.push(listState);
         }
         var reg = RegExp('^h[1-6]$');
+        var enabledFormat = {};
         result.reduce(function (previousValue, currentValue, index, array) {
             if (reg.test(currentValue)) {
               array[index] = 'header';
             }
+            switch (array[index]) {
+                case 'link':
+                    enabledFormat[array[index]] = getLink();
+                    break;
+                default:
+                    enabledFormat[array[index]] = true;
+            }
+
         }, null);
-        console.log(result);
-        nativeCallbackHandler.onCursorChanged(JSON.stringify(result));
+
+        console.log(enabledFormat);
+        nativeCallbackHandler.onCursorChanged(JSON.stringify(enabledFormat));
+    }
+
+    function getLink() {
+        return tinyMCE.editors[0].selection.getNode().getAttribute('href');
     }
 
     function getListState() {

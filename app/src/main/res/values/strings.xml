@@ -64,4 +64,7 @@
     <string name="change_user_name_successful">Change user name successful</string>
     <string name="search">Search</string>
     <string name="notebooks">Notebooks</string>
+    <string name="clear">Clear</string>
+    <string name="multiple_links">Multiple links</string>
+    <string name="apply">Apply</string>
 </resources>
