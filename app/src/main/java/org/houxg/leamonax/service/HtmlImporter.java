@@ -95,10 +95,13 @@ public class HtmlImporter {
     }
 
     private void addClass(Element element) {
-        switch (element.nodeName()) {
+        switch (element.nodeName().toLowerCase()) {
             case "pre":
                 if (!element.hasClass("ace-tomorrow")) {
                     element.addClass("ace-tomorrow");
+                }
+                if (!element.hasClass("brush:html")) {
+                    element.addClass("brush:html");
                 }
                 break;
         }
