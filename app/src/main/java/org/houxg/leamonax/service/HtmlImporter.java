@@ -76,6 +76,16 @@ public class HtmlImporter {
             }
         }
 
+        for (Element preElement : document.body().select("pre")) {
+            Elements children = preElement.children();
+            if (children.size() == 1 && "code".equals(children.first().nodeName())) {
+                Element codeElement = children.first();
+                String codeHtml = codeElement.html();
+                codeElement.remove();
+                preElement.html(codeHtml);
+            }
+        }
+
         if (mShouldRemoveAttributes) {
             for (Element element : document.body().select(NORMAL_TAGS)) {
                 removeElementsAttributes(element);
