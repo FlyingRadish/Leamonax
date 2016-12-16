@@ -4,6 +4,7 @@ package org.houxg.leamonax.editor;
 import android.annotation.SuppressLint;
 import android.webkit.WebView;
 
+import org.houxg.leamonax.utils.AppLog;
 import org.houxg.leamonax.utils.HtmlUtils;
 
 import java.util.Locale;
@@ -63,13 +64,16 @@ public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceL
 
     @Override
     public void setContent(String content) {
-        execJs(String.format(Locale.US, "tinyMCE.editors[0].setContent('%s');", HtmlUtils.escapeHtml(content)));
+        content = HtmlUtils.escapeHtml(content);
+        AppLog.i(TAG, "escaped=" + content);
+        execJs(String.format(Locale.US, "tinyMCE.editors[0].setContent('%s');", content));
     }
 
     @Override
     public String getContent() {
-        String content = HtmlUtils.unescapeHtml(new JsRunner().get(mWebView, "tinyMCE.editors[0].getContent();"));
-        content = content.replaceAll("\\n", "");
+        String content = new JsRunner().get(mWebView, "getContent();");
+        content = HtmlUtils.unescapeHtml(content);
+        AppLog.i(TAG, "unescaped=" + content);
         return content;
     }
 
