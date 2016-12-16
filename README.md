@@ -1,5 +1,6 @@
-![master status](https://travis-ci.org/houxg/Leamonax.svg?branch=master)
 # Leamonax
+<img src='https://travis-ci.org/houxg/Leamonax.svg?branch=master'/>
+
 This is a third party Android client for Leanote.
 
 **It's still in developing.** Be careful when you using it and make sure you have an backup.
@@ -22,11 +23,11 @@ This is a third party Android client for Leanote.
 - [x] Search by note's title
 
 # TODO
-- [] Chinese language support
-- [] Quick note
-- [] Integration of tinnyMCE
-- [] Searching for full-text fields
-- [] Import html file
+- [ ] Chinese language support
+- [ ] Quick note
+- [ ] Integration of tinnyMCE
+- [ ] Searching for full-text fields
+- [ ] Import html file
 
 # Thanks
 ## Contributors
