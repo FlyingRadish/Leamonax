@@ -211,7 +211,7 @@
 
     function getContent() {
         var body = tinyMCE.$(tinyMCE.editors[0].getBody()).clone();
-        return $(body).clone().html();
+        return tinyMCE.$(body).clone().html();
     }
 
     function getListState() {
