@@ -3,6 +3,7 @@ package org.houxg.leamonax.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -76,7 +77,15 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         } else {
             holder.titleTv.setText(getHighlightedText(note.getTitle()));
         }
-        holder.contentTv.setText(note.getContent());
+        if (note.isMarkDown()) {
+            holder.contentTv.setText(note.getContent());
+        } else {
+            Spanned spannedContent = Html.fromHtml(note.getContent());
+            String contentStr = spannedContent.toString();
+            contentStr = contentStr.replaceAll("\\n\\n+", "\n");
+            holder.contentTv.setText(contentStr);
+        }
+
         holder.notebookTv.setText(mNotebookId2TitleMaps.get(note.getNoteBookId()));
         long updateTime = note.getUpdatedTimeVal();
         Context context = holder.updateTimeTv.getContext();
