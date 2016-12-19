@@ -2,7 +2,6 @@ package org.houxg.leamonax.ui;
 
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
@@ -20,6 +19,7 @@ import org.houxg.leamonax.model.BaseResponse;
 import org.houxg.leamonax.network.ApiProvider;
 import org.houxg.leamonax.network.LeaFailure;
 import org.houxg.leamonax.service.AccountService;
+import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
 import java.util.Locale;
@@ -119,13 +119,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     @OnClick(R.id.tv_forgot_password)
     void clickedForgotPassword() {
         String url = getHost() + FIND_PASSWORD;
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(url));
-        try {
-            startActivity(i);
-        } catch (Exception ex) {
-            ToastUtils.show(this, R.string.host_address_is_incorrect);
-        }
+        OpenUtils.openUrl(this, url);
     }
 
     @OnClick(R.id.tv_custom_host)
