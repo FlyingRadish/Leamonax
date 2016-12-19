@@ -64,4 +64,5 @@
     <string name="change_user_name_successful">Change user name successful</string>
     <string name="search">Search</string>
     <string name="notebooks">Notebooks</string>
+    <string name="illegal_host">Illegal host, please check again</string>
 </resources>

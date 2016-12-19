@@ -22,11 +22,14 @@ import org.houxg.leamonax.network.LeaFailure;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.ToastUtils;
 
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Func1;
@@ -62,6 +65,8 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     ProgressBar mSignUpProgress;
     @BindView(R.id.rl_sign_up)
     View mSignUpPanel;
+    @BindView(R.id.tv_example)
+    TextView mEampleTv;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,6 +90,22 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
         mActionPanel.setY(actionPanelOffsetY);
         mHostEt.setScaleY(isCustomHost ? 1 : 0);
         mHostEt.setText(host);
+        mHostEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mEampleTv.setText(String.format(Locale.US, "For example, login api will be:\n%s/api/login", s.toString()));
+            }
+        });
     }
 
     @Override
@@ -111,6 +132,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     void switchHost() {
         boolean isCustomHost = !(boolean) mCustomHostBtn.getTag();
         mCustomHostBtn.setTag(isCustomHost);
+        mEampleTv.setVisibility(isCustomHost ? View.VISIBLE : View.GONE);
         if (isCustomHost) {
             mCustomHostBtn.setText(R.string.use_leanote_host);
             mHostEt.animate()
@@ -156,11 +178,16 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
 
     @OnClick(R.id.tv_sign_in)
     void signIn() {
-        String email = mEmailEt.getText().toString();
-        String password = mPasswordEt.getText().toString();
+        final String email = mEmailEt.getText().toString();
+        final String password = mPasswordEt.getText().toString();
         final String host = getHost();
-        ApiProvider.getInstance().init(host);
-        AccountService.login(email, password)
+        initHost()
+                .flatMap(new Func1<String, Observable<Authentication>>() {
+                    @Override
+                    public Observable<Authentication> call(String s) {
+                        return AccountService.login(email, password);
+                    }
+                })
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
@@ -183,8 +210,12 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        ToastUtils.showNetworkError(SignInActivity.this);
-                        animateFinish(mSignInBtn, mSignInProgress);
+                        if (e instanceof IllegalHostException) {
+                            ToastUtils.show(SignInActivity.this, R.string.illegal_host);
+                        } else {
+                            ToastUtils.showNetworkError(SignInActivity.this);
+                            animateFinish(mSignInBtn, mSignInProgress);
+                        }
                     }
 
                     @Override
@@ -203,12 +234,17 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     }
 
     @OnClick(R.id.tv_sign_up)
-    void clickedSignup() {
+    void clickedSignUp() {
         final String email = mEmailEt.getText().toString();
         final String password = mPasswordEt.getText().toString();
         final String host = getHost();
-        ApiProvider.getInstance().init(host);
-        AccountService.register(email, password)
+        initHost()
+                .flatMap(new Func1<String, Observable<BaseResponse>>() {
+                    @Override
+                    public Observable<BaseResponse> call(String s) {
+                        return AccountService.register(email, password);
+                    }
+                })
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
@@ -241,8 +277,12 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        ToastUtils.showNetworkError(SignInActivity.this);
-                        animateFinish(mSignUpBtn, mSignUpProgress);
+                        if (e instanceof IllegalHostException) {
+                            ToastUtils.show(SignInActivity.this, R.string.illegal_host);
+                        } else {
+                            ToastUtils.showNetworkError(SignInActivity.this);
+                            animateFinish(mSignUpBtn, mSignUpProgress);
+                        }
                     }
 
                     @Override
@@ -260,13 +300,25 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                 });
     }
 
-    @OnClick(R.id.tv_sign_up)
-    void clickedSignUp() {
-        mSignUpPanel.animate()
-                .scaleX(1)
-                .setDuration(200)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .start();
+    private Observable<String> initHost() {
+        return Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                if (!subscriber.isUnsubscribed()) {
+                    String host = getHost();
+                    if (host.matches("^(http|https)://[^\\s]+")) {
+                        ApiProvider.getInstance().init(host);
+                        subscriber.onNext(host);
+                        subscriber.onCompleted();
+                    } else {
+                        subscriber.onError(new IllegalHostException());
+                    }
+                }
+            }
+        });
+    }
+
+    private static class IllegalHostException extends Exception {
     }
 
     private void animateProgress(View button, final View progressBar) {
