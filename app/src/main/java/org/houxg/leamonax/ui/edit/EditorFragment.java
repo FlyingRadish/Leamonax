@@ -8,12 +8,19 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebView;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.yuyh.library.imgsel.ImgSelActivity;
@@ -28,11 +35,18 @@ import org.houxg.leamonax.utils.DialogUtils;
 import org.houxg.leamonax.widget.ToggleImageButton;
 
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class EditorFragment extends Fragment implements Editor.EditorListener {
 
@@ -55,16 +69,17 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     @BindView(R.id.btn_italic)
     ToggleImageButton mItalicBtn;
     @Nullable
-    @BindView(R.id.btn_heading)
-    ToggleImageButton mHeadingBtn;
-    @Nullable
     @BindView(R.id.btn_quote)
     ToggleImageButton mQuoteBtn;
 
+    @BindView(R.id.btn_heading)
+    ToggleImageButton mHeadingBtn;
     @BindView(R.id.btn_order_list)
     ToggleImageButton mOrderListBtn;
     @BindView(R.id.btn_unorder_list)
     ToggleImageButton mUnorderListBtn;
+    @BindView(R.id.btn_link)
+    ToggleImageButton mLinkBtn;
     @BindView(R.id.web_editor)
     WebView mWebView;
 
@@ -166,14 +181,95 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     }
 
     @OnClick(R.id.btn_link)
-    void insertLink() {
-        DialogUtils.editLink(getActivity(), "", "", new DialogUtils.ChangedListener() {
+    void clickedLink() {
+        if (mEditor instanceof MarkdownEditor) {
+            DialogUtils.editLink(getActivity(), "", "", new DialogUtils.ChangedListener() {
+                @Override
+                public void onChanged(String title, String link) {
+                    Log.i(TAG, "title=" + title + ", url=" + link);
+                    mEditor.insertLink(title, link);
+                }
+            });
+        } else if (mEditor instanceof RichTextEditor) {
+            if (mLinkBtn.isChecked()) {
+                showEditLInkPanel(mLinkBtn);
+            } else {
+                Observable.create(
+                        new Observable.OnSubscribe<String>() {
+                            @Override
+                            public void call(Subscriber<? super String> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    subscriber.onNext(mEditor.getSelection());
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .filter(new Func1<String, Boolean>() {
+                            @Override
+                            public Boolean call(String s) {
+                                return !TextUtils.isEmpty(s);
+                            }
+                        })
+                        .subscribe(new Action1<String>() {
+                            @Override
+                            public void call(String s) {
+                                showEditLInkPanel(mLinkBtn);
+                            }
+                        });
+            }
+        }
+    }
+
+    private void showEditLInkPanel(View anchorView) {
+        View contentView = LayoutInflater.from(anchorView.getContext()).inflate(R.layout.pop_link, null);
+        contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        final EditText linkEt = (EditText) contentView.findViewById(R.id.et_link);
+        TextView multipleLinksTv = (TextView) contentView.findViewById(R.id.tv_multiple_links);
+        TextView confirmTv = (TextView) contentView.findViewById(R.id.tv_confirm);
+        TextView clearTv = (TextView) contentView.findViewById(R.id.tv_clear);
+        final PopupWindow popupWindow = new PopupWindow(contentView);
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+        popupWindow.setWidth(WindowManager.LayoutParams.MATCH_PARENT);
+        popupWindow.setAnimationStyle(R.style.anim_pop_up);
+
+        if (mLinkBtn.isChecked()) {
+            Object status = mLinkBtn.getTag();
+            if (status == null) {
+                return;
+            }
+            boolean canEdit = status instanceof String;
+            linkEt.setVisibility(canEdit ? View.VISIBLE : View.GONE);
+            confirmTv.setVisibility(canEdit ? View.VISIBLE : View.GONE);
+            multipleLinksTv.setVisibility(canEdit ? View.GONE : View.VISIBLE);
+            if (canEdit) {
+                linkEt.setText((String) mLinkBtn.getTag());
+                linkEt.setSelection(linkEt.getText().length());
+            }
+        }
+        confirmTv.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onChanged(String title, String link) {
-                Log.i(TAG, "title=" + title + ", url=" + link);
-                mEditor.insertLink(title, link);
+            public void onClick(View v) {
+                popupWindow.dismiss();
+                mEditor.updateLink("", linkEt.getText().toString());
             }
         });
+        clearTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+                mEditor.removeLink();
+            }
+        });
+
+        int[] tempLocation = new int[2];
+        anchorView.getLocationOnScreen(tempLocation);
+        int measure = contentView.getMeasuredHeight();
+        int offsetY = tempLocation[1] - measure;
+        popupWindow.showAtLocation(anchorView, Gravity.TOP | GravityCompat.START, 0, offsetY);
     }
 
     @Override
@@ -270,7 +366,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     }
 
     @Override
-    public void onStyleChanged(final Editor.Style style, final boolean enabled) {
+    public void onStyleChanged(final Editor.Format style, final boolean enabled) {
         mBoldBtn.post(new Runnable() {
             @Override
             public void run() {
@@ -281,15 +377,86 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                     case ITALIC:
                         mItalicBtn.setChecked(enabled);
                         break;
-                    case ORDER_LIST:
+                    case ORDERED_LIST:
                         mOrderListBtn.setChecked(enabled);
                         break;
-                    case UNORDER_LIST:
+                    case BULLET_LIST:
                         mUnorderListBtn.setChecked(enabled);
                         break;
                 }
             }
         });
+    }
+
+    @Override
+    public void onFormatChanged(final Map<Editor.Format, Object> formats) {
+        mBoldBtn.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshFormatStatus(formats);
+            }
+        });
+    }
+
+    @Override
+    public void onCursorChanged(final Map<Editor.Format, Object> enabledFormats) {
+        mBoldBtn.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mBoldBtn != null) {
+                    mBoldBtn.setChecked(false);
+                }
+                if (mItalicBtn != null) {
+                    mItalicBtn.setChecked(false);
+                }
+                mOrderListBtn.setChecked(false);
+                mUnorderListBtn.setChecked(false);
+                if (mQuoteBtn != null) {
+                    mQuoteBtn.setChecked(false);
+                }
+                mHeadingBtn.setChecked(false);
+                if (mLinkBtn != null) {
+                    mLinkBtn.setChecked(false);
+                }
+                refreshFormatStatus(enabledFormats);
+            }
+        });
+    }
+
+    @Override
+    public void linkTo(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
+    }
+
+    private void refreshFormatStatus(Map<Editor.Format, Object> formatStatus) {
+        for (Map.Entry<Editor.Format, Object> entry : formatStatus.entrySet()) {
+            switch (entry.getKey()) {
+                case BOLD:
+                    mBoldBtn.setChecked((Boolean) entry.getValue());
+                    break;
+                case ITALIC:
+                    mItalicBtn.setChecked((Boolean) entry.getValue());
+                    break;
+                case ORDERED_LIST:
+                    mOrderListBtn.setChecked((Boolean) entry.getValue());
+                    break;
+                case BULLET_LIST:
+                    mUnorderListBtn.setChecked((Boolean) entry.getValue());
+                    break;
+                case BLOCKQUOTE:
+                    mQuoteBtn.setChecked((Boolean) entry.getValue());
+                    break;
+                case HEADER:
+                    mHeadingBtn.setChecked((Boolean) entry.getValue());
+                    break;
+                case LINK:
+                    Object linkValue = entry.getValue();
+                    mLinkBtn.setChecked(linkValue != null);
+                    mLinkBtn.setTag(linkValue);
+                    break;
+            }
+        }
     }
 
     public interface EditorFragmentListener {

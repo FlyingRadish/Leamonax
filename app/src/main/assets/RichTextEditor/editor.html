@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RichTextEditor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="./tinymce/tinymce.min.js"></script>
+    <style type="text/css">
+        .without-border {outline: 0px solid transparent;}
+        .ace-tomorrow {
+            overflow: auto;
+            font-family: monospace, monospace;
+            font-size: 18px;
+            border: 1px solid rgb(221, 219, 204);
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+            border-bottom-left-radius: 3px;
+            margin-top: 0px;
+            margin-bottom: 40px;
+            padding: 15px 20px;
+            color: rgb(66, 66, 66);
+            line-height: normal;
+            widows: 1;
+            background-color: rgb(241, 240, 234);
+            background-position: initial initial;
+            background-repeat: initial initial;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="outline: 0px solid transparent;" class="without-border" contenteditable="true" id="title"></div>
+    <hr>
+    <form method="post">
+        <div id="content" style="outline: 0px solid transparent;"></div>
+    </form>
+</body>
+
+<script type="text/javascript">
+    var titleDiv = document.getElementById('title');
+
+    function getTitle() {
+        return titleDiv.innerHTML;
+    }
+
+    function setTitle(title) {
+        return titleDiv.innerHTML = title;
+    }
+    tinymce.init({
+        selector: 'div#content',
+        remove_trailing_brs: false,
+        element_format: 'html',
+        allow_unsafe_link_target: true,
+        plugins: "lists",
+        toolbar: false,
+        menubar: false,
+        inline: true
+    });
+
+    function toggleBold() {
+        tinyMCE.editors[0].formatter.toggle('bold');
+        var currentState = tinyMCE.editors[0].formatter.match('bold');
+        nativeCallbackHandler.onFormatChange(JSON.stringify({bold : currentState}));
+    }
+
+    function toggleBlockquote() {
+        tinyMCE.editors[0].formatter.toggle('blockquote');
+        var currentState = tinyMCE.editors[0].formatter.match('blockquote');
+        nativeCallbackHandler.onFormatChange(JSON.stringify({blockquote:currentState}));
+    }
+
+    function toggleHeader() {
+        var currentHeader = getCurrentHeader();
+        if (currentHeader) {
+            var currentVal = parseInt(currentHeader.substr(1));
+            var newVal = (currentVal + 1) % 7;
+            if (newVal) {
+                tinyMCE.editors[0].formatter.apply('h' + newVal);
+            } else {
+                tinyMCE.editors[0].formatter.remove(currentHeader);
+            }
+        } else {
+            tinyMCE.editors[0].formatter.apply('h1');
+        }
+        currentHeader = getCurrentHeader();
+        nativeCallbackHandler.onFormatChange(JSON.stringify({header: currentHeader}));
+    }
+
+    function getCurrentHeader() {
+        var intrestFormats = [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6'
+        ];
+        var result = tinyMCE.editors[0].formatter.matchAll(intrestFormats);
+        if (result) {
+            return result[0];
+        } else {
+            return "";
+        }
+    }
+
+    function getSelectedContent() {
+        return tinyMCE.editors[0].selection.getContent();
+    }
+
+    function toggleItalic() {
+        tinyMCE.editors[0].formatter.toggle('italic');
+        var currentState = tinyMCE.editors[0].formatter.match('italic');
+        nativeCallbackHandler.onFormatChange(JSON.stringify({italic: currentState}));
+    }
+
+    function toggleBulletList() {
+        tinyMCE.editors[0].execCommand("InsertUnorderedList", false)
+        var listState = getListState();
+        listState = listState.toLowerCase() === 'ul';
+        nativeCallbackHandler.onFormatChange(JSON.stringify({bullet: listState}));
+    }
+
+    function toggleOrderedList() {
+        tinyMCE.editors[0].execCommand("InsertOrderedList", false)
+        var listState = getListState();
+        listState = listState.toLowerCase() === 'ol';
+        nativeCallbackHandler.onFormatChange(JSON.stringify({ordered: listState}));
+    }
+
+    function insertImage(src) {
+        tinyMCE.editors[0].insertContent('<img src="' + src + '" alt=""/>');
+    }
+
+    function formatLink(url) {
+        tinyMCE.editors[0].formatter.apply('link', {
+            href: url
+        });
+        nativeCallbackHandler.onFormatChange(JSON.stringify({link: url}));
+    }
+
+    function removeLink(title, url) {
+        tinyMCE.editors[0].formatter.remove('link');
+        nativeCallbackHandler.onFormatChange(JSON.stringify({link: null}));
+    }
+
+    function enable() {
+        document.addEventListener("selectionchange", selectionChangeHandler, false);
+        document.removeEventListener("click", clickHandeler, false);
+        tinyMCE.editors[0].setMode('design');
+        titleDiv.setAttribute("contenteditable", true);
+    }
+
+    function disable() {
+        document.removeEventListener("selectionchange", selectionChangeHandler, false);
+        document.addEventListener("click", clickHandeler, false);
+        tinyMCE.editors[0].setMode('readonly');
+        titleDiv.setAttribute("contenteditable", false);
+    }
+
+    function clickHandeler(e) {
+        var target = e.target;
+        if (target.tagName === 'A') {
+            var link = target.getAttribute('href');
+            var title = target.innerHTML;
+            e.preventDefault();
+            nativeCallbackHandler.linkTo(link);
+        }
+    }
+
+    function selectionChangeHandler() {
+        var intrestFormats = ['bold',
+            'italic',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'blockquote',
+            'link'
+        ];
+        var result = tinyMCE.editors[0].formatter.matchAll(intrestFormats);
+        listState = getListState();
+        if (listState) {
+            result.push(listState);
+        }
+        var reg = RegExp('^h[1-6]$');
+        var enabledFormat = {};
+        result.reduce(function (previousValue, currentValue, index, array) {
+            if (reg.test(currentValue)) {
+              array[index] = 'header';
+            }
+            switch (array[index]) {
+                case 'link':
+                    enabledFormat[array[index]] = getLink();
+                    break;
+                default:
+                    enabledFormat[array[index]] = true;
+            }
+
+        }, null);
+
+        console.log(enabledFormat);
+        nativeCallbackHandler.onCursorChanged(JSON.stringify(enabledFormat));
+    }
+
+    function getLink() {
+        return tinyMCE.editors[0].selection.getNode().getAttribute('href');
+    }
+
+    function getContent() {
+        var body = tinyMCE.$(tinyMCE.editors[0].getBody()).clone();
+        return tinyMCE.$(body).clone().html();
+    }
+
+    function getListState() {
+        var node = tinyMCE.editors[0].selection.getNode()
+        var parents = tinymce.dom.DomQuery(node).parents();
+        var lists = tinyMCE.util.Tools.grep(parents, isNodeList);
+        if (lists.length > 0) {
+            return lists[0].nodeName.toLowerCase();
+        } else {
+            return "";
+        }
+    }
+
+    function isNodeList(node) {
+        return node && (/^(OL|UL|DL)$/).test(node.nodeName) && isChildOfBody(node);
+    }
+
+    function isChildOfBody(elm) {
+        return tinyMCE.editors[0].$.contains(tinyMCE.editors[0].getBody(), elm);
+    }
+</script>
+
+</html>

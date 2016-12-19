@@ -7,4 +7,14 @@
         app:showAsAction="always"
         android:title="@string/edit"/>
 
+    <item
+        android:id="@+id/action_print"
+        app:showAsAction="never"
+        android:title="Print"/>
+
+    <item
+        android:id="@+id/action_get"
+        app:showAsAction="never"
+        android:title="Get"/>
+
 </menu>

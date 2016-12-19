@@ -65,4 +65,7 @@
     <string name="search">Search</string>
     <string name="notebooks">Notebooks</string>
     <string name="illegal_host">Illegal host, please check again</string>
+    <string name="clear">Clear</string>
+    <string name="multiple_links">Multiple links</string>
+    <string name="apply">Apply</string>
 </resources>
