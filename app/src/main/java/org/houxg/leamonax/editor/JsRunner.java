@@ -37,6 +37,7 @@ public class JsRunner implements ValueCallback<String> {
 
     @Override
     public void onReceiveValue(String value) {
+        Log.i(TAG, "rsp=" + value);
         mResult = value.substring(1, value.length() - 1);
         mLatch.countDown();
     }

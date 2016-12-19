@@ -12,13 +12,18 @@ import android.webkit.WebViewClient;
 
 import org.houxg.leamonax.service.NoteFileService;
 
+import java.util.Map;
+
 public abstract class Editor {
 
-    public enum Style {
+    public enum Format {
         BOLD,
         ITALIC,
-        ORDER_LIST,
-        UNORDER_LIST
+        BULLET_LIST,
+        ORDERED_LIST,
+        BLOCKQUOTE,
+        HEADER,
+        LINK
     }
 
     protected EditorListener mListener;
@@ -61,10 +66,19 @@ public abstract class Editor {
 
     public abstract void toggleHeading();
 
+    public void removeLink() {}
+
+    public String getSelection() {
+        return "";
+    }
+
     public interface EditorListener {
         void onPageLoaded();
         void onClickedLink(String title, String url);
-        void onStyleChanged(Style style, boolean enabled);
+        void onStyleChanged(Format style, boolean enabled);
+        void onFormatChanged(Map<Format, Object> enabledFormats);
+        void onCursorChanged(Map<Format, Object> enabledFormats);
+        void linkTo(String url);
     }
 
     protected class EditorClient extends WebViewClient {
@@ -116,10 +130,8 @@ public abstract class Editor {
 
         @Override
         public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-            Log.i(TAG, String.format("console: id=%s, line=%d, level=%s, message=%s",
-                    consoleMessage.sourceId(),
+            Log.i(TAG, String.format("line=%d, msg=%s",
                     consoleMessage.lineNumber(),
-                    consoleMessage.messageLevel(),
                     consoleMessage.message()));
             return true;
         }

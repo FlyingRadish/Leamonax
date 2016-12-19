@@ -17,6 +17,7 @@ import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.HtmlImporter;
+import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.utils.TestUtils;
 
 import java.io.File;
@@ -85,6 +86,11 @@ public class AboutActivity extends BaseActivity {
     void test() {
         Intent intent = new Intent(getApplicationContext(), ru.bartwell.exfilepicker.ExFilePickerActivity.class);
         startActivityForResult(intent, 1);
+    }
+
+    @OnClick(R.id.ll_github)
+    void clickedGithub() {
+        OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax");
     }
 
     @Override

@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,9 +14,7 @@ import android.view.View;
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
-import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.edit.EditorFragment;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
@@ -24,8 +22,6 @@ import org.houxg.leamonax.utils.AppLog;
 import org.houxg.leamonax.utils.DialogDisplayer;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
-
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -76,8 +72,8 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.preview, menu);
-        MenuItem item = menu.findItem(R.id.action_print_url);
-        item.setVisible(BuildConfig.DEBUG);
+        menu.findItem(R.id.action_print).setVisible(BuildConfig.DEBUG);
+        menu.findItem(R.id.action_get).setVisible(BuildConfig.DEBUG);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -87,9 +83,21 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
             case R.id.action_edit:
                 startActivityForResult(NoteEditActivity.getOpenIntent(this, mNote.getId(), false), REQ_EDIT);
                 return true;
-            case R.id.action_print_url:
-                Account account = AccountService.getCurrent();
-                Log.i(TAG, account.getHost() + "/api/note/getNoteAndContent?" + String.format(Locale.US, "noteId=%s&token=%s", mNote.getNoteId(), account.getAccessToken()));
+            case R.id.action_get:
+                Observable.create(
+                        new Observable.OnSubscribe<Void>() {
+                            @Override
+                            public void call(Subscriber<? super Void> subscriber) {
+                                mEditorFragment.getContent();
+                                subscriber.onNext(null);
+                                subscriber.onCompleted();
+                            }
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe();
+                return true;
+            case R.id.action_print:
                 AppLog.i(TAG, mNote.getContent());
         }
         return super.onOptionsItemSelected(item);
@@ -214,7 +222,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
         mActionContainer.setVisibility(mNote.isDirty() ? View.VISIBLE : View.GONE);
         mRevertBtn.setVisibility(mNote.getUsn() > 0 ? View.VISIBLE : View.GONE);
 
-        mEditorFragment.setTitle(mNote.getTitle());
+        mEditorFragment.setTitle(TextUtils.isEmpty(mNote.getTitle()) ? getString(R.string.untitled) : mNote.getTitle());
         mEditorFragment.setContent(mNote.getContent());
     }
 }

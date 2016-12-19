@@ -284,7 +284,8 @@ public class Note extends BaseModel implements Serializable {
     private boolean isChanged(String message, Object l, Object r) {
         boolean isEqual = l.equals(r);
         if (!isEqual) {
-            Log.i("Note", message + " changed, origin=" + l + ", modified=" + r);
+            Log.i("Note", message + " changed, origin  =" + l);
+            Log.i("Note", message + " changed, modified=" + r);
         }
         return !isEqual;
     }
