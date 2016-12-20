@@ -2,11 +2,12 @@ package org.houxg.leamonax.service;
 
 
 import android.net.Uri;
-import android.util.Log;
+import android.text.TextUtils;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.model.Note;
+import org.houxg.leamonax.utils.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Attributes;
@@ -32,9 +33,15 @@ public class HtmlImporter {
             .charset("UTF-8")
             .syntax(Document.OutputSettings.Syntax.html);
 
+    private String mDefaultNotebookId;
+
 
     public void setPureContent(boolean isPureContent) {
         mShouldRemoveAttributes = isPureContent;
+    }
+
+    public void setNotebookId(String notebookId) {
+        mDefaultNotebookId = notebookId;
     }
 
     public Note from(File file) {
@@ -42,6 +49,9 @@ public class HtmlImporter {
         String name = file.getName();
         note.setTitle(name.substring(0, name.lastIndexOf(".html")));
         note.setUserId(AccountService.getCurrent().getUserId());
+        if (!TextUtils.isEmpty(mDefaultNotebookId)) {
+            note.setNoteBookId(mDefaultNotebookId);
+        }
         note.insert();
 
         Document document;
@@ -55,11 +65,10 @@ public class HtmlImporter {
         File parentFile = file.getParentFile();
         for (Element imgNode : imgs) {
             String imgPath = imgNode.attr("src");
-            Log.i("will", "img src=" + imgPath);
             File imageFile = new File(parentFile, imgPath);
             if (imageFile.isFile()) {
                 try {
-                    String cacheName = new ObjectId().toString() + "." + getExtension(imageFile.getName());
+                    String cacheName = new ObjectId().toString() + "." + FileUtils.getExtension(imageFile.getName());
                     File targetFile = new File(Leamonax.getContext().getCacheDir(), cacheName);
                     Source source = Okio.source(imageFile);
                     BufferedSink bufferedSink = Okio.buffer(Okio.sink(targetFile));
@@ -102,7 +111,19 @@ public class HtmlImporter {
         }
 
         document.outputSettings(mOutPutSettings);
-        String output = document.body().children().outerHtml();
+        String output;
+        String html = document.body().html().trim();
+        int firstTokenizerIndex = html.indexOf("<");
+        if (firstTokenizerIndex > 0) {
+            String firstContent = "<p>" + html.substring(0, firstTokenizerIndex) + "</p>";
+            String formattedContent = html.substring(firstTokenizerIndex, html.length());
+            html = firstContent + formattedContent;
+            document.body().html(html);
+        } else if (firstTokenizerIndex < 0){
+             document.body().html("<p>" + document.body().text() + "</p>");
+        }
+        output = document.body().children().outerHtml();
+
         note.setContent(output);
         long time = System.currentTimeMillis();
         note.setCreatedTimeVal(time);
@@ -147,15 +168,5 @@ public class HtmlImporter {
             default:
                 return true;
         }
-    }
-
-    private String getExtension(String fileName) {
-        String ext = "";
-        int i = fileName.lastIndexOf('.');
-
-        if (i > 0 && i < fileName.length() - 1) {
-            ext = fileName.substring(i + 1).toLowerCase();
-        }
-        return ext;
     }
 }

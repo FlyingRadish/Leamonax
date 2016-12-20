@@ -1,6 +1,5 @@
 package org.houxg.leamonax.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -16,11 +15,9 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.AccountService;
-import org.houxg.leamonax.service.HtmlImporter;
 import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.utils.TestUtils;
 
-import java.io.File;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +25,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import ru.bartwell.exfilepicker.ExFilePickerParcelObject;
 import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
@@ -39,7 +35,6 @@ public class AboutActivity extends BaseActivity {
     TextView mVersionTv;
     @BindView(R.id.ll_debug)
     View mDebugPanel;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,28 +79,11 @@ public class AboutActivity extends BaseActivity {
 
     @OnClick(R.id.ll_test)
     void test() {
-        Intent intent = new Intent(getApplicationContext(), ru.bartwell.exfilepicker.ExFilePickerActivity.class);
-        startActivityForResult(intent, 1);
+
     }
 
     @OnClick(R.id.ll_github)
     void clickedGithub() {
         OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax");
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (data != null) {
-                ExFilePickerParcelObject object = data.getParcelableExtra(ExFilePickerParcelObject.class.getCanonicalName());
-                if (object.count > 0) {
-                    // Here is object contains selected files names and path
-                    HtmlImporter importer = new HtmlImporter();
-                    importer.setPureContent(true);
-                    importer.from(new File(object.path + object.names.get(0)));
-                }
-            }
-        }
     }
 }

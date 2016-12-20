@@ -15,35 +15,50 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.BaseResponse;
 import org.houxg.leamonax.model.Note;
-import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Notebook_Table;
+import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
 import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.model.Tag_Table;
 import org.houxg.leamonax.service.AccountService;
+import org.houxg.leamonax.service.HtmlImporter;
+import org.houxg.leamonax.utils.DialogDisplayer;
+import org.houxg.leamonax.utils.FileUtils;
 import org.houxg.leamonax.utils.ToastUtils;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import ru.bartwell.exfilepicker.ExFilePicker;
+import ru.bartwell.exfilepicker.ExFilePickerParcelObject;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class SettingsActivity extends BaseActivity {
 
     private final String[] mEditors = new String[]{"RichText", "Markdown"};
+
+    private static final int REQ_CHOOSE_HTML = 15;
 
     @BindView(R.id.tv_editor)
     TextView mEditorTv;
@@ -60,6 +75,8 @@ public class SettingsActivity extends BaseActivity {
     @BindView(R.id.ll_clear)
     View mClearDataView;
 
+    private HtmlImporter mHtmlImporter;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +85,8 @@ public class SettingsActivity extends BaseActivity {
         ButterKnife.bind(this);
         refresh();
         mClearDataView.setVisibility(BuildConfig.DEBUG ? View.VISIBLE : View.GONE);
+        mHtmlImporter = new HtmlImporter();
+        mHtmlImporter.setPureContent(true);
     }
 
     @OnClick(R.id.ll_editor)
@@ -178,6 +197,130 @@ public class SettingsActivity extends BaseActivity {
                     }
                 })
                 .show();
+    }
+
+    @OnClick(R.id.ll_import_html)
+    void clickedImportHtml() {
+        Intent intent = new Intent(getApplicationContext(), ru.bartwell.exfilepicker.ExFilePickerActivity.class);
+        intent.putExtra(ExFilePicker.SET_CHOICE_TYPE, ExFilePicker.CHOICE_TYPE_ALL);
+
+        startActivityForResult(intent, REQ_CHOOSE_HTML);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CHOOSE_HTML) {
+            if (data != null) {
+                ExFilePickerParcelObject object = data.getParcelableExtra(ExFilePickerParcelObject.class.getCanonicalName());
+                if (object.count > 0) {
+                    scanHtml(object.path, object.names)
+                            .flatMapIterable(new Func1<List<String>, Iterable<String>>() {
+                                @Override
+                                public Iterable<String> call(List<String> strings) {
+                                    return strings;
+                                }
+                            })
+                            .flatMap(new Func1<String, Observable<Note>>() {
+                                @Override
+                                public Observable<Note> call(final String filePath) {
+                                    return Observable.create(new Observable.OnSubscribe<Note>() {
+                                        @Override
+                                        public void call(Subscriber<? super Note> subscriber) {
+                                            if (!subscriber.isUnsubscribed()) {
+                                                File file = new File(filePath);
+                                                Note note = mHtmlImporter.from(file);
+                                                subscriber.onNext(note);
+                                                subscriber.onCompleted();
+                                            }
+                                        }
+                                    });
+                                }
+                            })
+                            .doOnSubscribe(new Action0() {
+                                @Override
+                                public void call() {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            DialogDisplayer.showProgress(SettingsActivity.this, getString(R.string.parsing_html));
+                                        }
+                                    });
+
+                                }
+                            })
+                            .doOnCompleted(new Action0() {
+                                @Override
+                                public void call() {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            DialogDisplayer.dismissProgress();
+                                        }
+                                    });
+
+                                }
+                            })
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Observer<Note>() {
+                                @Override
+                                public void onCompleted() {
+
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    e.printStackTrace();
+                                    CrashReport.postCatchedException(e);
+                                    ToastUtils.show(SettingsActivity.this, R.string.parse_error);
+                                }
+
+                                @Override
+                                public void onNext(Note note) {
+
+                                }
+                            });
+                }
+            }
+        }
+    }
+
+    private Observable<List<String>> scanHtml(final String path, final List<String> names) {
+        return Observable.create(
+                new Observable.OnSubscribe<List<String>>() {
+                    @Override
+                    public void call(Subscriber<? super List<String>> subscriber) {
+                        if (!subscriber.isUnsubscribed()) {
+                            List<String> absPaths = new ArrayList<>();
+                            for (String name : names) {
+                                File file = new File(path + name);
+                                scanHtmlFile(absPaths, file);
+                            }
+                            subscriber.onNext(absPaths);
+                            subscriber.onCompleted();
+                        }
+                    }
+                });
+    }
+
+    private void scanHtmlFile(List<String> absPaths, File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    String extension = FileUtils.getExtension(pathname.getName()).toLowerCase();
+                    return pathname.isDirectory() || (pathname.isFile() && "html".equals(extension));
+                }
+            });
+            if (children != null && children.length > 0) {
+                for (File child : children) {
+                    scanHtmlFile(absPaths, child);
+                }
+            }
+        } else if (file.isFile() && "html".equals(FileUtils.getExtension(file.getName()).toLowerCase())) {
+            absPaths.add(file.getAbsolutePath());
+        }
     }
 
     private void clearData() {

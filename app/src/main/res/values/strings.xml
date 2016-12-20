@@ -68,4 +68,7 @@
     <string name="clear">Clear</string>
     <string name="multiple_links">Multiple links</string>
     <string name="apply">Apply</string>
+    <string name="import_from_html">Import from html</string>
+    <string name="parsing_html">Parsing html</string>
+    <string name="parse_error">Parse error</string>
 </resources>

@@ -180,6 +180,26 @@
                 <include layout="@layout/divider" />
             </LinearLayout>
 
+            <include layout="@layout/divider"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/ll_import_html"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="@string/import_from_html" />
+
+                <include layout="@layout/divider" />
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/ll_log_out"
                 style="@style/SettingsPanel"
