@@ -31,7 +31,7 @@
     <string name="delete_note_failed">Delete note failed</string>
     <string name="email_or_password_incorrect">Email or password is incorrect</string>
     <string name="network_error">Network error</string>
-    <string name="untitled">Untitled</string>
+    <string name="untitled" translatable="false">Untitled</string>
     <string name="time_yesterday">Yesterday %s</string>
     <string name="use_leanote_host">Use Leanote.com</string>
     <string name="use_custom_host">Use custom host</string>
@@ -68,8 +68,8 @@
     <string name="clear">Clear</string>
     <string name="multiple_links">Multiple links</string>
     <string name="apply">Apply</string>
-    <string name="import_from_html">Import from html</string>
-    <string name="parsing_html">Parsing html</string>
+    <string name="import_from_html">Import from HTML</string>
     <string name="parse_error">Parse error</string>
+    <string name="parsing_html">Parsing HTML</string>
     <string name="select_notebook">Select notebook</string>
 </resources>
