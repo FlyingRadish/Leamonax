@@ -108,7 +108,6 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
-            case
             case R.id.action_save:
                 filterUnchanged()
                         .doOnNext(new Action1<Wrapper>() {
