@@ -32,6 +32,7 @@ import org.houxg.leamonax.model.Tag_Table;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.HtmlImporter;
 import org.houxg.leamonax.utils.DialogDisplayer;
+import org.houxg.leamonax.utils.DialogUtils;
 import org.houxg.leamonax.utils.FileUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
@@ -214,71 +215,15 @@ public class SettingsActivity extends BaseActivity {
             if (data != null) {
                 ExFilePickerParcelObject object = data.getParcelableExtra(ExFilePickerParcelObject.class.getCanonicalName());
                 if (object.count > 0) {
-                    scanHtml(object.path, object.names)
-                            .flatMapIterable(new Func1<List<String>, Iterable<String>>() {
+                    ImportConfig importConfig = new ImportConfig();
+                    importConfig.names = object.names;
+                    importConfig.path = object.path;
+                    selectImportNotebook(importConfig)
+                            .subscribe(new Action1<ImportConfig>() {
                                 @Override
-                                public Iterable<String> call(List<String> strings) {
-                                    return strings;
-                                }
-                            })
-                            .flatMap(new Func1<String, Observable<Note>>() {
-                                @Override
-                                public Observable<Note> call(final String filePath) {
-                                    return Observable.create(new Observable.OnSubscribe<Note>() {
-                                        @Override
-                                        public void call(Subscriber<? super Note> subscriber) {
-                                            if (!subscriber.isUnsubscribed()) {
-                                                File file = new File(filePath);
-                                                Note note = mHtmlImporter.from(file);
-                                                subscriber.onNext(note);
-                                                subscriber.onCompleted();
-                                            }
-                                        }
-                                    });
-                                }
-                            })
-                            .doOnSubscribe(new Action0() {
-                                @Override
-                                public void call() {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            DialogDisplayer.showProgress(SettingsActivity.this, getString(R.string.parsing_html));
-                                        }
-                                    });
-
-                                }
-                            })
-                            .doOnCompleted(new Action0() {
-                                @Override
-                                public void call() {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            DialogDisplayer.dismissProgress();
-                                        }
-                                    });
-
-                                }
-                            })
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Observer<Note>() {
-                                @Override
-                                public void onCompleted() {
-
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-                                    e.printStackTrace();
-                                    CrashReport.postCatchedException(e);
-                                    ToastUtils.show(SettingsActivity.this, R.string.parse_error);
-                                }
-
-                                @Override
-                                public void onNext(Note note) {
-
+                                public void call(ImportConfig config) {
+                                    mHtmlImporter.setNotebookId(config.notebookId);
+                                    importHtml(config);
                                 }
                             });
                 }
@@ -286,15 +231,107 @@ public class SettingsActivity extends BaseActivity {
         }
     }
 
-    private Observable<List<String>> scanHtml(final String path, final List<String> names) {
+    private static class ImportConfig {
+        String path;
+        List<String> names;
+        String notebookId;
+    }
+
+    private Observable<ImportConfig> selectImportNotebook(final ImportConfig config) {
+        return Observable.create(new Observable.OnSubscribe<ImportConfig>() {
+            @Override
+            public void call(final Subscriber<? super ImportConfig> subscriber) {
+                if (!subscriber.isUnsubscribed()) {
+                    DialogUtils.selectNotebook(SettingsActivity.this, "Import to which notebook?", new DialogUtils.SelectNotebookListener() {
+                        @Override
+                        public void onNotebookSelected(Notebook notebook) {
+                            config.notebookId = notebook.getNotebookId();
+                            subscriber.onNext(config);
+                            subscriber.onCompleted();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void importHtml(ImportConfig config) {
+        getAllHtmlPath(config)
+                .flatMapIterable(new Func1<List<String>, Iterable<String>>() {
+                    @Override
+                    public Iterable<String> call(List<String> strings) {
+                        return strings;
+                    }
+                })
+                .flatMap(new Func1<String, Observable<Note>>() {
+                    @Override
+                    public Observable<Note> call(final String filePath) {
+                        return Observable.create(new Observable.OnSubscribe<Note>() {
+                            @Override
+                            public void call(Subscriber<? super Note> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    File file = new File(filePath);
+                                    Note note = mHtmlImporter.from(file);
+                                    subscriber.onNext(note);
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        });
+                    }
+                })
+                .doOnSubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DialogDisplayer.showProgress(SettingsActivity.this, getString(R.string.parsing_html));
+                            }
+                        });
+                    }
+                })
+                .doOnCompleted(new Action0() {
+                    @Override
+                    public void call() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DialogDisplayer.dismissProgress();
+                            }
+                        });
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Note>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        CrashReport.postCatchedException(e);
+                        ToastUtils.show(SettingsActivity.this, R.string.parse_error);
+                    }
+
+                    @Override
+                    public void onNext(Note note) {
+
+                    }
+                });
+    }
+
+    private Observable<List<String>> getAllHtmlPath(final ImportConfig config) {
         return Observable.create(
                 new Observable.OnSubscribe<List<String>>() {
                     @Override
                     public void call(Subscriber<? super List<String>> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             List<String> absPaths = new ArrayList<>();
-                            for (String name : names) {
-                                File file = new File(path + name);
+                            for (String name : config.names) {
+                                File file = new File(config.path + name);
                                 scanHtmlFile(absPaths, file);
                             }
                             subscriber.onNext(absPaths);
