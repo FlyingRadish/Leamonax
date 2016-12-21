@@ -30,9 +30,23 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     private Stack<String> mStack = new Stack<>();
     private List<Notebook> mData;
     private NotebookAdapterListener mListener;
+    private boolean mHasAddButton = true;
+    private boolean mCanOpenEmpty = true;
+    private int currentSelection = -1;
 
-    public void setListener(NotebookAdapterListener listener) {
+    public NotebookAdapter setListener(NotebookAdapterListener listener) {
         mListener = listener;
+        return this;
+    }
+
+    public NotebookAdapter setHasAddButton(boolean hasAddButton) {
+        mHasAddButton = hasAddButton;
+        return this;
+    }
+
+    public NotebookAdapter setCanOpenEmpty(boolean canOpenEmpty) {
+        mCanOpenEmpty = canOpenEmpty;
+        return this;
     }
 
     public void refresh() {
@@ -52,7 +66,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 
     @Override
     public int getItemViewType(int position) {
-        if (position == getItemCount() - 1) {
+        if (mHasAddButton && position == getItemCount() - 1) {
             return TYPE_ADD;
         } else {
             return TYPE_NOTEBOOK;
@@ -90,9 +104,9 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         String notebookId = notebook.getNotebookId();
         boolean isSuper = isSuper(notebookId);
         boolean isSuperOrRoot = isSuper | mStack.isEmpty();
-//        boolean hasChild = hasChild(notebookId);
+        boolean hasChild = hasChild(notebookId);
         holder.placeholder.setVisibility(isSuperOrRoot ? View.GONE : View.VISIBLE);
-//        holder.navigator.setVisibility(hasChild ? View.VISIBLE : View.INVISIBLE);
+        holder.navigator.setVisibility(mCanOpenEmpty | hasChild ? View.VISIBLE : View.INVISIBLE);
         holder.navigator.setImageResource(isSuper ? R.drawable.ic_expanding : R.drawable.ic_expandable);
         holder.navigator.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,7 +179,8 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 
     @Override
     public int getItemCount() {
-        return mData == null ? 1 : mData.size() + 1;
+        int fixed = mHasAddButton ? 1 : 0;
+        return mData == null ? fixed : mData.size() + fixed;
     }
 
     public interface NotebookAdapterListener {
