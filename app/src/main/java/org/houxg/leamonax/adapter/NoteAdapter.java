@@ -19,7 +19,6 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.TimeUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.util.HashMap;
@@ -86,10 +85,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         if (note.isMarkDown()) {
             holder.contentTv.setText(note.getContent());
         } else {
-            Document document = Jsoup.parse(note.getContent());
-            document.body().select("style, script").remove();
-            document.outputSettings(mOutPutSettings);
-            Spanned spannedContent = Html.fromHtml(document.body().children().outerHtml());
+            Spanned spannedContent = Html.fromHtml(note.getContent());
             String contentStr = spannedContent.toString();
             contentStr = contentStr.replaceAll("\\n\\n+", "\n");
             holder.contentTv.setText(contentStr);
