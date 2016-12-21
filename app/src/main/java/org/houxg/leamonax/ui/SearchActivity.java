@@ -17,7 +17,7 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.ToastUtils;
-import org.houxg.leamonax.widget.DashDividerDecoration;
+import org.houxg.leamonax.widget.DividerDecoration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,11 +57,8 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         mNoteListView.setLayoutManager(layoutManager);
         mNoteListView.setItemAnimator(new DefaultItemAnimator());
-
-        int dashGap = DisplayUtils.dp2px(4);
-        int dashWidth = DisplayUtils.dp2px(8);
-        int height = DisplayUtils.dp2px(1);
-        mNoteListView.addItemDecoration(new DashDividerDecoration(0xffa0a0a0, dashGap, dashWidth, height));
+        
+        mNoteListView.addItemDecoration(new DividerDecoration(DisplayUtils.dp2px(8)));
         mAdapter = new NoteAdapter(this);
         mNoteListView.setAdapter(mAdapter);
         mNoteListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
