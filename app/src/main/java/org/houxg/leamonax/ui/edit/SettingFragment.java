@@ -1,9 +1,7 @@
 package org.houxg.leamonax.ui.edit;
 
 
-import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +9,6 @@ import android.text.Editable;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +23,7 @@ import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.CollectionUtils;
+import org.houxg.leamonax.utils.DialogUtils;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.widget.RoundedRectBackgroundSpan;
 
@@ -172,29 +170,13 @@ public class SettingFragment extends Fragment {
 
     @OnClick(R.id.ll_notebook)
     void selectNotebook() {
-        final List<Notebook> notebooks = AppDataBase.getAllNotebook(AccountService.getCurrent().getUserId());
-        int currentSelection = -1;
-        String[] titles = new String[notebooks.size()];
-        for (int i = 0; i < titles.length; i++) {
-            titles[i] = notebooks.get(i).getTitle();
-            if (notebooks.get(i).getNotebookId().equals(mNoteBookId)) {
-                currentSelection = i;
+        DialogUtils.selectNotebook(getActivity(), getString(R.string.select_notebook), new DialogUtils.SelectNotebookListener() {
+            @Override
+            public void onNotebookSelected(Notebook notebook) {
+                mNoteBookId = notebook.getNotebookId();
+                mNotebookTv.setText(notebook.getTitle());
             }
-        }
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.choose_notebook)
-                .setSingleChoiceItems(titles, currentSelection, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Notebook selected = notebooks.get(which);
-                        mNoteBookId = selected.getNotebookId();
-                        Log.i(TAG, "select=" + mNoteBookId);
-                        mNotebookTv.setText(selected.getTitle());
-                        dialog.dismiss();
-                    }
-                })
-                .setCancelable(true)
-                .show();
+        });
     }
 
     public interface SettingFragmentListener {
