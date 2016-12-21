@@ -106,8 +106,9 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
+            case
             case R.id.action_save:
                 filterUnchanged()
                         .doOnNext(new Action1<Wrapper>() {
@@ -158,6 +159,34 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                 return true;
             case R.id.action_settings:
                 mPager.setCurrentItem(FRAG_SETTINGS);
+                return true;
+            case android.R.id.home:
+                if (mPager.getCurrentItem() > FRAG_EDITOR) {
+                    mPager.setCurrentItem(FRAG_EDITOR);
+                } else {
+                    filterUnchanged()
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .doOnCompleted(new Action0() {
+                                @Override
+                                public void call() {
+                                    NoteEditActivity.super.onOptionsItemSelected(item);
+                                }
+                            })
+                            .subscribe(new Action1<Wrapper>() {
+                                @Override
+                                public void call(Wrapper wrapper) {
+                                    setResult(RESULT_OK);
+                                    Log.i(TAG, wrapper.toString());
+
+                                    if (mIsNewNote && isTitleContentEmpty(wrapper.note)) {
+                                        Log.i(TAG, "remove empty note, id=" + wrapper.note.getId());
+                                        AppDataBase.deleteNoteByLocalId(wrapper.note.getId());
+                                    } else {
+                                        saveAsDraft(wrapper);
+                                    }
+                                }
+                            });
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
