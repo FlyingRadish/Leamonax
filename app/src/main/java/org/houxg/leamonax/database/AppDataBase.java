@@ -24,6 +24,7 @@ import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
 import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.model.Tag_Table;
+import org.houxg.leamonax.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +61,7 @@ public class AppDataBase {
                     if (TextUtils.isEmpty(tagText)) {
                         continue;
                     }
-                    Tag tagModel =  SQLite.select()
+                    Tag tagModel = SQLite.select()
                             .from(Tag.class)
                             .where(Tag_Table.userId.eq(uid))
                             .and(Tag_Table.text.eq(tagText))
@@ -149,7 +150,21 @@ public class AppDataBase {
     }
 
     public static Notebook getRecentNoteBook(String userId) {
-        //FIXME:get recent notebook
+        List<Note> recentNotes = SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.userId.eq(userId))
+                .and(Note_Table.notebookId.notEq(""))
+                .orderBy(Note_Table.updatedTime, false)
+                .queryList();
+
+        if (CollectionUtils.isNotEmpty(recentNotes)) {
+            for (Note note : recentNotes) {
+                Notebook notebook = getNotebookByServerId(note.getNoteBookId());
+                if (!notebook.isDeleted()) {
+                    return notebook;
+                }
+            }
+        }
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))

@@ -256,6 +256,10 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         Account account = AccountService.getCurrent();
         Note newNote = new Note();
         newNote.setUserId(account.getUserId());
+        Notebook recentNotebook = AppDataBase.getRecentNoteBook(AccountService.getCurrent().getUserId());
+        if (recentNotebook != null) {
+            newNote.setNoteBookId(recentNotebook.getNotebookId());
+        }
         newNote.setIsMarkDown(account.getDefaultEditor() == Account.EDITOR_MARKDOWN);
         newNote.save();
         Intent intent = NoteEditActivity.getOpenIntent(this, newNote.getId(), true);
