@@ -113,6 +113,7 @@ public class AppDataBase {
                 .and(Note_Table.userId.eq(userId))
                 .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
+                .and(Note_Table.isTrash.eq(false))
                 .queryList();
     }
 
@@ -130,6 +131,7 @@ public class AppDataBase {
                 .where(Note_Table.userId.eq(userId))
                 .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
+                .and(Note_Table.isTrash.eq(false))
                 .queryList();
     }
 
