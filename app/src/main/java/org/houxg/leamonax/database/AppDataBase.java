@@ -2,7 +2,6 @@ package org.houxg.leamonax.database;
 
 import android.database.Cursor;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.raizlabs.android.dbflow.annotation.Database;
 import com.raizlabs.android.dbflow.annotation.Migration;
@@ -154,6 +153,7 @@ public class AppDataBase {
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .querySingle();
     }
 
@@ -161,6 +161,7 @@ public class AppDataBase {
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .queryList();
     }
 
@@ -169,15 +170,16 @@ public class AppDataBase {
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
                 .and(Notebook_Table.parentNotebookId.eq(""))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .queryList();
     }
 
     public static List<Notebook> getChildNotebook(String notebookId, String userId) {
-        Log.i(TAG, "getChildNotebook(), parentId=" + notebookId);
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
                 .and(Notebook_Table.parentNotebookId.eq(notebookId))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .queryList();
     }
 

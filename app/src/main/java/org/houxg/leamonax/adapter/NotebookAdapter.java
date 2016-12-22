@@ -50,17 +50,26 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     }
 
     public void refresh() {
-        if (mStack.isEmpty()) {
-            mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
-        } else {
-            Notebook parent = mData.get(0);
-            mData = AppDataBase.getChildNotebook(mStack.peek(), AccountService.getCurrent().getUserId());
-            mData.add(0, parent);
-        }
+        getSafeNotebook(mStack);
         notifyDataSetChanged();
     }
 
-    private String getCurrentParentId() {
+    private void getSafeNotebook(Stack<String> stack) {
+        if (stack.isEmpty()) {
+           mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
+        } else {
+            Notebook parent = AppDataBase.getNotebookByServerId(stack.peek());
+            if (parent.isDeleted()) {
+                stack.pop();
+                getSafeNotebook(stack);
+            } else {
+                mData = AppDataBase.getChildNotebook(mStack.peek(), AccountService.getCurrent().getUserId());
+                mData.add(0, parent);
+            }
+        }
+    }
+
+    public String getCurrentParentId() {
         return mStack.size() == 0 ? "" : mStack.peek();
     }
 
@@ -123,6 +132,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
+                    listChild(notebook);
                     mListener.onClickedNotebook(notebook);
                 }
             }

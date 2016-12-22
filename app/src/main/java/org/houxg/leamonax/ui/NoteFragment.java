@@ -48,7 +48,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
     private static final String EXT_SHOULD_FETCH_NOTES = "ext_should_fetch_notes";
 
-    Mode mCurrentMode = Mode.RECENT_NOTES;
+    private Mode mCurrentMode = Mode.RECENT_NOTES;
 
     @BindView(R.id.recycler_view)
     RecyclerView mNoteListView;
@@ -57,6 +57,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
     List<Note> mNotes;
     private NoteAdapter mAdapter;
+    private OnSyncFinishListener mSyncFinishListener;
 
     private float mScrollPosition;
 
@@ -69,6 +70,10 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         bundle.putBoolean(EXT_SHOULD_FETCH_NOTES, shouldFetchNotes);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    public void setSyncFinishListener(OnSyncFinishListener listener) {
+        mSyncFinishListener = listener;
     }
 
     @Nullable
@@ -171,7 +176,12 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         refreshNotes();
     }
 
+    public Mode getCurrentMode() {
+        return mCurrentMode;
+    }
+
     private void refreshNotes() {
+        Log.i(TAG, "refresh:" + mCurrentMode);
         switch (mCurrentMode) {
             case RECENT_NOTES:
                 mNotes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
@@ -240,6 +250,9 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         Log.i(TAG, "RequestNotes rcv: isSucceed=" + event.isSucceed());
         if (isAdded()) {
             mSwipeRefresh.setRefreshing(false);
+            if (mSyncFinishListener != null) {
+                mSyncFinishListener.onSyncFinish(event);
+            }
             refreshNotes();
             if (!event.isSucceed()) {
                 ToastUtils.show(getActivity(), R.string.sync_notes_failed);
@@ -247,7 +260,11 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         }
     }
 
-    private enum Mode {
+    public interface OnSyncFinishListener {
+        void onSyncFinish(SyncEvent event);
+    }
+
+    public enum Mode {
         RECENT_NOTES,
         NOTEBOOK,
         TAG;
@@ -261,6 +278,14 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
         public void setTagText(String tagText) {
             this.tagText = tagText;
+        }
+
+        @Override
+        public String toString() {
+            return name() + "{" +
+                    "notebookId=" + notebookId +
+                    ", tagText='" + tagText + '\'' +
+                    '}';
         }
     }
 }
