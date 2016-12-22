@@ -74,6 +74,9 @@ public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceL
         String content = new JsRunner().get(mWebView, "getContent();");
         content = HtmlUtils.unescapeHtml(content);
         AppLog.i(TAG, "unescaped=" + content);
+        if ("<p><br data-mce-bogus=\"1\"></p>".equals(content)) {
+            content = "";
+        }
         return content;
     }
 
