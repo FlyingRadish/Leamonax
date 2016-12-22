@@ -83,4 +83,9 @@ public class AboutActivity extends BaseActivity {
         OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax");
     }
 
+    @OnClick(R.id.ll_feedback)
+    void clickedFeedback() {
+        OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax/issues");
+    }
+
 }

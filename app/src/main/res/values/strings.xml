@@ -72,4 +72,5 @@
     <string name="parse_error">Parse error</string>
     <string name="parsing_html">Parsing HTML</string>
     <string name="select_notebook">Select notebook</string>
+    <string name="feedback">Feedback</string>
 </resources>

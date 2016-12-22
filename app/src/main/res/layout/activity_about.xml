@@ -121,6 +121,21 @@
             <include layout="@layout/divider" />
 
             <LinearLayout
+                android:id="@+id/ll_feedback"
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/feedback" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+            <LinearLayout
                 android:id="@+id/ll_debug"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
