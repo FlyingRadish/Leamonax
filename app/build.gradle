@@ -15,6 +15,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 def dbflow_version = "4.0.0-beta2"
+def ciName = isEmpty(System.getenv("TRAVIS_TAG")) ? "Staging" : System.getenv("TRAVIS_TAG")
+def ciCode = isEmpty(System.getenv("TRAVIS_BUILD_NUMBER")) ? 1000 : Integer.valueOf(System.getenv("TRAVIS_BUILD_NUMBER"))
+
+def isEmpty(String str) {
+    return str == null || "".equals(str);
+}
 
 android {
     signingConfigs {
@@ -31,8 +37,8 @@ android {
         applicationId "org.houxg.leamonax"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 3
-        versionName "1.1.0"
+        versionCode ciCode
+        versionName ciName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
