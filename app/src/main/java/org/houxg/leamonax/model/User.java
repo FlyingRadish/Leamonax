@@ -35,6 +35,11 @@ public class User extends BaseResponse {
     }
 
     public String getAvatar() {
-        return avatar;
+    	Account current = AccountService.getCurrent();
+        String host = current.getHost();
+        if(host.equals("https://leanote.com")){
+            return avatar;}
+        else
+        {return host+avatar;}
     }
 }
