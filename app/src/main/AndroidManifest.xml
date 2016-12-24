@@ -9,9 +9,6 @@
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
@@ -42,6 +39,9 @@
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/settings" />
+        <activity
+            android:name=".ui.AccountActivity"
+            android:label="@string/user_name" />
         <activity
             android:name=".ui.AboutActivity"
             android:label="@string/about" />

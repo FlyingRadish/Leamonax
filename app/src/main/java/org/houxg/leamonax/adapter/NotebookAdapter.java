@@ -30,52 +30,29 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     private Stack<String> mStack = new Stack<>();
     private List<Notebook> mData;
     private NotebookAdapterListener mListener;
-    private boolean mHasAddButton = true;
-    private boolean mCanOpenEmpty = true;
-    private int currentSelection = -1;
 
-    public NotebookAdapter setListener(NotebookAdapterListener listener) {
+    public void setListener(NotebookAdapterListener listener) {
         mListener = listener;
-        return this;
-    }
-
-    public NotebookAdapter setHasAddButton(boolean hasAddButton) {
-        mHasAddButton = hasAddButton;
-        return this;
-    }
-
-    public NotebookAdapter setCanOpenEmpty(boolean canOpenEmpty) {
-        mCanOpenEmpty = canOpenEmpty;
-        return this;
     }
 
     public void refresh() {
-        getSafeNotebook(mStack);
+        if (mStack.isEmpty()) {
+            mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
+        } else {
+            Notebook parent = mData.get(0);
+            mData = AppDataBase.getChildNotebook(mStack.peek(), AccountService.getCurrent().getUserId());
+            mData.add(0, parent);
+        }
         notifyDataSetChanged();
     }
 
-    private void getSafeNotebook(Stack<String> stack) {
-        if (stack.isEmpty()) {
-           mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
-        } else {
-            Notebook parent = AppDataBase.getNotebookByServerId(stack.peek());
-            if (parent.isDeleted()) {
-                stack.pop();
-                getSafeNotebook(stack);
-            } else {
-                mData = AppDataBase.getChildNotebook(mStack.peek(), AccountService.getCurrent().getUserId());
-                mData.add(0, parent);
-            }
-        }
-    }
-
-    public String getCurrentParentId() {
+    private String getCurrentParentId() {
         return mStack.size() == 0 ? "" : mStack.peek();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mHasAddButton && position == getItemCount() - 1) {
+        if (position == getItemCount() - 1) {
             return TYPE_ADD;
         } else {
             return TYPE_NOTEBOOK;
@@ -113,9 +90,9 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         String notebookId = notebook.getNotebookId();
         boolean isSuper = isSuper(notebookId);
         boolean isSuperOrRoot = isSuper | mStack.isEmpty();
-        boolean hasChild = hasChild(notebookId);
+//        boolean hasChild = hasChild(notebookId);
         holder.placeholder.setVisibility(isSuperOrRoot ? View.GONE : View.VISIBLE);
-        holder.navigator.setVisibility(mCanOpenEmpty | hasChild ? View.VISIBLE : View.INVISIBLE);
+//        holder.navigator.setVisibility(hasChild ? View.VISIBLE : View.INVISIBLE);
         holder.navigator.setImageResource(isSuper ? R.drawable.ic_expanding : R.drawable.ic_expandable);
         holder.navigator.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,7 +109,6 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    listChild(notebook);
                     mListener.onClickedNotebook(notebook);
                 }
             }
@@ -189,8 +165,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 
     @Override
     public int getItemCount() {
-        int fixed = mHasAddButton ? 1 : 0;
-        return mData == null ? fixed : mData.size() + fixed;
+        return mData == null ? 1 : mData.size() + 1;
     }
 
     public interface NotebookAdapterListener {

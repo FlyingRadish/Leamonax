@@ -5,9 +5,9 @@ import android.app.Application;
 import android.content.Context;
 
 import com.facebook.stetho.Stetho;
+import com.flurry.android.FlurryAgent;
 import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
-import com.tencent.bugly.crashreport.CrashReport;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
@@ -25,7 +25,9 @@ public class Leamonax extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = this;
-        CrashReport.initCrashReport(this, BuildConfig.BUGLY_KEY, BuildConfig.DEBUG);
+        new FlurryAgent.Builder()
+                .withLogEnabled(true)
+                .build(this, BuildConfig.FLURRY_KEY);
         EventBus.builder()
                 .logNoSubscriberMessages(false)
                 .sendNoSubscriberEvent(false)

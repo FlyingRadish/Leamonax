@@ -15,7 +15,6 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.AccountService;
-import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.utils.TestUtils;
 
 import java.security.SecureRandom;
@@ -48,7 +47,7 @@ public class AboutActivity extends BaseActivity {
         mDebugPanel.setVisibility(BuildConfig.DEBUG ? View.VISIBLE : View.GONE);
     }
 
-    @OnClick(R.id.ll_generate_random_note)
+    /*@OnClick(R.id.ll_generate_random_note)
     void clickedVersion() {
         Observable.create(
                 new Observable.OnSubscribe<Void>() {
@@ -76,16 +75,7 @@ public class AboutActivity extends BaseActivity {
                     }
                 }).subscribeOn(Schedulers.io())
                 .subscribe();
-    }
+    }*/
 
-    @OnClick(R.id.ll_github)
-    void clickedGithub() {
-        OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax");
-    }
-
-    @OnClick(R.id.ll_feedback)
-    void clickedFeedback() {
-        OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax/issues");
-    }
 
 }

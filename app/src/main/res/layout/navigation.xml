@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground">
 
         <ImageView
             android:id="@+id/iv_avatar"
@@ -20,7 +21,8 @@
             android:layout_height="40dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_settings"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -28,7 +30,8 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@id/iv_avatar"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:src="@drawable/ic_settings">
 
             <TextView
                 android:id="@+id/tv_user_name"

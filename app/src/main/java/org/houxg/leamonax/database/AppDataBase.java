@@ -2,6 +2,7 @@ package org.houxg.leamonax.database;
 
 import android.database.Cursor;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.raizlabs.android.dbflow.annotation.Database;
 import com.raizlabs.android.dbflow.annotation.Migration;
@@ -24,7 +25,6 @@ import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
 import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.model.Tag_Table;
-import org.houxg.leamonax.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,7 +61,7 @@ public class AppDataBase {
                     if (TextUtils.isEmpty(tagText)) {
                         continue;
                     }
-                    Tag tagModel = SQLite.select()
+                    Tag tagModel =  SQLite.select()
                             .from(Tag.class)
                             .where(Tag_Table.userId.eq(uid))
                             .and(Tag_Table.text.eq(tagText))
@@ -113,7 +113,6 @@ public class AppDataBase {
                 .and(Note_Table.userId.eq(userId))
                 .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
-                .and(Note_Table.isTrash.eq(false))
                 .queryList();
     }
 
@@ -131,7 +130,6 @@ public class AppDataBase {
                 .where(Note_Table.userId.eq(userId))
                 .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
-                .and(Note_Table.isTrash.eq(false))
                 .queryList();
     }
 
@@ -150,25 +148,10 @@ public class AppDataBase {
     }
 
     public static Notebook getRecentNoteBook(String userId) {
-        List<Note> recentNotes = SQLite.select()
-                .from(Note.class)
-                .where(Note_Table.userId.eq(userId))
-                .and(Note_Table.notebookId.notEq(""))
-                .orderBy(Note_Table.updatedTime, false)
-                .queryList();
-
-        if (CollectionUtils.isNotEmpty(recentNotes)) {
-            for (Note note : recentNotes) {
-                Notebook notebook = getNotebookByServerId(note.getNoteBookId());
-                if (!notebook.isDeleted()) {
-                    return notebook;
-                }
-            }
-        }
+        //FIXME:get recent notebook
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
-                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .querySingle();
     }
 
@@ -176,7 +159,6 @@ public class AppDataBase {
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
-                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .queryList();
     }
 
@@ -185,16 +167,15 @@ public class AppDataBase {
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
                 .and(Notebook_Table.parentNotebookId.eq(""))
-                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .queryList();
     }
 
     public static List<Notebook> getChildNotebook(String notebookId, String userId) {
+        Log.i(TAG, "getChildNotebook(), parentId=" + notebookId);
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
                 .and(Notebook_Table.parentNotebookId.eq(notebookId))
-                .and(Notebook_Table.isDeletedOnServer.eq(false))
                 .queryList();
     }
 

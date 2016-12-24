@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/host" />
+
+                <TextView
+                    android:id="@+id/tv_host"
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="https://leanote.com" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+            <RelativeLayout
+                android:id="@+id/rl_avatar"
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/avatar" />
+
+                <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+
+            </RelativeLayout>
+
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/email" />
+
+                <TextView
+                    android:id="@+id/tv_email"
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                android:id="@+id/ll_user_name"
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/user_name" />
+
+                <TextView
+                    android:id="@+id/tv_user_name"
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                android:id="@+id/ll_change_password"
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_password" />
+
+            </LinearLayout>
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                android:id="@+id/ll_editor"
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/editor" />
+
+                <TextView
+                    android:id="@+id/tv_editor"
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Markdown" />
+
+            </LinearLayout>
+            <include layout="@layout/divider" />
+
+            <LinearLayout
+                android:id="@+id/ll_image_size"
+                style="@style/SettingsPanel"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/image_size" />
+
+                <TextView
+                    android:id="@+id/tv_image_size"
+                    style="@style/SettingsStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="200*200" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/ll_clear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="@string/clear_data" />
+
+                <include layout="@layout/divider" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_log_out"
+                style="@style/SettingsPanel"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/SettingsSecondaryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/log_out" />
+
+            </LinearLayout>
+
+            <include layout="@layout/divider" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

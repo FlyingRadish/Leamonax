@@ -23,12 +23,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.tencent.bugly.crashreport.CrashReport;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.adapter.TagAdapter;
-import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
@@ -49,13 +50,12 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends BaseActivity implements NotebookAdapter.NotebookAdapterListener, TagAdapter.TagAdapterListener, NoteFragment.OnSyncFinishListener {
+public class MainActivity extends BaseActivity implements NotebookAdapter.NotebookAdapterListener, TagAdapter.TagAdapterListener {
 
     private static final String EXT_SHOULD_RELOAD = "ext_should_reload";
     private static final String TAG_NOTE_FRAGMENT = "tag_note_fragment";
 
     NoteFragment mNoteFragment;
-    NotebookAdapter mNotebookAdapter;
 
     @BindView(R.id.rv_notebook)
     RecyclerView mNotebookRv;
@@ -90,20 +90,24 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         initToolBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white);
-        CrashReport.setUserId(AccountService.getCurrent().getUserId());
+
         if (savedInstanceState == null) {
+            new Thread(new Runnable() {
+                public void run() {
             mNoteFragment = NoteFragment.newInstance(getIntent().getBooleanExtra(EXT_SHOULD_RELOAD, false));
             getFragmentManager().beginTransaction().add(R.id.container, mNoteFragment, TAG_NOTE_FRAGMENT).commit();
+                }
+            }).start();
         } else {
             mNoteFragment = (NoteFragment) getFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);
         }
-        mNoteFragment.setSyncFinishListener(this);
         mEmailTv.setText(AccountService.getCurrent().getEmail());
         initNotebookPanel();
         initTagPanel();
 
         refreshInfo();
         fetchInfo();
+        EventBus.getDefault().register(this);
     }
 
     private void initTagPanel() {
@@ -116,17 +120,23 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
 
     private void initNotebookPanel() {
         mNotebookRv.setLayoutManager(new LinearLayoutManager(this));
-        mNotebookAdapter = new NotebookAdapter();
-        mNotebookAdapter.setListener(this);
-        mNotebookRv.setAdapter(mNotebookAdapter);
-        mNotebookAdapter.refresh();
+        NotebookAdapter notebookAdapter = new NotebookAdapter();
+        notebookAdapter.setListener(this);
+        mNotebookRv.setAdapter(notebookAdapter);
+        notebookAdapter.refresh();
         mNotebookTriangle.setTag(false);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        refreshNotebookAndNotes();
+        ((NotebookAdapter) mNotebookRv.getAdapter()).refresh();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -246,7 +256,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
 
                     @Override
                     public void onNext(Void isSucceed) {
-                        mNotebookAdapter.refresh();
+                        ((NotebookAdapter) mNotebookRv.getAdapter()).refresh();
                     }
                 });
     }
@@ -256,10 +266,6 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         Account account = AccountService.getCurrent();
         Note newNote = new Note();
         newNote.setUserId(account.getUserId());
-        Notebook recentNotebook = AppDataBase.getRecentNoteBook(AccountService.getCurrent().getUserId());
-        if (recentNotebook != null) {
-            newNote.setNoteBookId(recentNotebook.getNotebookId());
-        }
         newNote.setIsMarkDown(account.getDefaultEditor() == Account.EDITOR_MARKDOWN);
         newNote.save();
         Intent intent = NoteEditActivity.getOpenIntent(this, newNote.getId(), true);
@@ -281,6 +287,21 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     @OnClick(R.id.rl_settings)
     void clickedSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+    @OnClick(R.id.tv_email)
+    void clickedemail() {
+        Intent intent = new Intent(this, AccountActivity.class);
+        startActivity(intent);
+    }
+    @OnClick(R.id.iv_avatar)
+    void clickedavatar() {
+        Intent intent = new Intent(this, AccountActivity.class);
+        startActivity(intent);
+    }
+    @OnClick(R.id.tv_user_name)
+    void clickedusername() {
+        Intent intent = new Intent(this, AccountActivity.class);
         startActivity(intent);
     }
 
@@ -318,26 +339,14 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(SyncEvent event) {
+        ((NotebookAdapter) mNotebookRv.getAdapter()).refresh();
+    }
+
     @Override
     public void onClickedTag(Tag tag) {
         mNoteFragment.loadFromTag(tag.getText());
         mDrawerLayout.closeDrawer(GravityCompat.START, true);
-    }
-
-    @Override
-    public void onSyncFinish(SyncEvent event) {
-        refreshNotebookAndNotes();
-    }
-
-    private void refreshNotebookAndNotes() {
-        mNotebookAdapter.refresh();
-        if (mNoteFragment.getCurrentMode() == NoteFragment.Mode.NOTEBOOK) {
-            if (TextUtils.isEmpty(mNotebookAdapter.getCurrentParentId())) {
-                mNoteFragment.loadRecentNotes();
-            } else {
-                Notebook notebook = AppDataBase.getNotebookByServerId(mNotebookAdapter.getCurrentParentId());
-                mNoteFragment.loadFromNotebook(notebook.getId());
-            }
-        }
     }
 }
