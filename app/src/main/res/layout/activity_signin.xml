@@ -64,7 +64,7 @@
                         android:background="@color/colorAccent"
                         android:gravity="center"
                         android:padding="8dp"
-                        android:text="Sign up"
+                        android:text="@string/sign_up"
                         android:textColor="#EEEEEE"
                         android:textSize="18sp" />
 
