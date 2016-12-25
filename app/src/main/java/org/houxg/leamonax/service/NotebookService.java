@@ -20,9 +20,9 @@ public class NotebookService {
         }
         if (notebook.isOk()) {
             Account account = AccountService.getCurrent();
-            if (notebook.getUsn() - account.getLastSyncUsn() == 1) {
+            if (notebook.getUsn() - account.getNotebookUsn() == 1) {
                 Log.d(TAG, "update usn=" + notebook.getUsn());
-                account.setLastUsn(notebook.getUsn());
+                account.setNotebookUsn(notebook.getUsn());
                 account.save();
             }
             notebook.insert();

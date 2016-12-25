@@ -30,8 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-//TODO:upgrade to Ver.2, handle tags
-@Database(name = "leanote_db", version = 2)
+@Database(name = "leanote_db", version = 3)
 public class AppDataBase {
 
     private static final String TAG = "AppDataBase";
@@ -80,6 +79,8 @@ public class AppDataBase {
             cursor.close();
         }
     }
+
+    //TODO:copy the value of lastUsn, save it as the noteUsn and notebookUsn
 
     public static void deleteNoteByLocalId(long localId) {
         SQLite.delete().from(Note.class)

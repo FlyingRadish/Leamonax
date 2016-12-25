@@ -48,86 +48,79 @@ public class NoteService {
     private static final int MAX_ENTRY = 20;
 
     public static boolean fetchFromServer() {
-        int noteUsn = AccountService.getCurrent().getLastSyncUsn();
-        int notebookUsn = noteUsn;
-        List<Note> notes;
-        do {
-            notes = RetrofitUtils.excute(getSyncNotes(noteUsn, MAX_ENTRY));
-            if (notes != null) {
-                for (Note noteMeta : notes) {
-                    Note remoteNote = RetrofitUtils.excute(getNoteByServerId(noteMeta.getNoteId()));
-                    if (remoteNote == null) {
-                        return false;
-                    }
-                    Note localNote = AppDataBase.getNoteByServerId(noteMeta.getNoteId());
-                    noteUsn = remoteNote.getUsn();
-                    long localId;
-                    if (localNote == null) {
-                        localId = remoteNote.insert();
-                        remoteNote.setId(localId);
-                        Log.i(TAG, "note insert, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId() + ", local=" + localId);
-                    } else {
-                        if (localNote.isDirty()) {
-                            Log.w(TAG, "note conflict, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
-                            continue;
-                        } else {
-                            Log.i(TAG, "note update, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
-                            remoteNote.setId(localNote.getId());
-                            localId = localNote.getId();
-                        }
-                    }
-                    remoteNote.setIsDirty(false);
-                    if (remoteNote.isMarkDown()) {
-                        remoteNote.setContent(convertToLocalImageLinkForMD(localId, remoteNote.getContent()));
-                    } else {
-                        remoteNote.setContent(convertToLocalImageLinkForRichText(localId, remoteNote.getContent()));
-                    }
-                    Log.i(TAG, "content=" + remoteNote.getContent());
-                    remoteNote.update();
-                    handleFile(localId, remoteNote.getNoteFiles());
-                    updateTagsToLocal(localId, remoteNote.getTagData());
-                }
-            } else {
-                return false;
-            }
-        } while (notes.size() == MAX_ENTRY);
-
+        //sync notebook
+        int notebookUsn = AccountService.getCurrent().getNotebookUsn();
         List<Notebook> notebooks;
         do {
-            notebooks = RetrofitUtils.excute(getSyncNotebooks(notebookUsn, MAX_ENTRY));
-            if (notebooks != null) {
-                for (Notebook remoteNotebook : notebooks) {
-                    Notebook localNotebook = AppDataBase.getNotebookByServerId(remoteNotebook.getNotebookId());
-                    if (localNotebook == null) {
-                        Log.i(TAG, "notebook insert, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
-                        remoteNotebook.insert();
+            notebooks = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNotebookApi().getSyncNotebooks(notebookUsn, MAX_ENTRY));
+            for (Notebook remoteNotebook : notebooks) {
+                Notebook localNotebook = AppDataBase.getNotebookByServerId(remoteNotebook.getNotebookId());
+                if (localNotebook == null) {
+                    Log.i(TAG, "notebook insert, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
+                    remoteNotebook.insert();
+                } else {
+                    if (localNotebook.isDirty()) {
+                        Log.w(TAG, "notebook conflict, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
                     } else {
-                        if (localNotebook.isDirty()) {
-                            Log.w(TAG, "notebook conflict, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
-                        } else {
-                            Log.i(TAG, "notebook update, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
-                            remoteNotebook.setId(localNotebook.getId());
-                            remoteNotebook.setIsDirty(false);
-                            remoteNotebook.update();
-                        }
+                        Log.i(TAG, "notebook update, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
+                        remoteNotebook.setId(localNotebook.getId());
+                        remoteNotebook.setIsDirty(false);
+                        remoteNotebook.update();
                     }
-                    notebookUsn = remoteNotebook.getUsn();
                 }
-            } else {
-                return false;
+                notebookUsn = remoteNotebook.getUsn();
+                Account account = AccountService.getCurrent();
+                account.setNotebookUsn(notebookUsn);
+                account.save();
             }
         } while (notebooks.size() == MAX_ENTRY);
 
-        Log.i(TAG, "noteUsn=" + noteUsn + ", notebookUsn=" + notebookUsn);
-        int max = Math.max(notebookUsn, noteUsn);
-        saveLastUsn(max);
-        return true;
-    }
 
-    private static void saveLastUsn(int lastUsn) {
-        Account account = AccountService.getCurrent();
-        account.setLastUsn(lastUsn);
-        account.save();
+        //sync note
+        int noteUsn = AccountService.getCurrent().getNoteUsn();
+        List<Note> notes;
+        do {
+            notes = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getSyncNotes(noteUsn, MAX_ENTRY));
+            for (Note noteMeta : notes) {
+                Note remoteNote = RetrofitUtils.excute(ApiProvider.getInstance().getNoteApi().getNoteAndContent(noteMeta.getNoteId()));
+                if (remoteNote == null) {
+                    return false;
+                }
+                Note localNote = AppDataBase.getNoteByServerId(noteMeta.getNoteId());
+                noteUsn = remoteNote.getUsn();
+                long localId;
+                if (localNote == null) {
+                    localId = remoteNote.insert();
+                    remoteNote.setId(localId);
+                    Log.i(TAG, "note insert, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId() + ", local=" + localId);
+                } else {
+                    if (localNote.isDirty()) {
+                        Log.w(TAG, "note conflict, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
+                        continue;
+                    } else {
+                        Log.i(TAG, "note update, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
+                        remoteNote.setId(localNote.getId());
+                        localId = localNote.getId();
+                    }
+                }
+                remoteNote.setIsDirty(false);
+                if (remoteNote.isMarkDown()) {
+                    remoteNote.setContent(convertToLocalImageLinkForMD(localId, remoteNote.getContent()));
+                } else {
+                    remoteNote.setContent(convertToLocalImageLinkForRichText(localId, remoteNote.getContent()));
+                }
+                Log.i(TAG, "content=" + remoteNote.getContent());
+                remoteNote.update();
+                handleFile(localId, remoteNote.getNoteFiles());
+                updateTagsToLocal(localId, remoteNote.getTagData());
+                Account account = AccountService.getCurrent();
+                account.setNoteUsn(noteUsn);
+                account.save();
+            }
+        } while (notes.size() == MAX_ENTRY);
+
+
+        return true;
     }
 
     private static void handleFile(long noteLocalId, List<NoteFile> remoteFiles) {
@@ -229,7 +222,7 @@ public class NoteService {
             handleFile(modifiedNote.getId(), note.getNoteFiles());
             updateTagsToLocal(modifiedNote.getId(), note.getTagData());
             note.save();
-            updateUsnIfNeed(note.getUsn());
+            updateNoteUsnIfNeed(note.getUsn());
         } else {
             throw new IllegalStateException(note.getMsg());
         }
@@ -428,7 +421,7 @@ public class NoteService {
                                         ApiProvider.getInstance().getNoteApi().delete(note.getNoteId(), note.getUsn()));
                                 if (response.isOk()) {
                                     AppDataBase.deleteNoteByLocalId(note.getId());
-                                    updateUsnIfNeed(response.getUsn());
+                                    updateNoteUsnIfNeed(response.getUsn());
                                 } else {
                                     throw new IllegalStateException(response.getMsg());
                                 }
@@ -440,10 +433,10 @@ public class NoteService {
                 });
     }
 
-    private static void updateUsnIfNeed(int newUsn) {
+    private static void updateNoteUsnIfNeed(int newUsn) {
         Account account = AccountService.getCurrent();
-        if (newUsn - account.getLastSyncUsn() == 1) {
-            account.setLastUsn(newUsn);
+        if (newUsn - account.getNoteUsn() == 1) {
+            account.setNoteUsn(newUsn);
             account.update();
         }
     }
