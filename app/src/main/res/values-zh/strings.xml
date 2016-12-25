@@ -61,12 +61,13 @@
     <string name="select_notebook">选择笔记本</string>
     <string name="settings">设置</string>
     <string name="sign_in">登入</string>
+    <string name="sign_up">注册</string>
     <string name="sync_notes_failed">同步笔记失败</string>
     <string name="tags">标签</string>
     <string name="thanks">致谢</string>
     <string name="time_yesterday">昨天 %s</string>
     <string name="title">标题</string>
-    <string name="untitled"></string>
+    <string name="untitled">未定义</string>
     <string name="use_custom_host">使用自定义服务器</string>
     <string name="use_leanote_host">使用Leanote.com</string>
     <string name="user_name">用户名</string>
