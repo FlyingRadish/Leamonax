@@ -204,7 +204,8 @@ public class SettingsActivity extends BaseActivity {
                                     .where(RelationshipOfNoteTag_Table.userId.eq(currentUser.getUserId()))
                                     .execute();
                             Account account = AccountService.getCurrent();
-                            account.setLastUsn(0);
+                            account.setNoteUsn(0);
+                            account.setNotebookUsn(0);
                             account.update();
                             subscriber.onNext(null);
                             subscriber.onCompleted();

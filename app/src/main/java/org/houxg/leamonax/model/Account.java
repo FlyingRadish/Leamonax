@@ -43,12 +43,18 @@ public class Account extends BaseModel {
     String accessToken = "";
     @Column(name = "defaultEditor")
     int defaultEditor = EDITOR_MARKDOWN;
-    @Column(name = "lastUsn")
-    @SerializedName("LastSyncUsn")
-    int lastSyncUsn;
     @Column(name = "host")
     @SerializedName("Host")
     String host = "";
+    @Column(name = "noteUsn")
+    int noteUsn;
+    @Column(name = "notebookUsn")
+    int notebookUsn;
+
+    @Deprecated
+    @Column(name = "lastUsn")
+    @SerializedName("LastSyncUsn")
+    int lastSyncUsn;
 
     public Account() {
     }
@@ -85,6 +91,7 @@ public class Account extends BaseModel {
         return accessToken;
     }
 
+    @Deprecated
     public int getLastSyncUsn() {
         return lastSyncUsn;
     }
@@ -121,6 +128,7 @@ public class Account extends BaseModel {
         this.host = host;
     }
 
+    @Deprecated
     public void setLastUsn(int lastUsn) {
         this.lastSyncUsn = lastUsn;
     }
@@ -135,6 +143,22 @@ public class Account extends BaseModel {
 
     public void setDefaultEditor(int defaultEditor) {
         this.defaultEditor = defaultEditor;
+    }
+
+    public int getNoteUsn() {
+        return noteUsn;
+    }
+
+    public int getNotebookUsn() {
+        return notebookUsn;
+    }
+
+    public void setNoteUsn(int noteUsn) {
+        this.noteUsn = noteUsn;
+    }
+
+    public void setNotebookUsn(int notebookUsn) {
+        this.notebookUsn = notebookUsn;
     }
 
     @Override
