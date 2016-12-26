@@ -2,12 +2,12 @@ package org.houxg.leamonax.ui.edit;
 
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -95,6 +95,12 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
         arguments.putBoolean(ARG_ENABLE_EDIT, enableEditing);
         fragment.setArguments(arguments);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
     }
 
     @Override

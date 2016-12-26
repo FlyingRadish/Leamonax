@@ -93,9 +93,9 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         CrashReport.setUserId(AccountService.getCurrent().getUserId());
         if (savedInstanceState == null) {
             mNoteFragment = NoteFragment.newInstance(getIntent().getBooleanExtra(EXT_SHOULD_RELOAD, false));
-            getFragmentManager().beginTransaction().add(R.id.container, mNoteFragment, TAG_NOTE_FRAGMENT).commit();
+            getSupportFragmentManager().beginTransaction().add(R.id.container, mNoteFragment, TAG_NOTE_FRAGMENT).commit();
         } else {
-            mNoteFragment = (NoteFragment) getFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);
+            mNoteFragment = (NoteFragment) getSupportFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);
         }
         mNoteFragment.setSyncFinishListener(this);
         mEmailTv.setText(AccountService.getCurrent().getEmail());

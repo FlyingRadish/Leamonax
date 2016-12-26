@@ -60,7 +60,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
         mNote = AppDataBase.getNoteByLocalId(noteLocalId);
 
         mEditorFragment = EditorFragment.getNewInstance(mNote.isMarkDown(), false);
-        getFragmentManager().beginTransaction().add(R.id.container, mEditorFragment).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.container, mEditorFragment).commit();
     }
 
     public static Intent getOpenIntent(Context context, long noteLocalId) {
