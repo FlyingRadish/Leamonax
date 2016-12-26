@@ -43,9 +43,6 @@ public class Account extends BaseModel {
     String accessToken = "";
     @Column(name = "defaultEditor")
     int defaultEditor = EDITOR_MARKDOWN;
-    @Column(name = "lastUsn")
-    @SerializedName("LastSyncUsn")
-    int lastSyncUsn;
     @Column(name = "host")
     @SerializedName("Host")
     String host = "";
@@ -54,6 +51,10 @@ public class Account extends BaseModel {
     @Column(name = "notebookUsn")
     int notebookUsn;
 
+    @Deprecated
+    @Column(name = "lastUsn")
+    @SerializedName("LastSyncUsn")
+    int lastSyncUsn;
 
     public Account() {
     }

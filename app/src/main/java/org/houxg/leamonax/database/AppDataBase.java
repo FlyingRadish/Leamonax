@@ -5,10 +5,12 @@ import android.text.TextUtils;
 
 import com.raizlabs.android.dbflow.annotation.Database;
 import com.raizlabs.android.dbflow.annotation.Migration;
+import com.raizlabs.android.dbflow.sql.SQLiteType;
 import com.raizlabs.android.dbflow.sql.language.Join;
 import com.raizlabs.android.dbflow.sql.language.NameAlias;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.sql.language.property.IProperty;
+import com.raizlabs.android.dbflow.sql.migration.AlterTableMigration;
 import com.raizlabs.android.dbflow.sql.migration.BaseMigration;
 import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
 
@@ -80,7 +82,51 @@ public class AppDataBase {
         }
     }
 
-    //TODO:copy the value of lastUsn, save it as the noteUsn and notebookUsn
+    @Migration(version = 3, priority = 1, database = AppDataBase.class)
+    public static class AddUsnColumn extends AlterTableMigration<Account> {
+
+        public AddUsnColumn(Class<Account> table) {
+            super(table);
+        }
+
+        @Override
+        public void onPreMigrate() {
+            super.onPreMigrate();
+            addColumn(SQLiteType.INTEGER, "noteUsn");
+            addColumn(SQLiteType.INTEGER, "notebookUsn");
+        }
+    }
+
+    @Migration(version = 3, priority =  0, database = AppDataBase.class)
+    public static class UpdateUsn extends BaseMigration {
+
+        @Override
+        public void migrate(DatabaseWrapper database) {
+            Cursor cursor = SQLite.select()
+                    .from(Account.class)
+                    .query(database);
+            if (cursor == null) {
+                return;
+            }
+            int idIndex = cursor.getColumnIndex("id");
+            int usnIndex = cursor.getColumnIndex("lastUsn");
+            while (cursor.moveToNext()) {
+                int lastUsn = cursor.getInt(usnIndex);
+                int id = cursor.getInt(idIndex);
+                Account account = SQLite.select()
+                        .from(Account.class)
+                        .where(Account_Table.id.eq(id))
+                        .querySingle(database);
+                if (account != null) {
+                    account.setNoteUsn(lastUsn);
+                    account.setNotebookUsn(lastUsn);
+                    account.update(database);
+                }
+            }
+            cursor.close();
+            database.execSQL("");
+        }
+    }
 
     public static void deleteNoteByLocalId(long localId) {
         SQLite.delete().from(Note.class)
