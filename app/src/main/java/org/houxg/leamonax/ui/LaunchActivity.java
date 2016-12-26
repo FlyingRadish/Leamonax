@@ -18,8 +18,10 @@ public class LaunchActivity extends Activity {
             Account account = AccountService.getCurrent();
             ApiProvider.getInstance().init(account.getHost());
             intent = MainActivity.getOpenIntent(this, false);
+            finish();
         } else {
             intent = new Intent(this, SignInActivity.class);
+            finish();
         }
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

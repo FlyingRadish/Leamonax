@@ -7,33 +7,14 @@
     <script src="./tinymce/tinymce.min.js"></script>
     <style type="text/css">
         .without-border {outline: 0px solid transparent;}
-        .ace-tomorrow {
-            overflow: auto;
-            font-family: monospace, monospace;
-            font-size: 18px;
-            border: 1px solid rgb(221, 219, 204);
-            border-top-left-radius: 3px;
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-            border-bottom-left-radius: 3px;
-            margin-top: 0px;
-            margin-bottom: 40px;
-            padding: 15px 20px;
-            color: rgb(66, 66, 66);
-            line-height: normal;
-            widows: 1;
-            background-color: rgb(241, 240, 234);
-            background-position: initial initial;
-            background-repeat: initial initial;
-        }
     </style>
 </head>
 
 <body>
-    <div style="outline: 0px solid transparent;" class="without-border" contenteditable="true" id="title"></div>
+    <div class="without-border" contenteditable="true" id="title"></div>
     <hr>
     <form method="post">
-        <div id="content" style="outline: 0px solid transparent;"></div>
+        <div id="content"></div>
     </form>
 </body>
 
@@ -207,11 +188,6 @@
 
     function getLink() {
         return tinyMCE.editors[0].selection.getNode().getAttribute('href');
-    }
-
-    function getContent() {
-        var body = tinyMCE.$(tinyMCE.editors[0].getBody()).clone();
-        return tinyMCE.$(body).clone().html();
     }
 
     function getListState() {

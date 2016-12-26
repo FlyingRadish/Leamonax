@@ -47,7 +47,7 @@ public class AboutActivity extends BaseActivity {
         mDebugPanel.setVisibility(BuildConfig.DEBUG ? View.VISIBLE : View.GONE);
     }
 
-    @OnClick(R.id.ll_generate_random_note)
+    /*@OnClick(R.id.ll_generate_random_note)
     void clickedVersion() {
         Observable.create(
                 new Observable.OnSubscribe<Void>() {
@@ -75,7 +75,7 @@ public class AboutActivity extends BaseActivity {
                     }
                 }).subscribeOn(Schedulers.io())
                 .subscribe();
-    }
+    }*/
 
 
 }

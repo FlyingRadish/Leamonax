@@ -40,6 +40,9 @@
             android:name=".ui.SettingsActivity"
             android:label="@string/settings" />
         <activity
+            android:name=".ui.AccountActivity"
+            android:label="@string/user_name" />
+        <activity
             android:name=".ui.AboutActivity"
             android:label="@string/about" />
 

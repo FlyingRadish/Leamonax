@@ -92,8 +92,12 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white);
 
         if (savedInstanceState == null) {
+            new Thread(new Runnable() {
+                public void run() {
             mNoteFragment = NoteFragment.newInstance(getIntent().getBooleanExtra(EXT_SHOULD_RELOAD, false));
             getFragmentManager().beginTransaction().add(R.id.container, mNoteFragment, TAG_NOTE_FRAGMENT).commit();
+                }
+            }).start();
         } else {
             mNoteFragment = (NoteFragment) getFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);
         }
@@ -283,6 +287,21 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     @OnClick(R.id.rl_settings)
     void clickedSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+    @OnClick(R.id.tv_email)
+    void clickedemail() {
+        Intent intent = new Intent(this, AccountActivity.class);
+        startActivity(intent);
+    }
+    @OnClick(R.id.iv_avatar)
+    void clickedavatar() {
+        Intent intent = new Intent(this, AccountActivity.class);
+        startActivity(intent);
+    }
+    @OnClick(R.id.tv_user_name)
+    void clickedusername() {
+        Intent intent = new Intent(this, AccountActivity.class);
         startActivity(intent);
     }
 

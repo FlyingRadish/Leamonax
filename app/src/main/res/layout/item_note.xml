@@ -28,7 +28,7 @@
                 android:textSize="20sp"
                 tools:text="Leanote API" />
 
-            <TextView
+           <TextView
                 android:id="@+id/tv_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -93,7 +93,6 @@
                 tools:text="Gradle" />
 
         </LinearLayout>
-
 
     </LinearLayout>
 

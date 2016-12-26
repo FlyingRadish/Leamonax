@@ -93,7 +93,7 @@
                     style="@style/SettingsStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Leanote" />
+                    android:text="Leanote&#38;Leamonax" />
 
                 <TextView
                     style="@style/SettingsStatus"
@@ -105,7 +105,7 @@
 
             <include layout="@layout/divider" />
 
-            <LinearLayout
+           <LinearLayout
                 android:id="@+id/ll_debug"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -121,11 +121,11 @@
                         style="@style/SettingsSecondaryText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Generate random note" />
+                        android:text="" />
 
                 </LinearLayout>
 
-                <include layout="@layout/divider" />
+
 
             </LinearLayout>
 

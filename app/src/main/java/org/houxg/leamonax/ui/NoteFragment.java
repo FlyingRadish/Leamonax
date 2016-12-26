@@ -85,33 +85,36 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public void onRefresh() {
-                syncNotes();
+           public void onRefresh() {
+                    new Thread(new Runnable() {
+                    public void run() {
+                        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
+                            ToastUtils.showNetworkUnavailable(getActivity());
+                            return;
+                        }
+                        NoteSyncService.startServiceForNote(getActivity());
+                    }
+                }).start();
+                //syncNotes();
             }
         });
 
         mNoteListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
+                    @Override
+                    public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                        super.onScrollStateChanged(recyclerView, newState);
+                    }
 
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                mScrollPosition = dy;
-            }
-        });
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        mScrollPosition = dy;
+                    }
+                });
         return view;
     }
 
-    private void syncNotes() {
-        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
-            ToastUtils.showNetworkUnavailable(getActivity());
-            return;
-        }
-        NoteSyncService.startServiceForNote(getActivity());
-    }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -125,8 +128,13 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     public void run() {
                         Log.i(TAG, "fetch notes");
                         mSwipeRefresh.setRefreshing(true);
-                        syncNotes();
-                    }
+                                if (!NetworkUtils.isNetworkAvailable(getActivity())) {
+                                    ToastUtils.showNetworkUnavailable(getActivity());
+                                    return;
+                                }
+                                NoteSyncService.startServiceForNote(getActivity());
+                            }
+                        //syncNotes();
                 }, 200);
             }
         }
@@ -263,4 +271,5 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
             this.tagText = tagText;
         }
     }
+
 }

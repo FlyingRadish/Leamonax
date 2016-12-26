@@ -214,11 +214,11 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                     public void call(Subscriber<? super Wrapper> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             updateNote();
-                            if (mOriginal.note.hasChanges(mModified.note)
+                            if (mModified.note.isDirty()
+                                    || mOriginal.note.hasChanges(mModified.note)
+                                    || isLocalNote(mModified.note)
                                     || isTitleContentEmpty(mModified.note)
-                                    || !CollectionUtils.isTheSame(mOriginal.tags, mModified.tags)
-                                    || mModified.note.isDirty()
-                                    || isLocalNote(mModified.note)) {
+                                    || !CollectionUtils.isTheSame(mOriginal.tags, mModified.tags)) {
                                 subscriber.onNext(mModified);
                             }
                             subscriber.onCompleted();

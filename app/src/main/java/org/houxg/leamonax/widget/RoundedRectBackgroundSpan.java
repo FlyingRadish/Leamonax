@@ -31,14 +31,15 @@ public class RoundedRectBackgroundSpan extends ReplacementSpan {
     }
 
     @Override
+
     public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
-        mTempRect.set(x, top, x + paint.measureText(text, start, end) + padding * 2, bottom);
-        float offsetY = DisplayUtils.dp2px(2);
-        mTempRect.offset(0, -offsetY);
-        int textColor = paint.getColor();
-        paint.setColor(mColor);
-        canvas.drawRoundRect(mTempRect, mRadius, mRadius, paint);
-        paint.setColor(textColor);
-        canvas.drawText(text, start, end, x + padding, y - offsetY, paint);
-    }
+            mTempRect.set(x,top,x+paint.measureText(text,start,end)+padding*2,bottom);
+            float offsetY = DisplayUtils.dp2px(2);
+            mTempRect.offset(0,-offsetY);
+            int textColor = paint.getColor();
+            paint.setColor(mColor);
+            canvas.drawRoundRect(mTempRect,mRadius,mRadius,paint);
+            paint.setColor(textColor);
+            canvas.drawText(text,start,end,x+padding,y-offsetY,paint);
+        }
 }
