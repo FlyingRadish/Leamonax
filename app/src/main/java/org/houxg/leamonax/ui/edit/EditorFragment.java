@@ -170,7 +170,9 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
 
     @OnClick(R.id.btn_img)
     void handleInsertImage() {
+        //TODO: request camera permission
         ImgSelConfig config = new ImgSelConfig.Builder(
+                getActivity(),
                 new com.yuyh.library.imgsel.ImageLoader() {
                     @Override
                     public void displayImage(Context context, String path, ImageView imageView) {
