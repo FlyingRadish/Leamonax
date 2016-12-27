@@ -4,8 +4,6 @@ package org.houxg.leamonax.model;
 import com.google.gson.annotations.SerializedName;
 import com.raizlabs.android.dbflow.annotation.Column;
 
-import org.houxg.leamonax.service.AccountService;
-
 public class User extends BaseResponse {
 
     @SerializedName("UserId")
@@ -37,11 +35,6 @@ public class User extends BaseResponse {
     }
 
     public String getAvatar() {
-        Account current = AccountService.getCurrent();
-        String host = current.getHost();
-        if(host.equals("https://leanote.com")){
-            return avatar;}
-        else
-        {return host+avatar;}
+        return avatar;
     }
 }
