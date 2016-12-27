@@ -47,6 +47,7 @@
     <string name="password">Password</string>
     <string name="host_address">Host address</string>
     <string name="sign_in">Sign in</string>
+    <string name="sign_up">Sign up</string>
     <string name="forgot_password">Forgot password?</string>
     <string name="old_password">Old password</string>
     <string name="new_password">New password</string>
