@@ -1,12 +1,11 @@
 package org.houxg.leamonax.ui.edit;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -65,12 +64,12 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         initToolBar((Toolbar) findViewById(R.id.toolbar), true);
         mPager = (LeaViewPager) findViewById(R.id.pager);
         mPager.setPagingEnabled(false);
-        mPager.setAdapter(new SectionAdapter(getFragmentManager()));
+        mPager.setAdapter(new SectionAdapter(getSupportFragmentManager()));
         mPager.setOffscreenPageLimit(2);
 
         if (savedInstanceState != null) {
-            mEditorFragment = (EditorFragment) getFragmentManager().findFragmentByTag(savedInstanceState.getString(TAG_EDITOR));
-            mSettingsFragment = (SettingFragment) getFragmentManager().findFragmentByTag(savedInstanceState.getString(TAG_SETTING));
+            mEditorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(savedInstanceState.getString(TAG_EDITOR));
+            mSettingsFragment = (SettingFragment) getSupportFragmentManager().findFragmentByTag(savedInstanceState.getString(TAG_SETTING));
         }
 
         long noteLocalId = getIntent().getLongExtra(EXT_NOTE_LOCAL_ID, -1);
@@ -326,7 +325,8 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
 
     private class SectionAdapter extends FragmentPagerAdapter {
 
-        public SectionAdapter(FragmentManager fm) {
+
+        public SectionAdapter(android.support.v4.app.FragmentManager fm) {
             super(fm);
         }
 

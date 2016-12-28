@@ -29,7 +29,6 @@ This is a third party Android client for Leanote.
 - [ ] Searching for full-text fields
 - [ ] Import html file
 
-# Thanks
-## Contributors
-[xingstarx](https://github.com/xingstarx)
-##
+# Contributors
+- [xingstarx](https://github.com/xingstarx)
+- [nicacol](https://github.com/nicacol)

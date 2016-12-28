@@ -5,6 +5,7 @@
     <title>RichTextEditor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <script src="./tinymce/tinymce.min.js"></script>
+    <script src="jquery-3.1.1.min.js"></script>
     <style type="text/css">
         .without-border {outline: 0px solid transparent;}
         .ace-tomorrow {
@@ -26,15 +27,19 @@
             background-position: initial initial;
             background-repeat: initial initial;
         }
+
+        html, body {
+            height: 100%;
+        }
+
     </style>
 </head>
 
 <body>
-    <div style="outline: 0px solid transparent;" class="without-border" contenteditable="true" id="title"></div>
-    <hr>
-    <form method="post">
-        <div id="content" style="outline: 0px solid transparent;"></div>
-    </form>
+    <h3 id="title" style="outline: 0px solid transparent;" class="without-border" contenteditable="true"></h3>
+    <hr id="hr" />
+    <div id="content" style="outline: 0px solid transparent;"></div>
+    <p id="dummyP" style="display:none;"></p>
 </body>
 
 <script type="text/javascript">
@@ -47,16 +52,32 @@
     function setTitle(title) {
         return titleDiv.innerHTML = title;
     }
-    tinymce.init({
-        selector: 'div#content',
-        remove_trailing_brs: false,
-        element_format: 'html',
-        allow_unsafe_link_target: true,
-        plugins: "lists",
-        toolbar: false,
-        menubar: false,
-        inline: true
-    });
+
+    window.onload = function () {
+        var dummyP = $('#dummyP');
+        var hr = $('#hr');
+        var body = $('body');
+        var contentHeight = window.innerHeight
+                            - parseInt(body.css('marginTop'))
+                            - parseInt(body.css('marginBottom'))
+                            - parseInt(dummyP.css('marginTop'))
+                            - $('#title').outerHeight()
+                            - hr.outerHeight()
+                            - parseInt(hr.css('marginTop'))
+                            - parseInt(hr.css('marginBottom'));
+
+        $('#content').css('height', contentHeight + 'px');
+        tinymce.init({
+            selector: 'div#content',
+            remove_trailing_brs: false,
+            element_format: 'html',
+            allow_unsafe_link_target: true,
+            plugins: 'lists',
+            toolbar: false,
+            menubar: false,
+            inline: true
+        });
+    }
 
     function toggleBold() {
         tinyMCE.editors[0].formatter.toggle('bold');
@@ -100,7 +121,7 @@
         if (result) {
             return result[0];
         } else {
-            return "";
+            return '';
         }
     }
 
@@ -115,14 +136,14 @@
     }
 
     function toggleBulletList() {
-        tinyMCE.editors[0].execCommand("InsertUnorderedList", false)
+        tinyMCE.editors[0].execCommand('InsertUnorderedList', false)
         var listState = getListState();
         listState = listState.toLowerCase() === 'ul';
         nativeCallbackHandler.onFormatChange(JSON.stringify({bullet: listState}));
     }
 
     function toggleOrderedList() {
-        tinyMCE.editors[0].execCommand("InsertOrderedList", false)
+        tinyMCE.editors[0].execCommand('InsertOrderedList', false)
         var listState = getListState();
         listState = listState.toLowerCase() === 'ol';
         nativeCallbackHandler.onFormatChange(JSON.stringify({ordered: listState}));
@@ -145,17 +166,17 @@
     }
 
     function enable() {
-        document.addEventListener("selectionchange", selectionChangeHandler, false);
-        document.removeEventListener("click", clickHandeler, false);
+        document.addEventListener('selectionchange', selectionChangeHandler, false);
+        document.removeEventListener('click', clickHandeler, false);
         tinyMCE.editors[0].setMode('design');
         titleDiv.setAttribute("contenteditable", true);
     }
 
     function disable() {
-        document.removeEventListener("selectionchange", selectionChangeHandler, false);
-        document.addEventListener("click", clickHandeler, false);
+        document.removeEventListener('selectionchange', selectionChangeHandler, false);
+        document.addEventListener('click', clickHandeler, false);
         tinyMCE.editors[0].setMode('readonly');
-        titleDiv.setAttribute("contenteditable", false);
+        titleDiv.setAttribute('contenteditable', false);
     }
 
     function clickHandeler(e) {
@@ -221,7 +242,7 @@
         if (lists.length > 0) {
             return lists[0].nodeName.toLowerCase();
         } else {
-            return "";
+            return '';
         }
     }
 
