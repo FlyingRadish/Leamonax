@@ -97,4 +97,5 @@
     <string name="retry">重试</string>
     <string name="continue_text">继续</string>
     <string name="next_time">下次再说</string>
+    <string name="cant_open_url">无法打开该链接</string>
 </resources>

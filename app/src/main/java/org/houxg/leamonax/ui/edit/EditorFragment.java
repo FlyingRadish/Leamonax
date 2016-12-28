@@ -36,6 +36,7 @@ import org.houxg.leamonax.editor.MarkdownEditor;
 import org.houxg.leamonax.editor.RichTextEditor;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.DialogUtils;
+import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.widget.ToggleImageButton;
 
 import java.util.List;
@@ -392,7 +393,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                 }
             });
         } else {
-            //TODO: go to link
+            OpenUtils.openUrl(getActivity(), url);
         }
     }
 
@@ -456,8 +457,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
 
     @Override
     public void linkTo(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(intent);
+        OpenUtils.openUrl(getActivity(), url);
     }
 
     private void refreshFormatStatus(Map<Editor.Format, Object> formatStatus) {
