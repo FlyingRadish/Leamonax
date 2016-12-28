@@ -75,4 +75,26 @@
     <string name="feedback">Feedback</string>
     <string name="sign_up">Sign up</string>
     <string name="note_not_found">Note not found, please try again</string>
+    <string name="check_upgrade_error">An error occurs while checking latest version, please try again</string>
+    <string name="checking_upgrade">Checking latest version, please wait</string>
+    <string name="click_to_install">Click to install</string>
+    <string name="click_to_retry">Click to retry</string>
+    <string name="click_to_view">Click to view</string>
+    <string name="continue_download">Continue download</string>
+    <string name="continue_text">Continue</string>
+    <string name="download_error">Download failed</string>
+    <string name="download_successful">Dowload finished</string>
+    <string name="downloading">Dowloading</string>
+    <string name="what_s_new">What\'s new</string>
+    <string name="file_size">File size</string>
+    <string name="have_new_version">Have new version</string>
+    <string name="install">Install</string>
+    <string name="network_prompt">Network prompt</string>
+    <string name="next_time">Next time</string>
+    <string name="retry">Retry</string>
+    <string name="should_continue_download">You already switch to mobile network, would you like to continue download?</string>
+    <string name="update_time">Update time</string>
+    <string name="upgrade_now">Upgrade now</string>
+    <string name="your_are_the_latest_version">You are using latest version</string>
+
 </resources>

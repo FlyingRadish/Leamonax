@@ -109,5 +109,6 @@ dependencies {
     compile 'com.github.houxg:FlexLayout:1.2'
 
     compile 'net.danlew:android.joda:2.9.5'
-    compile 'com.tencent.bugly:crashreport:2.4.0'
+    compile group: 'com.tencent.bugly', name: 'crashreport_upgrade', version: '1.2.1'
+
 }
