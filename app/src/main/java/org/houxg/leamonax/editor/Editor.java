@@ -130,7 +130,8 @@ public abstract class Editor {
 
         @Override
         public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-            Log.i(TAG, String.format("line=%d, msg=%s",
+            Log.i(TAG, String.format("source=%s, line=%d, msg=%s",
+                    consoleMessage.sourceId(),
                     consoleMessage.lineNumber(),
                     consoleMessage.message()));
             return true;

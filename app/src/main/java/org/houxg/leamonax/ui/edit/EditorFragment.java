@@ -1,13 +1,17 @@
 package org.houxg.leamonax.ui.edit;
 
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -32,6 +36,7 @@ import org.houxg.leamonax.editor.MarkdownEditor;
 import org.houxg.leamonax.editor.RichTextEditor;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.DialogUtils;
+import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.widget.ToggleImageButton;
 
 import java.util.List;
@@ -54,7 +59,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     private static final String ARG_IS_MARKDOWN = "arg_is_markdown";
     private static final String ARG_ENABLE_EDIT = "arg_enable_edit";
     protected static final int REQ_SELECT_IMAGE = 879;
-
+    private static final int REQ_CAMERA_PERMISSION = 59;
 
     private EditorFragmentListener mListener;
     private Editor mEditor;
@@ -141,7 +146,6 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
         ButterKnife.bind(this, view);
         mToolContainer.setVisibility(mIsEditingEnabled ? View.VISIBLE : View.GONE);
         mEditor.init(mWebView);
-        mListener.onInitialized();
         return view;
     }
 
@@ -170,7 +174,26 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
 
     @OnClick(R.id.btn_img)
     void handleInsertImage() {
-        //TODO: request camera permission
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA},
+                    REQ_CAMERA_PERMISSION);
+            return;
+        }
+
+        openImageSelector(true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_CAMERA_PERMISSION) {
+            boolean cameraGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            openImageSelector(cameraGranted);
+        }
+    }
+
+    private void openImageSelector(boolean supportSelfie) {
         ImgSelConfig config = new ImgSelConfig.Builder(
                 getActivity(),
                 new com.yuyh.library.imgsel.ImageLoader() {
@@ -183,7 +206,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                 .backResId(R.drawable.ic_arrow_back_white)
                 .needCrop(true)
                 .cropSize(1, 1, 200, 200)
-                .needCamera(true)
+                .needCamera(supportSelfie)
                 .build();
         ImgSelActivity.startActivity(this, config, REQ_SELECT_IMAGE);
     }
@@ -369,7 +392,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                 }
             });
         } else {
-            //TODO: go to link
+            OpenUtils.openUrl(getActivity(), url);
         }
     }
 
@@ -433,8 +456,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
 
     @Override
     public void linkTo(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(intent);
+        OpenUtils.openUrl(getActivity(), url);
     }
 
     private void refreshFormatStatus(Map<Editor.Format, Object> formatStatus) {

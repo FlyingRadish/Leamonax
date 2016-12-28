@@ -96,5 +96,6 @@
     <string name="update_time">Update time</string>
     <string name="upgrade_now">Upgrade now</string>
     <string name="your_are_the_latest_version">You are using latest version</string>
+    <string name="cant_open_url">Can\'t open this url</string>
 
 </resources>
