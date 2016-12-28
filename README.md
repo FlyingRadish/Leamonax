@@ -13,7 +13,7 @@ This is a third party Android client for Leanote.
 
 # Download
 - [Git Release](https://github.com/houxg/Leamonax/releases/latest)
-- [Pgyer](https://www.pgyer.com/5pZe)
+- [Pgyer](https://www.pgyer.com/leamonax)
 
 # Features
 - [x] Sign in/up
