@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.tencent.bugly.crashreport.CrashReport;
+
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
@@ -48,8 +50,6 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
     @BindView(R.id.tv_revert)
     View mRevertBtn;
 
-    private ProgressDialog mProgressDialog;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +58,12 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
         initToolBar((Toolbar) findViewById(R.id.toolbar), true);
         long noteLocalId = getIntent().getLongExtra(EXT_NOTE_LOCAL_ID, -1);
         mNote = AppDataBase.getNoteByLocalId(noteLocalId);
-
+        if (mNote == null) {
+            ToastUtils.show(this, R.string.note_not_found);
+            CrashReport.postCatchedException(new IllegalStateException("Note not found while preview, localId=" + noteLocalId));
+            finish();
+            return;
+        }
         mEditorFragment = EditorFragment.getNewInstance(mNote.isMarkDown(), false);
         getSupportFragmentManager().beginTransaction().add(R.id.container, mEditorFragment).commit();
     }

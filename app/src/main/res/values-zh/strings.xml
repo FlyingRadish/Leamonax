@@ -75,4 +75,5 @@
     <string name="about">关于</string>
     <string name="feedback">反馈</string>
     <string name="sign_up">注册</string>
+    <string name="note_not_found">找不到该笔记，请重试</string>
 </resources>

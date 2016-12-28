@@ -31,7 +31,7 @@
     <string name="delete_note_failed">Delete note failed</string>
     <string name="email_or_password_incorrect">Email or password is incorrect</string>
     <string name="network_error">Network error</string>
-    <string name="untitled" translatable="false">Untitled</string>
+    <string name="untitled">Untitled</string>
     <string name="time_yesterday">Yesterday %s</string>
     <string name="use_leanote_host">Use Leanote.com</string>
     <string name="use_custom_host">Use custom host</string>
@@ -74,4 +74,5 @@
     <string name="select_notebook">Select notebook</string>
     <string name="feedback">Feedback</string>
     <string name="sign_up">Sign up</string>
+    <string name="note_not_found">Note not found, please try again</string>
 </resources>
