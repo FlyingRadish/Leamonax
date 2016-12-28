@@ -12,8 +12,8 @@ This is a third party Android client for Leanote.
 ![Markdown](https://raw.githubusercontent.com/houxg/Leamonax/develop/screenshot/Markdown.png)
 
 # Download
-[Git Release](https://github.com/houxg/Leamonax/releases/latest)
-[Pgyer](https://www.pgyer.com/5pZe)
+- [Git Release](https://github.com/houxg/Leamonax/releases/latest)
+- [Pgyer](https://www.pgyer.com/5pZe)
 
 # Features
 - [x] Sign in/up
