@@ -30,14 +30,13 @@
 
         html, body {
             height: 100%;
-            margin: 0px;
         }
 
     </style>
 </head>
 
 <body>
-    <div id="title" style="outline: 0px solid transparent;" class="without-border" contenteditable="true"></div>
+    <h3 id="title" style="outline: 0px solid transparent;" class="without-border" contenteditable="true"></h3>
     <hr id="hr" />
     <div id="content" style="outline: 0px solid transparent;"></div>
     <p id="dummyP" style="display:none;"></p>
@@ -56,10 +55,17 @@
 
     window.onload = function () {
         var dummyP = $('#dummyP');
-        var pMargin = parseInt(dummyP.css('marginTop'));
         var hr = $('#hr');
-        var hrHeight = hr.outerHeight() + parseInt(hr.css('marginTop')) + parseInt(hr.css('marginBottom'));
-        var contentHeight = window.innerHeight - pMargin - $('#title').outerHeight() - hrHeight;
+        var body = $('body');
+        var contentHeight = window.innerHeight
+                            - parseInt(body.css('marginTop'))
+                            - parseInt(body.css('marginBottom'))
+                            - parseInt(dummyP.css('marginTop'))
+                            - $('#title').outerHeight()
+                            - hr.outerHeight()
+                            - parseInt(hr.css('marginTop'))
+                            - parseInt(hr.css('marginBottom'));
+
         $('#content').css('height', contentHeight + 'px');
         tinymce.init({
             selector: 'div#content',
