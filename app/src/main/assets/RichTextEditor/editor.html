@@ -43,8 +43,21 @@
 </body>
 
 <script type="text/javascript">
-    var titleDiv = document.getElementById('title');
+    //resize editor area to fit window
+    var dummyP = $('#dummyP');
+    var hr = $('#hr');
+    var body = $('body');
+    var contentHeight = window.innerHeight
+                        - parseInt(body.css('marginTop'))
+                        - parseInt(body.css('marginBottom'))
+                        - parseInt(dummyP.css('marginTop'))
+                        - $('#title').outerHeight()
+                        - hr.outerHeight()
+                        - parseInt(hr.css('marginTop'))
+                        - parseInt(hr.css('marginBottom'));
+    $('#content').css('height', contentHeight + 'px');
 
+    var titleDiv = document.getElementById('title');
     function getTitle() {
         return titleDiv.innerHTML;
     }
@@ -53,31 +66,16 @@
         return titleDiv.innerHTML = title;
     }
 
-    window.onload = function () {
-        var dummyP = $('#dummyP');
-        var hr = $('#hr');
-        var body = $('body');
-        var contentHeight = window.innerHeight
-                            - parseInt(body.css('marginTop'))
-                            - parseInt(body.css('marginBottom'))
-                            - parseInt(dummyP.css('marginTop'))
-                            - $('#title').outerHeight()
-                            - hr.outerHeight()
-                            - parseInt(hr.css('marginTop'))
-                            - parseInt(hr.css('marginBottom'));
-
-        $('#content').css('height', contentHeight + 'px');
-        tinymce.init({
-            selector: 'div#content',
-            remove_trailing_brs: false,
-            element_format: 'html',
-            allow_unsafe_link_target: true,
-            plugins: 'lists',
-            toolbar: false,
-            menubar: false,
-            inline: true
-        });
-    }
+    tinymce.init({
+        selector: 'div#content',
+        remove_trailing_brs: false,
+        element_format: 'html',
+        allow_unsafe_link_target: true,
+        plugins: 'lists',
+        toolbar: false,
+        menubar: false,
+        inline: true,
+    });
 
     function toggleBold() {
         tinyMCE.editors[0].formatter.toggle('bold');
