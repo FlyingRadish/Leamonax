@@ -30,5 +30,5 @@ This is a third party Android client for Leanote.
 - [ ] Import html file
 
 # Contributors
-[xingstarx](https://github.com/xingstarx)
-[nicacol](https://github.com/nicacol)
+- [xingstarx](https://github.com/xingstarx)
+- [nicacol](https://github.com/nicacol)
