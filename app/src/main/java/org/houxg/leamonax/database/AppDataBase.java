@@ -124,7 +124,6 @@ public class AppDataBase {
                 }
             }
             cursor.close();
-            database.execSQL("");
         }
     }
 
