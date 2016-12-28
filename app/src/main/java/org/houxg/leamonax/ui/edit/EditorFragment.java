@@ -146,7 +146,6 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
         ButterKnife.bind(this, view);
         mToolContainer.setVisibility(mIsEditingEnabled ? View.VISIBLE : View.GONE);
         mEditor.init(mWebView);
-        mListener.onInitialized();
         return view;
     }
 
