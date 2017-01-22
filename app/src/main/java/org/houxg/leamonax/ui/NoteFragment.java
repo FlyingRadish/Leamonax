@@ -113,6 +113,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     private void syncNotes() {
         if (!NetworkUtils.isNetworkAvailable(getActivity())) {
             ToastUtils.showNetworkUnavailable(getActivity());
+            mSwipeRefresh.setRefreshing(false);
             return;
         }
         NoteSyncService.startServiceForNote(getActivity());
