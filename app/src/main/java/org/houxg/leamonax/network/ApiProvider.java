@@ -1,5 +1,8 @@
 package org.houxg.leamonax.network;
 
+import com.elvishew.xlog.XLog;
+
+import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.network.api.AuthApi;
 import org.houxg.leamonax.network.api.NoteApi;
@@ -37,9 +40,7 @@ public class ApiProvider {
     }
 
     public void init(String host) {
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder()
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .addNetworkInterceptor(new Interceptor() {
                     @Override
                     public Response intercept(Chain chain) throws IOException {
@@ -57,9 +58,18 @@ public class ApiProvider {
                                 .build();
                         return chain.proceed(newRequest);
                     }
-                })
-                .addNetworkInterceptor(interceptor)
-                .build();
+                });
+        if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+                @Override
+                public void log(String message) {
+                    XLog.i(message);
+                }
+            });
+            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            builder.addNetworkInterceptor(interceptor);
+        }
+        OkHttpClient client = builder.build();
         mApiRetrofit = new Retrofit.Builder()
                 .baseUrl(host + "/api/")
                 .client(client)
