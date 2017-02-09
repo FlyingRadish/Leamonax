@@ -38,7 +38,7 @@ import butterknife.OnClick;
 
 public class SettingFragment extends Fragment {
 
-    private static final String TAG = "SettingFragment";
+    private static final String TAG = "SettingFragment:";
     private static final Pattern TAG_PATTERN = Pattern.compile("[^,\\s]+\\s*[^,]*");
 
     @BindView(R.id.sw_public)

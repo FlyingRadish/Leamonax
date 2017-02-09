@@ -12,7 +12,7 @@ import java.util.Locale;
 import static android.view.View.SCROLLBARS_OUTSIDE_OVERLAY;
 
 public class MarkdownEditor extends Editor {
-    private static final String TAG = "MarkdownEditor";
+    private static final String TAG = "MarkdownEditor:";
     private WebView mWebView;
 
     public MarkdownEditor(Editor.EditorListener listener) {

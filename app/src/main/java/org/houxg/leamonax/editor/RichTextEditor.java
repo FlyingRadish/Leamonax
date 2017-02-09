@@ -4,7 +4,8 @@ package org.houxg.leamonax.editor;
 import android.annotation.SuppressLint;
 import android.webkit.WebView;
 
-import org.houxg.leamonax.utils.AppLog;
+import com.elvishew.xlog.XLog;
+
 import org.houxg.leamonax.utils.HtmlUtils;
 
 import java.util.Locale;
@@ -14,7 +15,7 @@ import static android.view.View.SCROLLBARS_OUTSIDE_OVERLAY;
 
 public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceListener {
 
-    private static final String TAG = "RichTextEditor";
+    private static final String TAG = "RichTextEditor:";
     private static final String JS_CALLBACK_HANDLER = "nativeCallbackHandler";
     private WebView mWebView;
 
@@ -65,7 +66,7 @@ public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceL
     @Override
     public void setContent(String content) {
         content = HtmlUtils.escapeHtml(content);
-        AppLog.i(TAG, "escaped=" + content);
+        XLog.i(TAG + "escaped=" + content);
         execJs(String.format(Locale.US, "tinyMCE.editors[0].setContent('%s');", content));
     }
 
@@ -73,7 +74,7 @@ public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceL
     public String getContent() {
         String content = new JsRunner().get(mWebView, "getContent();");
         content = HtmlUtils.unescapeHtml(content);
-        AppLog.i(TAG, "unescaped=" + content);
+        XLog.i(TAG + "unescaped=" + content);
         if ("<p><br data-mce-bogus=\"1\"></p>".equals(content)) {
             content = "";
         }

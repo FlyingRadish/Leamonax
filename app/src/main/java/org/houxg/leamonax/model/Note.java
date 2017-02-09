@@ -1,7 +1,6 @@
 package org.houxg.leamonax.model;
 
-import android.util.Log;
-
+import com.elvishew.xlog.XLog;
 import com.google.gson.annotations.SerializedName;
 import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
@@ -21,6 +20,8 @@ import java.util.List;
  */
 @Table(name = "Note", database = AppDataBase.class)
 public class Note extends BaseModel implements Serializable {
+
+    public static final String TAG = "Note:";
 
     @SerializedName("Ok")
     boolean isOk = true;
@@ -284,8 +285,8 @@ public class Note extends BaseModel implements Serializable {
     private boolean isChanged(String message, Object l, Object r) {
         boolean isEqual = l.equals(r);
         if (!isEqual) {
-            Log.i("Note", message + " changed, origin  =" + l);
-            Log.i("Note", message + " changed, modified=" + r);
+            XLog.i(TAG + message + " changed, origin  =" + l);
+            XLog.i(TAG + message + " changed, modified=" + r);
         }
         return !isEqual;
     }

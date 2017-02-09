@@ -1,8 +1,7 @@
 package org.houxg.leamonax.network;
 
 
-import android.util.Log;
-
+import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 
@@ -20,6 +19,7 @@ import retrofit2.Converter;
 public class LeaResponseConverter<T> implements Converter<ResponseBody, T> {
     private final Gson gson;
     private final TypeAdapter<T> adapter;
+    public static final String TAG = "LeaResponseConverter:";
 
     LeaResponseConverter(Gson gson, TypeAdapter<T> adapter) {
         this.gson = gson;
@@ -44,7 +44,7 @@ public class LeaResponseConverter<T> implements Converter<ResponseBody, T> {
             }
             return val;
         } catch (Exception ex) {
-            Log.i("LeaResponseConverter", ex.getMessage());
+            XLog.i(TAG + ex.getMessage());
             BaseResponse response = gson.fromJson(jsonString, BaseResponse.class);
             throw new LeaFailure(response);
         }finally {

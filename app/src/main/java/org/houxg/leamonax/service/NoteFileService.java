@@ -2,7 +2,8 @@ package org.houxg.leamonax.service;
 
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
+
+import com.elvishew.xlog.XLog;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.Leamonax;
@@ -23,7 +24,7 @@ import okio.Sink;
 
 public class NoteFileService {
 
-    private static final String TAG = "NoteFileService";
+    private static final String TAG = "NoteFileService:";
 
     private static final String SCHEME = "file";
     private static final String IMAGE_PATH = "getImage";
@@ -65,14 +66,14 @@ public class NoteFileService {
         String filePath = null;
         if (isLocalFileExist(noteFile.getLocalPath())) {
             filePath = noteFile.getLocalPath();
-            Log.i(TAG, "use local image, path=" + filePath);
+            XLog.i(TAG + "use local image, path=" + filePath);
         } else {
             String url = NoteFileService.getUrl(AccountService.getCurrent().getHost(), noteFile.getServerId(), AccountService.getCurrent().getAccessToken());
-            Log.i(TAG, "use server image, url=" + url);
+            XLog.i(TAG + "use server image, url=" + url);
             try {
                 filePath = NoteFileService.getImageFromServer(Uri.parse(url), Leamonax.getContext().getCacheDir());
                 noteFile.setLocalPath(filePath);
-                Log.i(TAG, "download finished, path=" + filePath);
+                XLog.i(TAG + "download finished, path=" + filePath);
                 noteFile.save();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -93,7 +94,7 @@ public class NoteFileService {
         URI target = URI.create(targetUri.toString());
         String fileName = String.format(Locale.US, "leanote-%s.png", new ObjectId().toString());
         File file = new File(parentDir, fileName);
-//        Log.i(TAG, "target=" + target.toString() + ", file=" + file.getAbsolutePath());
+//        XLog.i(TAG + "target=" + target.toString() + ", file=" + file.getAbsolutePath());
 
         InputStream input = target.toURL().openStream();
         BufferedSource source = Okio.buffer(Okio.source(input));

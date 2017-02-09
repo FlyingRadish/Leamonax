@@ -35,7 +35,7 @@ import java.util.List;
 @Database(name = "leanote_db", version = 3)
 public class AppDataBase {
 
-    private static final String TAG = "AppDataBase";
+    private static final String TAG = "AppDataBase:";
 
     @Migration(version = 2, database = AppDataBase.class)
     public static class UpdateTag extends BaseMigration {

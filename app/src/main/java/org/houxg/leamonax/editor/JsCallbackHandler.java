@@ -1,7 +1,8 @@
 package org.houxg.leamonax.editor;
 
-import android.util.Log;
 import android.webkit.JavascriptInterface;
+
+import com.elvishew.xlog.XLog;
 
 import org.houxg.leamonax.utils.HtmlUtils;
 import org.houxg.leamonax.utils.JSONUtils;
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class JsCallbackHandler {
-    private static final String TAG = "JsCallbackHandler";
+    private static final String TAG = "JsCallbackHandler:";
 
     private static final String JS_CALLBACK_DELIMITER = "~";
 
@@ -81,22 +82,22 @@ public class JsCallbackHandler {
                 break;
             case CALLBACK_FOCUS_IN:
                 // TODO: Needed to handle displaying/graying the format bar when focus changes between the title and content
-                Log.d(TAG, "Focus in callback received");
+                XLog.d(TAG + "Focus in callback received");
                 break;
             case CALLBACK_FOCUS_OUT:
                 // TODO: Needed to handle displaying/graying the format bar when focus changes between the title and content
-                Log.d(TAG, "Focus out callback received");
+                XLog.d(TAG + "Focus out callback received");
                 break;
             case CALLBACK_NEW_FIELD:
                 // TODO: Used for logging/testing purposes on iOS
-                Log.d(TAG, "New field created, " + params);
+                XLog.d(TAG + "New field created, " + params);
                 break;
             case CALLBACK_IMAGE_REPLACED:
                 // TODO: Notifies that image upload has finished and that the local url was replaced by the remote url in the ZSS editor
-                Log.d(TAG, "Image replaced, " + params);
+                XLog.d(TAG + "Image replaced, " + params);
                 break;
             case CALLBACK_IMAGE_TAP:
-                Log.d(TAG, "Image tapped, " + params);
+                XLog.d(TAG + "Image tapped, " + params);
 
                 String uploadStatus = "";
 
@@ -133,7 +134,7 @@ public class JsCallbackHandler {
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Log.d(TAG, "Media meta data from callback-image-tap was not JSON-formatted");
+                        XLog.d(TAG + "Media meta data from callback-image-tap was not JSON-formatted");
                     }
                 }
 
@@ -141,7 +142,7 @@ public class JsCallbackHandler {
                 break;
             case CALLBACK_LINK_TAP:
                 // Extract and HTML-decode the link data from the callback params
-                Log.d(TAG, "Link tapped, " + params);
+                XLog.d(TAG + "Link tapped, " + params);
 
                 List<String> linkIds = new ArrayList<>();
                 linkIds.add("url");
@@ -164,10 +165,10 @@ public class JsCallbackHandler {
                 break;
             case CALLBACK_LOG:
                 // Strip 'msg=' from beginning of string
-                Log.d(TAG, callbackId + ": " + params.substring(4));
+                XLog.d(TAG + callbackId + ": " + params.substring(4));
                 break;
             case CALLBACK_RESPONSE_STRING:
-                Log.d(TAG, callbackId + ": " + params);
+                XLog.d(TAG + callbackId + ": " + params);
                 Set<String> responseDataSet;
                 if (params.startsWith("function=")) {
                     String functionName = params.substring("function=".length(), params.indexOf(JS_CALLBACK_DELIMITER));
@@ -192,7 +193,7 @@ public class JsCallbackHandler {
                 mListener.onGetHtmlResponse(HtmlUtils.buildMapFromKeyValuePairs(responseDataSet));
                 break;
             default:
-                Log.d(TAG, "Unhandled callback: " + callbackId + ":" + params);
+                XLog.d(TAG + "Unhandled callback: " + callbackId + ":" + params);
         }
     }
 }

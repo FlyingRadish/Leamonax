@@ -2,14 +2,15 @@ package org.houxg.leamonax.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
+
+import com.elvishew.xlog.XLog;
 
 
 public class LeaWebView extends WebView {
 
-    private static final String TAG = "LeaWebView";
+    private static final String TAG = "LeaWebView:";
 
     public LeaWebView(Context context) {
         super(context);
@@ -21,7 +22,7 @@ public class LeaWebView extends WebView {
 
     @Override
     public void evaluateJavascript(String script, ValueCallback<String> resultCallback) {
-        Log.i(TAG, "execute=" + script);
+        XLog.i(TAG + "execute=" + script);
         super.evaluateJavascript(script, resultCallback);
     }
 }

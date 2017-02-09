@@ -2,13 +2,14 @@ package org.houxg.leamonax.editor;
 
 
 import android.net.Uri;
-import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import com.elvishew.xlog.XLog;
 
 import org.houxg.leamonax.service.NoteFileService;
 
@@ -83,14 +84,14 @@ public abstract class Editor {
 
     protected class EditorClient extends WebViewClient {
 
-        private static final String TAG = "WebViewClient";
+        private static final String TAG = "WebViewClient:";
 
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             Uri uri = Uri.parse(url);
-            Log.i(TAG, "shouldInterceptRequest(), request=" + url + ", scheme=" + uri.getScheme() + ", authority=" + uri.getAuthority());
+            XLog.i(TAG + "shouldInterceptRequest(), request=" + url + ", scheme=" + uri.getScheme() + ", authority=" + uri.getAuthority());
             if (NoteFileService.isLocalImageUri(uri)) {
-                Log.i(TAG, "get image");
+                XLog.i(TAG + "get image");
                 WebResourceResponse resourceResponse = new WebResourceResponse("image/png", "utf-8", NoteFileService.getImage(uri.getQueryParameter("id")));
                 return resourceResponse;
             } else {
@@ -101,36 +102,36 @@ public abstract class Editor {
         @Override
         public void onLoadResource(WebView view, String url) {
             super.onLoadResource(view, url);
-            Log.i(TAG, "onLoadResource(), rul=" + url);
+            XLog.i(TAG + "onLoadResource(), rul=" + url);
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            Log.i(TAG, "shouldOverrideUrlLoading(), url=" + url);
+            XLog.i(TAG + "shouldOverrideUrlLoading(), url=" + url);
             return super.shouldOverrideUrlLoading(view, url);
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            Log.i(TAG, "onPageFinished()");
+            XLog.i(TAG + "onPageFinished()");
             mListener.onPageLoaded();
         }
 
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
-            Log.i(TAG, "onReceivedError(), code=" + errorCode + ", desc=" + description + ", url=" + failingUrl);
+            XLog.i(TAG + "onReceivedError(), code=" + errorCode + ", desc=" + description + ", url=" + failingUrl);
         }
     }
 
     protected class EditorChromeClient extends WebChromeClient {
 
-        private static final String TAG = "ChromeClient";
+        private static final String TAG = "ChromeClient:";
 
         @Override
         public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-            Log.i(TAG, String.format("source=%s, line=%d, msg=%s",
+            XLog.i(TAG + String.format("source=%s, line=%d, msg=%s",
                     consoleMessage.sourceId(),
                     consoleMessage.lineNumber(),
                     consoleMessage.message()));
@@ -139,7 +140,7 @@ public abstract class Editor {
 
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-            Log.i(TAG, "alert: url=" + url + ", msg=" + message);
+            XLog.i(TAG + "alert: url=" + url + ", msg=" + message);
             return true;
         }
     }
