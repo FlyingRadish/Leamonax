@@ -912,7 +912,7 @@ div.jGrowl div.jGrowl-closer {
 }
 .preview-container, 
 #preview-contents, 
-.wmd-preview-section {
+.md-table {
 	overflow-x: auto; /*解决长表格无法滚动问题*/ 
 }
 .wmd-prompt-background {
