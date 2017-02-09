@@ -59,14 +59,10 @@ public class NoteService {
                     Log.i(TAG, "notebook insert, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
                     remoteNotebook.insert();
                 } else {
-                    if (localNotebook.isDirty()) {
-                        Log.w(TAG, "notebook conflict, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
-                    } else {
-                        Log.i(TAG, "notebook update, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
-                        remoteNotebook.setId(localNotebook.getId());
-                        remoteNotebook.setIsDirty(false);
-                        remoteNotebook.update();
-                    }
+                    Log.i(TAG, "notebook update, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
+                    remoteNotebook.setId(localNotebook.getId());
+                    remoteNotebook.setIsDirty(false);
+                    remoteNotebook.update();
                 }
                 notebookUsn = remoteNotebook.getUsn();
                 Account account = AccountService.getCurrent();
@@ -94,14 +90,18 @@ public class NoteService {
                     remoteNote.setId(localId);
                     Log.i(TAG, "note insert, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId() + ", local=" + localId);
                 } else {
+                    long id = localNote.getId();
                     if (localNote.isDirty()) {
                         Log.w(TAG, "note conflict, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
-                        continue;
-                    } else {
-                        Log.i(TAG, "note update, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
-                        remoteNote.setId(localNote.getId());
-                        localId = localNote.getId();
+                        //save local version as a local note
+                        localNote.setId(null);
+                        localNote.setTitle(localNote.getTitle() + "--conflict");
+                        localNote.setNoteId("");
+                        localNote.insert();
                     }
+                    Log.i(TAG, "note update, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
+                    remoteNote.setId(id);
+                    localId = localNote.getId();
                 }
                 remoteNote.setIsDirty(false);
                 if (remoteNote.isMarkDown()) {
