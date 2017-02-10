@@ -7,10 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,23 +30,28 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.SyncEvent;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteService;
-import org.houxg.leamonax.utils.DisplayUtils;
+import org.houxg.leamonax.utils.ActionModeHandler;
+import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
-import org.houxg.leamonax.widget.DividerDecoration;
 import org.houxg.leamonax.widget.NoteList;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterListener {
+import static org.houxg.leamonax.R.menu.note;
+
+public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterListener, ActionModeHandler.Callback<Note> {
 
     private static final String TAG = "NoteFragment:";
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
@@ -64,6 +68,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
     List<Note> mNotes;
     private OnSyncFinishListener mSyncFinishListener;
+    ActionModeHandler<Note> mActionModeHandler;
 
     public NoteFragment() {
     }
@@ -89,7 +94,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.note, menu);
+        inflater.inflate(note, menu);
     }
 
     @Override
@@ -143,12 +148,19 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         } else {
             mNoteList.setScrollPosition(savedInstanceState.getInt(EXT_SCROLL_POSITION, 0));
         }
+        mActionModeHandler = new ActionModeHandler<>(getActivity(), this, R.menu.delete);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(EXT_SCROLL_POSITION, mNoteList.getScrollPosition());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshNotes();
     }
 
     @Override
@@ -196,36 +208,31 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
     @Override
     public void onClickNote(Note note) {
-        startActivity(NotePreviewActivity.getOpenIntent(getActivity(), note.getId()));
+        if (mActionModeHandler.isActionMode()) {
+            boolean isSelected = mActionModeHandler.chooseItem(note);
+            mNoteList.setSelected(note, isSelected);
+        } else {
+            startActivity(NotePreviewActivity.getOpenIntent(getActivity(), note.getId()));
+        }
     }
 
     @Override
     public void onLongClickNote(final Note note) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.delete_note)
-                .setMessage(String.format(Locale.US, getString(R.string.are_you_sure_to_delete_note), TextUtils.isEmpty(note.getTitle()) ? "this note" : note.getTitle()))
-                .setCancelable(true)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        deleteNote(note);
-                    }
-                })
-                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
+        boolean isSelected = mActionModeHandler.chooseItem(note);
+        mNoteList.setSelected(note, isSelected);
     }
 
-    private void deleteNote(final Note note) {
-        NoteService.deleteNote(note)
+    private void deleteNote(final List<Note> notes) {
+        Observable.from(notes)
+                .flatMap(new Func1<Note, rx.Observable<Note>>() {
+                    @Override
+                    public rx.Observable<Note> call(Note note) {
+                        return NoteService.deleteNote(note);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Void>() {
+                .subscribe(new Observer<Note>() {
                     @Override
                     public void onCompleted() {
 
@@ -234,10 +241,11 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     @Override
                     public void onError(Throwable e) {
                         ToastUtils.show(getActivity(), R.string.delete_note_failed);
+                        mNoteList.invalidateAllSelected();
                     }
 
                     @Override
-                    public void onNext(Void aVoid) {
+                    public void onNext(Note note) {
                         mNoteList.remove(note);
                     }
                 });
@@ -255,6 +263,47 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
             if (!event.isSucceed()) {
                 ToastUtils.show(getActivity(), R.string.sync_notes_failed);
             }
+        }
+    }
+
+    @Override
+    public boolean onAction(int actionId, List<Note> pendingItems) {
+        if (CollectionUtils.isEmpty(pendingItems)) {
+            ToastUtils.show(getActivity(), R.string.no_note_was_selected);
+            return false;
+        }
+        final List<Note> waitToDelete = new ArrayList<>();
+        for (int i = 0; i < pendingItems.size(); i++) {
+            waitToDelete.add(pendingItems.get(i));
+        }
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.delete_note)
+                .setMessage(R.string.are_you_sure_to_delete_note)
+                .setCancelable(true)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        mActionModeHandler.dismiss();
+                        deleteNote(waitToDelete);
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        mActionModeHandler.dismiss();
+                        mNoteList.invalidateAllSelected();
+                    }
+                })
+                .show();
+        return true;
+    }
+
+    @Override
+    public void onDestroy(List<Note> pendingItems) {
+        if (CollectionUtils.isNotEmpty(pendingItems)) {
+            mNoteList.invalidateAllSelected();
         }
     }
 

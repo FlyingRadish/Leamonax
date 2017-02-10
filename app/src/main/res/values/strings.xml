@@ -11,7 +11,7 @@
     <string name="link">Link</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <string name="are_you_sure_to_delete_note">Are you sure to delete %s?</string>
+    <string name="are_you_sure_to_delete_note">Are you sure to delete these notes?</string>
     <string name="delete_note">Delete note</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -98,5 +98,7 @@
     <string name="your_are_the_latest_version">You are using latest version</string>
     <string name="cant_open_url">Can\'t open this url</string>
     <string name="view_type">View type</string>
+    <string name="delete">Delete</string>
+    <string name="no_note_was_selected">No note was selected</string>
 
 </resources>
