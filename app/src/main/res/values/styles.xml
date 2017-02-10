@@ -11,11 +11,10 @@
         <item name="windowActionBarOverlay">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_white</item>
         <item name="actionModeStyle">@style/CustomActionMode</item>
-        <item name="android:actionModeCloseDrawable">@drawable/ic_arrow_back_white</item>
     </style>
 
     <style name="CustomActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">@color/colorPrimaryDark</item>
+        <item name="background">@color/white</item>
         <item name="height">?attr/actionBarSize</item>
     </style>
 
