@@ -3,12 +3,18 @@ package org.houxg.leamonax.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.view.Gravity;
+import android.view.Window;
 import android.widget.ImageView;
 
 import org.houxg.leamonax.R;
@@ -48,6 +54,9 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        getWindow().setEnterTransition(new Slide(Gravity.END));
+        getWindow().setReturnTransition(new Slide(Gravity.END));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         ButterKnife.bind(this);

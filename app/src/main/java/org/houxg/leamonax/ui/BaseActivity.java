@@ -4,6 +4,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -43,7 +44,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
+            ActivityCompat.finishAfterTransition(this);
             return true;
         }
         return super.onOptionsItemSelected(item);

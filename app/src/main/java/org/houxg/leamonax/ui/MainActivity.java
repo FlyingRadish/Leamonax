@@ -1,12 +1,14 @@
 package org.houxg.leamonax.ui;
 
 
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -146,7 +148,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
             return true;
         } else if (item.getItemId() == R.id.action_search) {
             Intent intent = new Intent(this, SearchActivity.class);
-            startActivity(intent);
+            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
         }
         return super.onOptionsItemSelected(item);
     }
