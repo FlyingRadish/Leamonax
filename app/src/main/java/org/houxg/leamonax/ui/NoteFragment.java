@@ -12,6 +12,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -32,6 +35,7 @@ import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.DividerDecoration;
+import org.houxg.leamonax.widget.NoteList;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,11 +60,10 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     @BindView(R.id.swiperefresh)
     SwipeRefreshLayout mSwipeRefresh;
 
-    List<Note> mNotes;
-    private NoteAdapter mAdapter;
-    private OnSyncFinishListener mSyncFinishListener;
+    NoteList mNoteList;
 
-    private float mScrollPosition;
+    List<Note> mNotes;
+    private OnSyncFinishListener mSyncFinishListener;
 
     public NoteFragment() {
     }
@@ -77,35 +80,36 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         mSyncFinishListener = listener;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.note, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_view_type) {
+            mNoteList.toggleType();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         ButterKnife.bind(this, view);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(container.getContext());
-        mNoteListView.setLayoutManager(layoutManager);
-        mNoteListView.setItemAnimator(new DefaultItemAnimator());
-        mNoteListView.addItemDecoration(new DividerDecoration(DisplayUtils.dp2px(8)));
-        mAdapter = new NoteAdapter(this);
-        mNoteListView.setAdapter(mAdapter);
-
+        mNoteList = new NoteList(container.getContext(), view, this);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 syncNotes();
-            }
-        });
-
-        mNoteListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                mScrollPosition = dy;
             }
         });
         return view;
@@ -124,8 +128,8 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         EventBus.getDefault().register(this);
+        refreshNotes();
         if (savedInstanceState == null) {
-            refreshNotes();
             if (getArguments().getBoolean(EXT_SHOULD_FETCH_NOTES, false)) {
                 mSwipeRefresh.postDelayed(new Runnable() {
                     @Override
@@ -136,23 +140,15 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     }
                 }, 200);
             }
+        } else {
+            mNoteList.setScrollPosition(savedInstanceState.getInt(EXT_SCROLL_POSITION, 0));
         }
-        if (savedInstanceState != null) {
-            mScrollPosition = savedInstanceState.getFloat(EXT_SCROLL_POSITION, 0);
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mNoteListView.scrollTo(0, (int) mScrollPosition);
-        refreshNotes();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putFloat(EXT_SCROLL_POSITION, mScrollPosition);
+        outState.putInt(EXT_SCROLL_POSITION, mNoteList.getScrollPosition());
     }
 
     @Override
@@ -195,7 +191,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                 mNotes = AppDataBase.getNotesByTagText(mCurrentMode.tagText, AccountService.getCurrent().getUserId());
         }
         Collections.sort(mNotes, new Note.UpdateTimeComparetor());
-        mAdapter.load(mNotes);
+        mNoteList.render(mNotes);
     }
 
     @Override
@@ -242,7 +238,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
                     @Override
                     public void onNext(Void aVoid) {
-                        mAdapter.delete(note);
+                        mNoteList.remove(note);
                     }
                 });
     }

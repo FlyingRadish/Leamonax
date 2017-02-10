@@ -97,5 +97,6 @@
     <string name="upgrade_now">Upgrade now</string>
     <string name="your_are_the_latest_version">You are using latest version</string>
     <string name="cant_open_url">Can\'t open this url</string>
+    <string name="view_type">View type</string>
 
 </resources>
