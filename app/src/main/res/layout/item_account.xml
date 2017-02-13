@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:gravity="center_vertical"
+    android:foreground="?android:attr/selectableItemBackground"
     android:padding="16dp">
 
     <ImageView
