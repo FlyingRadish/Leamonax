@@ -43,6 +43,22 @@ public class TriangleView extends ImageView {
         mListener = listener;
     }
 
+    public void toggle() {
+        performClick();
+    }
+
+    public void setChecked(boolean isChecked) {
+        if (mIsChecked == isChecked) {
+            return;
+        }
+        int rotate = isChecked ? -180 : 0;
+        setRotation(rotate);
+        mIsChecked = isChecked;
+        if (mListener != null) {
+            mListener.onToggle(mIsChecked);
+        }
+    }
+
     public interface OnToggleListener {
         void onToggle(boolean isChecked);
     }

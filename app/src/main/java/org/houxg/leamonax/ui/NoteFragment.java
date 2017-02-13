@@ -53,36 +53,21 @@ import static org.houxg.leamonax.R.menu.note;
 
 public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterListener, ActionModeHandler.Callback<Note> {
 
-    private static final String TAG = "NoteFragment:";
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
-    private static final String EXT_SHOULD_FETCH_NOTES = "ext_should_fetch_notes";
-
-    private Mode mCurrentMode = Mode.RECENT_NOTES;
 
     @BindView(R.id.recycler_view)
     RecyclerView mNoteListView;
-    @BindView(R.id.swiperefresh)
-    SwipeRefreshLayout mSwipeRefresh;
-
-    NoteList mNoteList;
 
     List<Note> mNotes;
-    private OnSyncFinishListener mSyncFinishListener;
     ActionModeHandler<Note> mActionModeHandler;
+    NoteList mNoteList;
 
     public NoteFragment() {
     }
 
-    public static NoteFragment newInstance(boolean shouldFetchNotes) {
+    public static NoteFragment newInstance() {
         NoteFragment fragment = new NoteFragment();
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(EXT_SHOULD_FETCH_NOTES, shouldFetchNotes);
-        fragment.setArguments(bundle);
         return fragment;
-    }
-
-    public void setSyncFinishListener(OnSyncFinishListener listener) {
-        mSyncFinishListener = listener;
     }
 
     @Override
@@ -111,41 +96,13 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         ButterKnife.bind(this, view);
         mNoteList = new NoteList(container.getContext(), view, this);
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                syncNotes();
-            }
-        });
         return view;
-    }
-
-    private void syncNotes() {
-        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
-            ToastUtils.showNetworkUnavailable(getActivity());
-            mSwipeRefresh.setRefreshing(false);
-            return;
-        }
-        NoteSyncService.startServiceForNote(getActivity());
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        EventBus.getDefault().register(this);
-        refreshNotes();
-        if (savedInstanceState == null) {
-            if (getArguments().getBoolean(EXT_SHOULD_FETCH_NOTES, false)) {
-                mSwipeRefresh.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        XLog.i(TAG + "fetch notes");
-                        mSwipeRefresh.setRefreshing(true);
-                        syncNotes();
-                    }
-                }, 200);
-            }
-        } else {
+        if (savedInstanceState != null) {
             mNoteList.setScrollPosition(savedInstanceState.getInt(EXT_SCROLL_POSITION, 0));
         }
         mActionModeHandler = new ActionModeHandler<>(getActivity(), this, R.menu.delete);
@@ -160,7 +117,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     @Override
     public void onResume() {
         super.onResume();
-        refreshNotes();
     }
 
     @Override
@@ -169,39 +125,8 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         EventBus.getDefault().unregister(this);
     }
 
-    public void loadRecentNotes() {
-        mCurrentMode = Mode.RECENT_NOTES;
-        refreshNotes();
-    }
-
-    public void loadFromNotebook(long notebookId) {
-        mCurrentMode = Mode.NOTEBOOK;
-        mCurrentMode.notebookId = notebookId;
-        refreshNotes();
-    }
-
-    public void loadFromTag(String tagText) {
-        mCurrentMode = Mode.TAG;
-        mCurrentMode.tagText = tagText;
-        refreshNotes();
-    }
-
-    public Mode getCurrentMode() {
-        return mCurrentMode;
-    }
-
-    public void refreshNotes() {
-        XLog.i(TAG + "refresh:" + mCurrentMode);
-        switch (mCurrentMode) {
-            case RECENT_NOTES:
-                mNotes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
-                break;
-            case NOTEBOOK:
-                mNotes = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), mCurrentMode.notebookId);
-                break;
-            case TAG:
-                mNotes = AppDataBase.getNotesByTagText(mCurrentMode.tagText, AccountService.getCurrent().getUserId());
-        }
+    public void setNotes(List<Note> notes) {
+        mNotes = notes;
         Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         mNoteList.render(mNotes);
     }
@@ -251,20 +176,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                 });
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(SyncEvent event) {
-        XLog.i(TAG + "RequestNotes rcv: isSucceed=" + event.isSucceed());
-        if (isAdded()) {
-            mSwipeRefresh.setRefreshing(false);
-            if (mSyncFinishListener != null) {
-                mSyncFinishListener.onSyncFinish(event);
-            }
-            refreshNotes();
-            if (!event.isSucceed()) {
-                ToastUtils.show(getActivity(), R.string.sync_notes_failed);
-            }
-        }
-    }
 
     @Override
     public boolean onAction(int actionId, List<Note> pendingItems) {
@@ -307,32 +218,4 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         }
     }
 
-    public interface OnSyncFinishListener {
-        void onSyncFinish(SyncEvent event);
-    }
-
-    public enum Mode {
-        RECENT_NOTES,
-        NOTEBOOK,
-        TAG;
-
-        long notebookId;
-        String tagText;
-
-        public void setNotebookId(long notebookId) {
-            this.notebookId = notebookId;
-        }
-
-        public void setTagText(String tagText) {
-            this.tagText = tagText;
-        }
-
-        @Override
-        public String toString() {
-            return name() + "{" +
-                    "notebookId=" + notebookId +
-                    ", tagText='" + tagText + '\'' +
-                    '}';
-        }
-    }
 }

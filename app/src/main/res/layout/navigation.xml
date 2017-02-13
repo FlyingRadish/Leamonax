@@ -24,16 +24,16 @@
             android:id="@+id/iv_other_account"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:scaleType="centerCrop"
             android:layout_alignParentEnd="true"
-            android:layout_alignTop="@id/iv_avatar"/>
+            android:layout_alignTop="@id/iv_avatar"
+            android:scaleType="centerCrop" />
 
         <LinearLayout
             android:id="@+id/ll_account_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_below="@id/iv_avatar"
+            android:layout_centerVertical="true"
             android:orientation="vertical">
 
             <TextView
@@ -59,8 +59,8 @@
             android:id="@+id/tr_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_alignBottom="@id/ll_account_info"
+            android:layout_alignParentEnd="true"
             android:padding="8dp" />
 
     </RelativeLayout>
@@ -71,14 +71,14 @@
         android:id="@+id/rv_account"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/rl_recent_notes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -135,19 +135,12 @@
             android:padding="8dp" />
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/rl_notebook_list"
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_notebook"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_notebook"
-            android:layout_width="240dp"
-            android:layout_height="match_parent" />
-
-    </RelativeLayout>
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/rl_tag"
@@ -187,7 +180,8 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_tag"
         android:layout_width="240dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <View
         android:layout_width="wrap_content"
@@ -200,8 +194,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -226,8 +220,8 @@
         android:id="@+id/rl_about"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
 
         <ImageView
             android:layout_width="wrap_content"
