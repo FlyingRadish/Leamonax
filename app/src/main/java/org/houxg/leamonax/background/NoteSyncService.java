@@ -5,7 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
+
+import com.elvishew.xlog.XLog;
 
 import org.greenrobot.eventbus.EventBus;
 import org.houxg.leamonax.model.SyncEvent;
@@ -22,11 +23,11 @@ import rx.schedulers.Schedulers;
  */
 public class NoteSyncService extends Service {
 
-    private static final String TAG = "NoteSyncService";
+    private static final String TAG = "NoteSyncService:";
 
     public static void startServiceForNote(Context context) {
         if (!AccountService.isSignedIn()) {
-            Log.w(TAG, "Trying to sync but not login");
+            XLog.w(TAG + "Trying to sync but not login");
             return;
         }
 

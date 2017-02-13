@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.elvishew.xlog.XLog;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.BuildConfig;
@@ -19,7 +20,6 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.edit.EditorFragment;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
-import org.houxg.leamonax.utils.AppLog;
 import org.houxg.leamonax.utils.DialogDisplayer;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
@@ -37,7 +37,7 @@ import rx.schedulers.Schedulers;
 
 public class NotePreviewActivity extends BaseActivity implements EditorFragment.EditorFragmentListener {
 
-    private static final String TAG = "NotePreviewActivity";
+    private static final String TAG = "NotePreviewActivity:";
     public static final String EXT_NOTE_LOCAL_ID = "ext_note_local_id";
     public static final int REQ_EDIT = 1;
 
@@ -102,7 +102,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                         .subscribe();
                 return true;
             case R.id.action_print:
-                AppLog.i(TAG, mNote.getContent());
+                XLog.i(TAG + mNote.getContent());
         }
         return super.onOptionsItemSelected(item);
     }

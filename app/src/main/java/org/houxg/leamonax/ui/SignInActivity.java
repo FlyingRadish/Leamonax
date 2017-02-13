@@ -37,7 +37,7 @@ import rx.schedulers.Schedulers;
 
 public class SignInActivity extends BaseActivity implements TextWatcher {
 
-    private static final String TAG = "SignInActivity";
+    private static final String TAG = "SignInActivity:";
 
     private static final String LEANOTE_HOST = "https://leanote.com";
     private static final String FIND_PASSWORD = "/findPassword";

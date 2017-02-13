@@ -11,10 +11,11 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.elvishew.xlog.XLog;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -44,7 +45,7 @@ import rx.schedulers.Schedulers;
 
 public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterListener {
 
-    private static final String TAG = "NoteFragment";
+    private static final String TAG = "NoteFragment:";
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
     private static final String EXT_SHOULD_FETCH_NOTES = "ext_should_fetch_notes";
 
@@ -113,6 +114,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     private void syncNotes() {
         if (!NetworkUtils.isNetworkAvailable(getActivity())) {
             ToastUtils.showNetworkUnavailable(getActivity());
+            mSwipeRefresh.setRefreshing(false);
             return;
         }
         NoteSyncService.startServiceForNote(getActivity());
@@ -128,7 +130,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                 mSwipeRefresh.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Log.i(TAG, "fetch notes");
+                        XLog.i(TAG + "fetch notes");
                         mSwipeRefresh.setRefreshing(true);
                         syncNotes();
                     }
@@ -181,7 +183,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     }
 
     private void refreshNotes() {
-        Log.i(TAG, "refresh:" + mCurrentMode);
+        XLog.i(TAG + "refresh:" + mCurrentMode);
         switch (mCurrentMode) {
             case RECENT_NOTES:
                 mNotes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
@@ -247,7 +249,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(SyncEvent event) {
-        Log.i(TAG, "RequestNotes rcv: isSucceed=" + event.isSucceed());
+        XLog.i(TAG + "RequestNotes rcv: isSucceed=" + event.isSucceed());
         if (isAdded()) {
             mSwipeRefresh.setRefreshing(false);
             if (mSyncFinishListener != null) {

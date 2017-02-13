@@ -14,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +26,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.elvishew.xlog.XLog;
 import com.yuyh.library.imgsel.ImgSelActivity;
 import com.yuyh.library.imgsel.ImgSelConfig;
 
@@ -55,7 +55,7 @@ import rx.schedulers.Schedulers;
 
 public class EditorFragment extends Fragment implements Editor.EditorListener {
 
-    private static final String TAG = "EditorFragment";
+    private static final String TAG = "EditorFragment:";
     private static final String ARG_IS_MARKDOWN = "arg_is_markdown";
     private static final String ARG_ENABLE_EDIT = "arg_enable_edit";
     protected static final int REQ_SELECT_IMAGE = 879;
@@ -217,7 +217,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
             DialogUtils.editLink(getActivity(), "", "", new DialogUtils.ChangedListener() {
                 @Override
                 public void onChanged(String title, String link) {
-                    Log.i(TAG, "title=" + title + ", url=" + link);
+                    XLog.i(TAG + "title=" + title + ", url=" + link);
                     mEditor.insertLink(title, link);
                 }
             });
@@ -314,7 +314,7 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
             List<String> pathList = data.getStringArrayListExtra(ImgSelActivity.INTENT_RESULT);
             if (CollectionUtils.isNotEmpty(pathList)) {
                 String path = pathList.get(0);
-                Log.i(TAG, "path=" + path);
+                XLog.i(TAG + "path=" + path);
                 //create ImageObject
                 Uri imageUri = mListener.createImage(path);
                 //insert to note

@@ -910,6 +910,11 @@ div.jGrowl div.jGrowl-closer {
 	overflow-y: visible; /*防止解析markdown时速度慢, 高度变少*/
 	overflow-x: hidden;
 }
+.preview-container, 
+#preview-contents, 
+.md-table {
+	overflow-x: auto; /*解决长表格无法滚动问题*/ 
+}
 .wmd-prompt-background {
 	display: none;
 }

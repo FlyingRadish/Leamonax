@@ -8,10 +8,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+
+import com.elvishew.xlog.XLog;
 
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
@@ -41,7 +42,7 @@ import rx.schedulers.Schedulers;
 //TODO: hide action bar
 public class NoteEditActivity extends BaseActivity implements EditorFragment.EditorFragmentListener, SettingFragment.SettingFragmentListener {
 
-    private static final String TAG = "NoteEditActivity";
+    private static final String TAG = "NoteEditActivity:";
     public static final String EXT_NOTE_LOCAL_ID = "ext_note_local_id";
     public static final String EXT_IS_NEW_NOTE = "ext_is_new_note";
     public static final String TAG_EDITOR = "tag_editor_tag";
@@ -174,10 +175,10 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                                 @Override
                                 public void call(Wrapper wrapper) {
                                     setResult(RESULT_OK);
-                                    Log.i(TAG, wrapper.toString());
+                                    XLog.i(TAG + wrapper.toString());
 
                                     if (mIsNewNote && isTitleContentEmpty(wrapper.note)) {
-                                        Log.i(TAG, "remove empty note, id=" + wrapper.note.getId());
+                                        XLog.i(TAG + "remove empty note, id=" + wrapper.note.getId());
                                         AppDataBase.deleteNoteByLocalId(wrapper.note.getId());
                                     } else {
                                         saveAsDraft(wrapper);
@@ -221,10 +222,10 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                         @Override
                         public void call(Wrapper wrapper) {
                             setResult(RESULT_OK);
-                            Log.i(TAG, wrapper.toString());
+                            XLog.i(TAG + wrapper.toString());
 
                             if (mIsNewNote && isTitleContentEmpty(wrapper.note)) {
-                                Log.i(TAG, "remove empty note, id=" + wrapper.note.getId());
+                                XLog.i(TAG + "remove empty note, id=" + wrapper.note.getId());
                                 AppDataBase.deleteNoteByLocalId(wrapper.note.getId());
                             } else {
                                 saveAsDraft(wrapper);
@@ -279,7 +280,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
 
     private void saveAsDraft(Wrapper wrapper) {
         Note modifiedNote = wrapper.note;
-        Log.i(TAG, "saveAsDraft(), local id=" + modifiedNote.getId());
+        XLog.i(TAG + "saveAsDraft(), local id=" + modifiedNote.getId());
         Note noteFromDb = AppDataBase.getNoteByLocalId(modifiedNote.getId());
         noteFromDb.setContent(modifiedNote.getContent());
         noteFromDb.setTitle(modifiedNote.getTitle());

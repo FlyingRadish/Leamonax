@@ -1,7 +1,7 @@
 package org.houxg.leamonax.service;
 
 
-import android.util.Log;
+import com.elvishew.xlog.XLog;
 
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
@@ -11,7 +11,7 @@ import org.houxg.leamonax.utils.RetrofitUtils;
 
 public class NotebookService {
 
-    private static final String TAG = "NotebookService";
+    private static final String TAG = "NotebookService:";
 
     public static void addNotebook(String title, String parentNotebookId) {
         Notebook notebook = RetrofitUtils.excute(ApiProvider.getInstance().getNotebookApi().addNotebook(title, parentNotebookId));
@@ -21,7 +21,7 @@ public class NotebookService {
         if (notebook.isOk()) {
             Account account = AccountService.getCurrent();
             if (notebook.getUsn() - account.getNotebookUsn() == 1) {
-                Log.d(TAG, "update usn=" + notebook.getUsn());
+                XLog.d(TAG + "update usn=" + notebook.getUsn());
                 account.setNotebookUsn(notebook.getUsn());
                 account.save();
             }

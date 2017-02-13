@@ -4,9 +4,9 @@ package org.houxg.leamonax.service;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.elvishew.xlog.XLog;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.bson.types.ObjectId;
@@ -41,7 +41,7 @@ import rx.Subscriber;
 
 public class NoteService {
 
-    private static final String TAG = "NoteService";
+    private static final String TAG = "NoteService:";
     private static final String TRUE = "1";
     private static final String FALSE = "0";
     private static final String MULTIPART_FORM_DATA = "multipart/form-data";
@@ -56,17 +56,13 @@ public class NoteService {
             for (Notebook remoteNotebook : notebooks) {
                 Notebook localNotebook = AppDataBase.getNotebookByServerId(remoteNotebook.getNotebookId());
                 if (localNotebook == null) {
-                    Log.i(TAG, "notebook insert, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
+                    XLog.i(TAG + "notebook insert, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
                     remoteNotebook.insert();
                 } else {
-                    if (localNotebook.isDirty()) {
-                        Log.w(TAG, "notebook conflict, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
-                    } else {
-                        Log.i(TAG, "notebook update, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
-                        remoteNotebook.setId(localNotebook.getId());
-                        remoteNotebook.setIsDirty(false);
-                        remoteNotebook.update();
-                    }
+                    XLog.i(TAG + "notebook update, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
+                    remoteNotebook.setId(localNotebook.getId());
+                    remoteNotebook.setIsDirty(false);
+                    remoteNotebook.update();
                 }
                 notebookUsn = remoteNotebook.getUsn();
                 Account account = AccountService.getCurrent();
@@ -92,16 +88,20 @@ public class NoteService {
                 if (localNote == null) {
                     localId = remoteNote.insert();
                     remoteNote.setId(localId);
-                    Log.i(TAG, "note insert, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId() + ", local=" + localId);
+                    XLog.i(TAG + "note insert, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId() + ", local=" + localId);
                 } else {
+                    long id = localNote.getId();
                     if (localNote.isDirty()) {
-                        Log.w(TAG, "note conflict, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
-                        continue;
-                    } else {
-                        Log.i(TAG, "note update, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
-                        remoteNote.setId(localNote.getId());
-                        localId = localNote.getId();
+                        XLog.w(TAG + "note conflict, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
+                        //save local version as a local note
+                        localNote.setId(null);
+                        localNote.setTitle(localNote.getTitle() + "--conflict");
+                        localNote.setNoteId("");
+                        localNote.insert();
                     }
+                    XLog.i(TAG + "note update, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
+                    remoteNote.setId(id);
+                    localId = localNote.getId();
                 }
                 remoteNote.setIsDirty(false);
                 if (remoteNote.isMarkDown()) {
@@ -109,7 +109,7 @@ public class NoteService {
                 } else {
                     remoteNote.setContent(convertToLocalImageLinkForRichText(localId, remoteNote.getContent()));
                 }
-                Log.i(TAG, "content=" + remoteNote.getContent());
+                XLog.i(TAG + "content=" + remoteNote.getContent());
                 remoteNote.update();
                 handleFile(localId, remoteNote.getNoteFiles());
                 updateTagsToLocal(localId, remoteNote.getTagData());
@@ -127,7 +127,7 @@ public class NoteService {
         if (CollectionUtils.isEmpty(remoteFiles)) {
             return;
         }
-        Log.i(TAG, "file size=" + remoteFiles.size());
+        XLog.i(TAG + "file size=" + remoteFiles.size());
         List<String> excepts = new ArrayList<>();
         for (NoteFile remote : remoteFiles) {
             NoteFile local;
@@ -137,10 +137,10 @@ public class NoteService {
                 local = AppDataBase.getNoteFileByLocalId(remote.getLocalId());
             }
             if (local != null) {
-                Log.i(TAG, "has local file, id=" + remote.getServerId());
+                XLog.i(TAG + "has local file, id=" + remote.getServerId());
                 local.setServerId(remote.getServerId());
             } else {
-                Log.i(TAG, "need to insert, id=" + remote.getServerId());
+                XLog.i(TAG + "need to insert, id=" + remote.getServerId());
                 local = new NoteFile();
                 local.setLocalId(new ObjectId().toString());
             }
@@ -159,7 +159,7 @@ public class NoteService {
                 new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
-                        Log.i(TAG, "in=" + original);
+                        XLog.i(TAG + "in=" + original);
                         Uri linkUri = Uri.parse(original.substring(6, original.length() - 1));
                         String serverId = linkUri.getQueryParameter("fileId");
                         NoteFile noteFile = AppDataBase.getNoteFileByServerId(serverId);
@@ -172,7 +172,7 @@ public class NoteService {
                         }
                         String localId = noteFile.getLocalId();
                         String result = String.format(Locale.US, " src=\"%s\"", NoteFileService.getLocalImageUri(localId).toString());
-                        Log.i(TAG, "out=" + result);
+                        XLog.i(TAG + "out=" + result);
                         return result;
                     }
                 }, noteLocalId);
@@ -501,7 +501,7 @@ public class NoteService {
         try {
             tempFile = new File(noteFile.getLocalPath());
             if (!tempFile.isFile()) {
-                Log.w(TAG, "not a file");
+                XLog.w(TAG + "not a file");
                 return null;
             }
         } catch (Exception e) {

@@ -1,9 +1,9 @@
 package org.houxg.leamonax.editor;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 
+import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class TinnyMceCallback {
 
-    private static final String TAG = "TinnyMceCallback";
+    private static final String TAG = "TinnyMceCallback:";
 
     private TinnyMceListener mListener;
     private Gson mGson = new Gson();
@@ -45,7 +45,7 @@ public class TinnyMceCallback {
 
     @JavascriptInterface
     public void onCursorChanged(String data) {
-        Log.i(TAG, data);
+        XLog.i(TAG + data);
         if (mListener == null) {
             return;
         }
