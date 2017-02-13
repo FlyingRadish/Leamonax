@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +39,7 @@ import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
+import org.houxg.leamonax.widget.TriangleView;
 
 import java.util.List;
 
@@ -72,19 +72,19 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     ImageView mAvatarIv;
     @BindView(R.id.tv_user_name)
     TextView mUserNameTv;
-    @BindView(R.id.iv_notebook_triangle)
-    View mNotebookTriangle;
+    @BindView(R.id.tr_notebook)
+    TriangleView mNotebookTr;
     @BindView(R.id.rl_notebook_list)
     View mNotebookPanel;
     @BindView(R.id.rv_tag)
     RecyclerView mTagRv;
-    @BindView(R.id.iv_tag_triangle)
-    View mTagTriangle;
+    @BindView(R.id.tr_tag)
+    TriangleView mTagTr;
     @BindView(R.id.iv_other_account)
     ImageView mOtherAccountIv;
 
     @BindView(R.id.tr_account)
-    View mAccountTr;
+    TriangleView mAccountTr;
     @BindView(R.id.rv_account)
     RecyclerView mAccountRv;
     List<Account> accounts;
@@ -153,7 +153,12 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         });
         accountAdapter.load(AccountService.getAccountList());
         mAccountRv.setAdapter(accountAdapter);
-        mAccountTr.setTag(false);
+        mAccountTr.setOnToggleListener(new TriangleView.OnToggleListener() {
+            @Override
+            public void onToggle(boolean isChecked) {
+                mAccountRv.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     private void initTagPanel() {
@@ -161,7 +166,12 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         TagAdapter tagAdapter = new TagAdapter();
         tagAdapter.setListener(this);
         mTagRv.setAdapter(tagAdapter);
-        mTagTriangle.setTag(false);
+        mTagTr.setOnToggleListener(new TriangleView.OnToggleListener() {
+            @Override
+            public void onToggle(boolean isChecked) {
+                ((TagAdapter) mTagRv.getAdapter()).toggle();
+            }
+        });
     }
 
     private void initNotebookPanel() {
@@ -170,7 +180,12 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         mNotebookAdapter.setListener(this);
         mNotebookRv.setAdapter(mNotebookAdapter);
         mNotebookAdapter.refresh();
-        mNotebookTriangle.setTag(false);
+        mNotebookTr.setOnToggleListener(new TriangleView.OnToggleListener() {
+            @Override
+            public void onToggle(boolean isChecked) {
+                mNotebookPanel.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     @Override
@@ -334,49 +349,6 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     void clickedSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
-    }
-
-    @OnClick(R.id.rl_notebook)
-    void toggleNotebook() {
-        boolean shouldShowNotebook = (boolean) mNotebookTriangle.getTag();
-        shouldShowNotebook = !shouldShowNotebook;
-        animateTriangle(mNotebookTriangle, shouldShowNotebook);
-        mNotebookPanel.setVisibility(shouldShowNotebook ? View.VISIBLE : View.GONE);
-        mNotebookTriangle.setTag(shouldShowNotebook);
-    }
-
-    @OnClick(R.id.tr_account)
-    void toggleAccount() {
-        boolean shouldShowAccount = (boolean) mAccountTr.getTag();
-        shouldShowAccount = !shouldShowAccount;
-        animateTriangle(mAccountTr, shouldShowAccount);
-        mAccountRv.setVisibility(shouldShowAccount ? View.VISIBLE : View.GONE);
-        mAccountTr.setTag(shouldShowAccount);
-    }
-
-    @OnClick(R.id.rl_tag)
-    void toggleTag() {
-        boolean shouldShowTag = (boolean) mTagTriangle.getTag();
-        shouldShowTag = !shouldShowTag;
-        animateTriangle(mTagTriangle, shouldShowTag);
-        ((TagAdapter) mTagRv.getAdapter()).toggle();
-        mTagTriangle.setTag(shouldShowTag);
-    }
-
-    private void animateTriangle(View triangle, boolean isOpen) {
-        if (isOpen) {
-            triangle.animate()
-                    .rotation(-180)
-                    .setDuration(200)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .start();
-        } else {
-            triangle.animate()
-                    .rotation(0)
-                    .setDuration(200)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .start();
-        }
     }
 
     @Override

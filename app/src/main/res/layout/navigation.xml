@@ -55,6 +55,14 @@
 
         </LinearLayout>
 
+        <org.houxg.leamonax.widget.TriangleView
+            android:id="@+id/tr_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBottom="@id/ll_account_info"
+            android:padding="8dp" />
+
     </RelativeLayout>
 
     <include layout="@layout/divider" />
@@ -118,14 +126,13 @@
             android:textColor="@color/hint_text_light"
             android:textSize="14sp" />
 
-        <ImageView
-            android:id="@+id/iv_notebook_triangle"
+        <org.houxg.leamonax.widget.TriangleView
+            android:id="@+id/tr_notebook"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:src="@drawable/ic_triangle" />
+            android:padding="8dp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -168,14 +175,13 @@
             android:textColor="@color/hint_text_light"
             android:textSize="14sp" />
 
-        <ImageView
-            android:id="@+id/iv_tag_triangle"
+        <org.houxg.leamonax.widget.TriangleView
+            android:id="@+id/tr_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:src="@drawable/ic_triangle" />
+            android:padding="8dp" />
     </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView
