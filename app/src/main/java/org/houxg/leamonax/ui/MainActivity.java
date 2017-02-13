@@ -104,7 +104,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
     }
 
     private void syncNotes() {
-        if (!NetworkUtils.isNetworkAvailable(MainActivity.this)) {
+        if (!NetworkUtils.isNetworkAvailable()) {
             ToastUtils.showNetworkUnavailable(MainActivity.this);
             mSwipeRefresh.setRefreshing(false);
             return;
