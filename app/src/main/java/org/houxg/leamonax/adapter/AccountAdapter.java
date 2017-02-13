@@ -76,7 +76,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountH
                 @Override
                 public void onClick(View v) {
                     if (mListener != null ) {
-                        mListener.onClickAccount(account);
+                        mListener.onClickAccount(v, account);
                     }
                 }
             });
@@ -118,7 +118,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountH
     }
 
     public interface AccountAdapterListener {
-        void onClickAccount(Account note);
+        void onClickAccount(View itemView, Account note);
 
         void onClickAddAccount();
     }

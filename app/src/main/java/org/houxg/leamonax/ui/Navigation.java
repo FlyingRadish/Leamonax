@@ -1,22 +1,31 @@
 package org.houxg.leamonax.ui;
 
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.elvishew.xlog.XLog;
 
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.AccountAdapter;
@@ -28,6 +37,7 @@ import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
+import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.widget.TriangleView;
 
 import butterknife.BindView;
@@ -47,6 +57,8 @@ public class Navigation {
     @BindView(R.id.drawer)
     DrawerLayout mDrawerLayout;
 
+    @BindView(R.id.rl_info)
+    View mInfoPanel;
     @BindView(R.id.tv_email)
     TextView mEmailTv;
     @BindView(R.id.iv_avatar)
@@ -67,6 +79,8 @@ public class Navigation {
     RecyclerView mTagRv;
     @BindView(R.id.tr_tag)
     TriangleView mTagTr;
+
+    Drawable mAccountRipple;
 
     private Callback mCallback;
     private Activity mActivity;
@@ -107,24 +121,20 @@ public class Navigation {
                     @Override
                     public void onNext(User user) {
                         AccountService.saveToAccount(user, AccountService.getCurrent().getHost());
-                        refreshUserInfo();
+                        refreshUserInfo(AccountService.getCurrent());
                     }
                 });
     }
 
     private void initAccountPanel() {
+        mAccountRipple = mInfoPanel.getBackground();
+        mAccountRipple.mutate();
+        mInfoPanel.setBackground(null);
         mAccountRv.setLayoutManager(new LinearLayoutManager(mActivity));
         mAccountAdapter = new AccountAdapter(new AccountAdapter.AccountAdapterListener() {
             @Override
-            public void onClickAccount(Account account) {
-                if (mCallback != null) {
-                    if (mCallback.onChangeAccount(account)) {
-                        mAccountTr.setChecked(false);
-                        mTagTr.setChecked(false);
-                        mNotebookTr.setChecked(false);
-                        close();
-                    }
-                }
+            public void onClickAccount(View v, final Account account) {
+                animateChangeAccount(v, account);
             }
 
             @Override
@@ -132,15 +142,104 @@ public class Navigation {
                 Intent intent = new Intent(mActivity, SignInActivity.class);
                 mActivity.startActivityForResult(intent, REQ_ADD_ACCOUNT);
             }
-        });
+        }
+
+        );
         mAccountRv.setAdapter(mAccountAdapter);
-        mAccountTr.setOnToggleListener(new TriangleView.OnToggleListener() {
-            @Override
-            public void onToggle(boolean isChecked) {
-                mAccountRv.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-            }
-        });
+        mAccountTr.setOnToggleListener(
+                new TriangleView.OnToggleListener() {
+                    @Override
+                    public void onToggle(boolean isChecked) {
+                        mAccountRv.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                    }
+                }
+        );
         mAccountAdapter.load(AccountService.getAccountList());
+    }
+
+    private void animateChangeAccount(View v, final Account account) {
+        ImageView itemAvatar = (ImageView) v.findViewById(R.id.iv_avatar);
+        final ViewGroup rootView = (ViewGroup) mActivity.getWindow().getDecorView().getRootView();
+
+        float preSize = DisplayUtils.dp2px(30);
+        float postSize = DisplayUtils.dp2px(40);
+        int[] position = new int[2];
+        itemAvatar.getLocationInWindow(position);
+        int preLeft = position[0];
+        int preTop = position[1];
+        mAvatarIv.getLocationInWindow(position);
+        int postLeft = position[0];
+        int postTop = position[1];
+
+        final ImageView animateView = new ImageView(mActivity);
+        Drawable drawable = itemAvatar.getDrawable();
+        drawable.mutate();
+        animateView.setImageDrawable(drawable);
+        animateView.setLayoutParams(new ViewGroup.LayoutParams((int) preSize, (int) preSize));
+        animateView.setX(preLeft);
+        animateView.setY(preTop);
+        animateView.setPivotX(0);
+        animateView.setPivotY(0);
+        animateView.setAlpha(0.7f);
+        rootView.addView(animateView);
+
+        animateView.animate()
+                .scaleX(postSize / preSize)
+                .scaleY(postSize / preSize)
+                .translationX(postLeft)
+                .translationY(postTop)
+                .setDuration(350)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setListener(new Animator.AnimatorListener() {
+                                 @Override
+                                 public void onAnimationStart(Animator animation) {
+
+                                 }
+
+                                 @Override
+                                 public void onAnimationEnd(Animator animation) {
+                                     //trigger quick ripple effect
+                                     mInfoPanel.setBackground(mAccountRipple);
+                                     mAccountRipple.setHotspot(mAvatarIv.getLeft() + mAvatarIv.getWidth() / 2, mAvatarIv.getTop() + mAvatarIv.getHeight() / 2);
+                                     mAccountRipple.setHotspotBounds(0, 0, mInfoPanel.getWidth(), mInfoPanel.getHeight());
+                                     mInfoPanel.setPressed(true);
+                                     mInfoPanel.setPressed(false);
+
+                                     refreshUserInfo(account);
+                                     rootView.removeView(animateView);
+                                     mInfoPanel.postDelayed(new Runnable() {
+                                         @Override
+                                         public void run() {
+                                             mInfoPanel.setBackground(null);
+                                             changeAccount(account);
+                                         }
+                                     }, 200);
+                                 }
+
+                                 @Override
+                                 public void onAnimationCancel(Animator animation) {
+
+                                 }
+
+                                 @Override
+                                 public void onAnimationRepeat(Animator animation) {
+
+                                 }
+                             }
+
+                )
+                .start();
+    }
+
+    private void changeAccount(Account account) {
+        if (mCallback != null) {
+            if (mCallback.onChangeAccount(account)) {
+                mAccountTr.setChecked(false);
+                mTagTr.setChecked(false);
+                mNotebookTr.setChecked(false);
+                close();
+            }
+        }
     }
 
     private void initTagPanel() {
@@ -240,8 +339,7 @@ public class Navigation {
                 });
     }
 
-    private void refreshUserInfo() {
-        Account account = AccountService.getCurrent();
+    private void refreshUserInfo(Account account) {
         mUserNameTv.setText(account.getUserName());
         mEmailTv.setText(account.getEmail());
         if (!TextUtils.isEmpty(account.getAvatar())) {
@@ -254,14 +352,14 @@ public class Navigation {
     }
 
     public void refresh() {
-        refreshUserInfo();
+        refreshUserInfo(AccountService.getCurrent());
         mAccountAdapter.load(AccountService.getAccountList());
         mTagAdapter.refresh();
         mNotebookAdapter.refresh();
         if (mCurrentMode == Mode.NOTEBOOK && TextUtils.isEmpty(mNotebookAdapter.getCurrentParentId())) {
             mCurrentMode = Mode.RECENT_NOTES;
         }
-        if (mCallback!= null) {
+        if (mCallback != null) {
             if (mCallback.onShowNotes(mCurrentMode)) {
                 close();
             }
@@ -300,8 +398,8 @@ public class Navigation {
         if (requestCode == REQ_ADD_ACCOUNT) {
             if (resultCode == RESULT_OK) {
                 Account account = AccountService.getAccountById(SignInActivity.getAccountIdFromData(data));
-                if (account != null && mCallback != null) {
-                    mCallback.onChangeAccount(account);
+                if (account != null) {
+                    changeAccount(account);
                 }
             }
             return true;
@@ -326,6 +424,11 @@ public class Navigation {
         }
     }
 
+    @OnClick(R.id.iv_avatar)
+    void clickedAvatar() {
+        mAccountTr.toggle();
+    }
+
     @OnClick(R.id.rl_about)
     void clickedAbout() {
         if (mCallback != null) {
@@ -347,7 +450,6 @@ public class Navigation {
         boolean onChangeAccount(Account account);
 
         /**
-         *
          * @param mode
          * @return true if processed
          */
