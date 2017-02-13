@@ -4,6 +4,7 @@ package org.houxg.leamonax;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.TextUtils;
 
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
@@ -31,7 +32,9 @@ public class Leamonax extends Application {
         super.onCreate();
         mContext = this;
         XLog.init(BuildConfig.DEBUG ? LogLevel.ALL : LogLevel.NONE);
-        initBugly();
+        if (!TextUtils.isEmpty(BuildConfig.BUGLY_KEY)) {
+            initBugly();
+        }
 
         EventBus.builder()
                 .logNoSubscriberMessages(false)
@@ -39,8 +42,10 @@ public class Leamonax extends Application {
                 .throwSubscriberException(true)
                 .installDefaultEventBus();
         FlowManager.init(new FlowConfig.Builder(this).build());
-        Stetho.initializeWithDefaults(this);
         JodaTimeAndroid.init(this);
+        if (BuildConfig.DEBUG) {
+            Stetho.initializeWithDefaults(this);
+        }
     }
 
     private void initBugly() {
