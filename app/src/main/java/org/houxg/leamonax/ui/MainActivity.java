@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,6 +27,7 @@ import com.bumptech.glide.Glide;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.adapter.AccountAdapter;
 import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.adapter.TagAdapter;
 import org.houxg.leamonax.database.AppDataBase;
@@ -40,6 +40,8 @@ import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,6 +57,7 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
 
     private static final String EXT_SHOULD_RELOAD = "ext_should_reload";
     private static final String TAG_NOTE_FRAGMENT = "tag_note_fragment";
+    public static final int REQ_ADD_ACCOUNT = 55;
 
     NoteFragment mNoteFragment;
     NotebookAdapter mNotebookAdapter;
@@ -77,6 +80,14 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     RecyclerView mTagRv;
     @BindView(R.id.iv_tag_triangle)
     View mTagTriangle;
+    @BindView(R.id.iv_other_account)
+    ImageView mOtherAccountIv;
+
+    @BindView(R.id.tr_account)
+    View mAccountTr;
+    @BindView(R.id.rv_account)
+    RecyclerView mAccountRv;
+    List<Account> accounts;
 
     public static Intent getOpenIntent(Context context, boolean shouldReload) {
         Intent intent = new Intent(context, MainActivity.class);
@@ -103,9 +114,46 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         mEmailTv.setText(AccountService.getCurrent().getEmail());
         initNotebookPanel();
         initTagPanel();
-
-        refreshInfo();
+        initAccountPanel();
+        refreshNavigation();
         fetchInfo();
+    }
+
+    private void useAccount(Account account) {
+        account.updateLastUseTime();
+        account.update();
+        refreshNavigation();
+        mNoteFragment.refreshNotes();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_ADD_ACCOUNT && resultCode == RESULT_OK) {
+            Account account = AccountService.getAccountById(SignInActivity.getAccountIdFromData(data));
+            if (account != null) {
+                useAccount(account);
+            }
+        }
+    }
+
+    private void initAccountPanel() {
+        mAccountRv.setLayoutManager(new LinearLayoutManager(this));
+        AccountAdapter accountAdapter = new AccountAdapter(new AccountAdapter.AccountAdapterListener() {
+            @Override
+            public void onClickAccount(Account account) {
+                useAccount(account);
+            }
+
+            @Override
+            public void onClickAddAccount() {
+                Intent intent = new Intent(MainActivity.this, SignInActivity.class);
+                startActivityForResult(intent, REQ_ADD_ACCOUNT);
+            }
+        });
+        accountAdapter.load(AccountService.getAccountList());
+        mAccountRv.setAdapter(accountAdapter);
+        mAccountTr.setTag(false);
     }
 
     private void initTagPanel() {
@@ -129,6 +177,8 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
     protected void onResume() {
         super.onResume();
         refreshNotebookAndNotes();
+        refreshNavigation();
+        ((AccountAdapter) mAccountRv.getAdapter()).load(AccountService.getAccountList());
     }
 
     @Override
@@ -180,12 +230,12 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
                     @Override
                     public void onNext(User user) {
                         AccountService.saveToAccount(user, AccountService.getCurrent().getHost());
-                        refreshInfo();
+                        refreshNavigation();
                     }
                 });
     }
 
-    private void refreshInfo() {
+    private void refreshNavigation() {
         Account account = AccountService.getCurrent();
         mUserNameTv.setText(account.getUserName());
         mEmailTv.setText(account.getEmail());
@@ -293,6 +343,15 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
         animateTriangle(mNotebookTriangle, shouldShowNotebook);
         mNotebookPanel.setVisibility(shouldShowNotebook ? View.VISIBLE : View.GONE);
         mNotebookTriangle.setTag(shouldShowNotebook);
+    }
+
+    @OnClick(R.id.tr_account)
+    void toggleAccount() {
+        boolean shouldShowAccount = (boolean) mAccountTr.getTag();
+        shouldShowAccount = !shouldShowAccount;
+        animateTriangle(mAccountTr, shouldShowAccount);
+        mAccountRv.setVisibility(shouldShowAccount ? View.VISIBLE : View.GONE);
+        mAccountTr.setTag(shouldShowAccount);
     }
 
     @OnClick(R.id.rl_tag)

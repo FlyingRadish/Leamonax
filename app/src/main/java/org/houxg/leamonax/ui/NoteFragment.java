@@ -190,7 +190,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         return mCurrentMode;
     }
 
-    private void refreshNotes() {
+    public void refreshNotes() {
         XLog.i(TAG + "refresh:" + mCurrentMode);
         switch (mCurrentMode) {
             case RECENT_NOTES:
