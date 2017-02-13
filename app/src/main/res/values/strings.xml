@@ -100,5 +100,11 @@
     <string name="view_type">View type</string>
     <string name="delete">Delete</string>
     <string name="no_note_was_selected">No note was selected</string>
+    <string name="add_account">Add account</string>
+    <string name="leanote">Leanote</string>
+    <string name="https_material_io_icons">https://material.io/icons/</string>
+    <string name="gnu_general_public_license_v3">GNU GENERAL PUBLIC LICENSE V3</string>
+    <string name="github">Github</string>
+    <string name="generate_random_note">Generate random note</string>
 
 </resources>
