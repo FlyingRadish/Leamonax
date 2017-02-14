@@ -157,6 +157,11 @@ public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceL
     }
 
     @Override
+    public void onClickedImage(String url) {
+        mListener.onClickedImage(url);
+    }
+
+    @Override
     public void onCursorChanged(Map<Format, Object> enabledFormats) {
         mListener.onCursorChanged(enabledFormats);
     }

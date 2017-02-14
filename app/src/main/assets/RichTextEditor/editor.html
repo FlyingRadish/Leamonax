@@ -188,6 +188,10 @@
             var title = target.innerHTML;
             e.preventDefault();
             nativeCallbackHandler.linkTo(link);
+        } else if (target.tagName === 'IMG') {
+            var src = target.getAttribute('src');
+            e.preventDefault();
+            nativeCallbackHandler.onClickedImage(src);
         }
     }
 

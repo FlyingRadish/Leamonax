@@ -34,11 +34,14 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.editor.Editor;
 import org.houxg.leamonax.editor.MarkdownEditor;
 import org.houxg.leamonax.editor.RichTextEditor;
+import org.houxg.leamonax.service.NoteFileService;
+import org.houxg.leamonax.ui.PictureViewerActivity;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.DialogUtils;
 import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.widget.ToggleImageButton;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -457,6 +460,14 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
     @Override
     public void linkTo(String url) {
         OpenUtils.openUrl(getActivity(), url);
+    }
+
+    @Override
+    public void onClickedImage(String url) {
+        String path = NoteFileService.getImagePath(Uri.parse(url));
+        if (!TextUtils.isEmpty(path)) {
+            startActivity(PictureViewerActivity.getOpenIntent(getActivity(), path));
+        }
     }
 
     private void refreshFormatStatus(Map<Editor.Format, Object> formatStatus) {

@@ -16,4 +16,5 @@
     <color name="navigation">#F5F5F5</color>
     <color name="transparent">#00000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="black">#000</color>
 </resources>

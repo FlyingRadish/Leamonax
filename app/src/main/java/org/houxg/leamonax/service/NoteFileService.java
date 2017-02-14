@@ -58,6 +58,20 @@ public class NoteFileService {
         return SCHEME.equals(uri.getScheme()) && IMAGE_PATH_WITH_SLASH.equals(uri.getPath());
     }
 
+    public static String getImagePath(Uri uri) {
+        String localId = uri.getQueryParameter("id");
+        NoteFile noteFile = AppDataBase.getNoteFileByLocalId(localId);
+        if (noteFile == null) {
+            return null;
+        }
+        if (!TextUtils.isEmpty(noteFile.getLocalPath())) {
+            File file = new File(noteFile.getLocalPath());
+            return file.isFile() ? noteFile.getLocalPath() : null;
+        } else {
+            return null;
+        }
+    }
+
     public static InputStream getImage(String localId) {
         NoteFile noteFile = AppDataBase.getNoteFileByLocalId(localId);
         if (noteFile == null) {
