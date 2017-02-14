@@ -206,8 +206,10 @@ public class AppDataBase {
         if (CollectionUtils.isNotEmpty(recentNotes)) {
             for (Note note : recentNotes) {
                 Notebook notebook = getNotebookByServerId(note.getNoteBookId());
-                if (!notebook.isDeleted()) {
-                    return notebook;
+                if (notebook != null) {
+                   if (!notebook.isDeleted()) {
+                       return notebook;
+                   }
                 }
             }
         }
