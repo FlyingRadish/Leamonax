@@ -24,11 +24,7 @@ This is a third party Android client for Leanote.
 - [x] Search by note's title
 
 # TODO
-- [x] Chinese language support
-- [ ] Quick note
-- [x] Integration of tinnyMCE
 - [ ] Searching for full-text fields
-- [ ] Import html file
 
 # Contributors
 - [xingstarx](https://github.com/xingstarx)
