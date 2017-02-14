@@ -41,6 +41,7 @@ import butterknife.ButterKnife;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
 
+    public static final int TYPE_DETAIL_PLACEHOLDER = 233;
 
     private List<Note> mData;
     private Map<String, String> mNotebookId2TitleMaps;
@@ -48,6 +49,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
     private Pattern mTitleHighlight;
     private int mCurrentType = NoteList.TYPE_SIMPLE;
     private List<Long> mSelectedNotes = new ArrayList<>();
+    private boolean isScrolling = false;
 
     public NoteAdapter(NoteAdapterListener listener) {
         mListener = listener;
@@ -65,6 +67,10 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         } else {
             mTitleHighlight = Pattern.compile(titleKeyWord, Pattern.CASE_INSENSITIVE);
         }
+    }
+
+    public void setScrolling(boolean scrolling) {
+        isScrolling = scrolling;
     }
 
     public void setType(int type) {
@@ -88,12 +94,15 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
 
     @Override
     public NoteAdapter.NoteHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = null;
+        int layoutId = -1;
         if (viewType == NoteList.TYPE_SIMPLE) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_note_simple, parent, false);
+            layoutId = R.layout.item_note_simple;
         } else if (viewType == NoteList.TYPE_DETAIL) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_note, parent, false);
+            layoutId = R.layout.item_note;
+        } else  if (viewType == TYPE_DETAIL_PLACEHOLDER) {
+            layoutId = R.layout.item_note_detail_placeholder;
         }
+        View view = LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false);
         return new NoteHolder(view);
     }
 
@@ -107,65 +116,29 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return mCurrentType;
+        if (isScrolling && mCurrentType == NoteList.TYPE_DETAIL) {
+            return TYPE_DETAIL_PLACEHOLDER;
+        } else {
+            return mCurrentType;
+        }
     }
 
     @Override
     public void onBindViewHolder(NoteAdapter.NoteHolder holder, int position) {
         final Note note = mData.get(position);
-        if (getItemViewType(position) == NoteList.TYPE_DETAIL) {
-            renderDetail(holder, note);
-        } else {
-            renderSimple(holder, note);
-        }
-        holder.container.setSelected(mSelectedNotes.contains(note.getId()));
-    }
-
-    private void renderDetail(NoteHolder holder, final Note note) {
-        List<NoteFile> noteFiles = NoteFileService.getRelatedNoteFiles(note.getId());
-        holder.imageView.setImageDrawable(null);
-        for (NoteFile noteFile : noteFiles) {
-            if (TextUtils.isEmpty(noteFile.getLocalPath())) {
-                continue;
-            }
-            File file = new File(noteFile.getLocalPath());
-            if (FileUtils.isImageFile(file)) {
-                Glide.with(holder.container.getContext())
-                        .load(file)
-                        .fitCenter()
-                        .into(holder.imageView);
+        int type = getItemViewType(position);
+        switch (type) {
+            case NoteList.TYPE_DETAIL:
+            case TYPE_DETAIL_PLACEHOLDER:
+                renderDetailMeta(holder, note);
+                if (type == NoteList.TYPE_DETAIL) {
+                    renderDetailContent(holder, note);
+                }
                 break;
-            }
+            case NoteList.TYPE_SIMPLE:
+                renderSimple(holder, note);
+                break;
         }
-        if (TextUtils.isEmpty(note.getTitle())) {
-            holder.titleTv.setText(R.string.untitled);
-        } else {
-            holder.titleTv.setText(getHighlightedText(note.getTitle()));
-        }
-        if (note.isMarkDown()) {
-            holder.contentTv.setText(note.getContent());
-        } else {
-            Spanned spannedContent = Html.fromHtml(note.getContent());
-            String contentStr = spannedContent.toString();
-            contentStr = contentStr.replaceAll("\\n\\n+", "\n");
-            holder.contentTv.setText(contentStr);
-        }
-
-        holder.notebookTv.setText(mNotebookId2TitleMaps.get(note.getNoteBookId()));
-        long updateTime = note.getUpdatedTimeVal();
-        Context context = holder.updateTimeTv.getContext();
-        String time;
-        if (updateTime >= TimeUtils.getToday().getTimeInMillis()) {
-            time = TimeUtils.toTimeFormat(updateTime);
-        } else if (updateTime >= TimeUtils.getYesterday().getTimeInMillis()) {
-            time = context.getString(R.string.time_yesterday, TimeUtils.toTimeFormat(updateTime));
-        } else if (updateTime >= TimeUtils.getThisYear().getTimeInMillis()) {
-            time = TimeUtils.toDateFormat(updateTime);
-        } else {
-            time = TimeUtils.toYearFormat(updateTime);
-        }
-        holder.updateTimeTv.setText(time);
-        holder.dirtyTv.setVisibility(note.isDirty() ? View.VISIBLE : View.GONE);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -183,6 +156,59 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
                 return true;
             }
         });
+        holder.container.setSelected(mSelectedNotes.contains(note.getId()));
+    }
+
+    private void renderDetailMeta(NoteHolder holder, final Note note) {
+        if (holder.imageView != null) {
+            holder.imageView.setImageDrawable(null);
+        }
+        if (TextUtils.isEmpty(note.getTitle())) {
+            holder.titleTv.setText(R.string.untitled);
+        } else {
+            holder.titleTv.setText(getHighlightedText(note.getTitle()));
+        }
+
+        holder.notebookTv.setText(mNotebookId2TitleMaps.get(note.getNoteBookId()));
+        long updateTime = note.getUpdatedTimeVal();
+        String time;
+        if (updateTime >= TimeUtils.getToday().getTimeInMillis()) {
+            time = TimeUtils.toTimeFormat(updateTime);
+        } else if (updateTime >= TimeUtils.getYesterday().getTimeInMillis()) {
+            time =  holder.updateTimeTv.getContext().getString(R.string.time_yesterday, TimeUtils.toTimeFormat(updateTime));
+        } else if (updateTime >= TimeUtils.getThisYear().getTimeInMillis()) {
+            time = TimeUtils.toDateFormat(updateTime);
+        } else {
+            time = TimeUtils.toYearFormat(updateTime);
+        }
+        holder.updateTimeTv.setText(time);
+        holder.dirtyTv.setVisibility(note.isDirty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void renderDetailContent(NoteHolder holder, final Note note) {
+        List<NoteFile> noteFiles = NoteFileService.getRelatedNoteFiles(note.getId());
+        holder.imageView.setImageDrawable(null);
+        for (NoteFile noteFile : noteFiles) {
+            if (TextUtils.isEmpty(noteFile.getLocalPath())) {
+                continue;
+            }
+            File file = new File(noteFile.getLocalPath());
+            if (FileUtils.isImageFile(file)) {
+                Glide.with(holder.container.getContext())
+                        .load(file)
+                        .fitCenter()
+                        .into(holder.imageView);
+                break;
+            }
+        }
+        if (note.isMarkDown()) {
+            holder.contentTv.setText(note.getContent());
+        } else {
+            Spanned spannedContent = Html.fromHtml(note.getContent());
+            String contentStr = spannedContent.toString();
+            contentStr = contentStr.replaceAll("\\n\\n+", "\n");
+            holder.contentTv.setText(contentStr);
+        }
     }
 
     private void renderSimple(final NoteHolder holder, final Note note) {
@@ -207,23 +233,6 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         }
         holder.updateTimeTv.setText(time);
         holder.dirtyTv.setVisibility(note.isDirty() ? View.VISIBLE : View.GONE);
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mListener != null) {
-                    mListener.onClickNote(note);
-                }
-            }
-        });
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (mListener != null) {
-                    mListener.onLongClickNote(note);
-                }
-                return true;
-            }
-        });
     }
 
     private CharSequence getHighlightedText(String text) {

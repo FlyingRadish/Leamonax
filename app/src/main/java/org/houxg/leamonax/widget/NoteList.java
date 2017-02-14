@@ -39,6 +39,10 @@ public class NoteList {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+                mAdapter.setScrolling(newState != RecyclerView.SCROLL_STATE_IDLE);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    mAdapter.notifyDataSetChanged();
+                }
             }
 
             @Override
