@@ -1,5 +1,5 @@
 # Leamonax
-<img src='https://travis-ci.org/houxg/Leamonax.svg?branch=master'/>
+<img src='https://travis-ci.org/leanote/leanote-android.svg?branch=master'/>
 
 This is a third party Android client for Leanote.
 
@@ -12,8 +12,8 @@ This is a third party Android client for Leanote.
 ![Markdown](https://raw.githubusercontent.com/houxg/Leamonax/develop/screenshot/Markdown.png)
 
 # Download
-- [Git Release](https://github.com/houxg/Leamonax/releases/latest)
-- [Pgyer](https://www.pgyer.com/leamonax)
+- [Git Release](https://github.com/leanote/leanote-android/releases/latest)
+- [Pgyer](https://www.pgyer.com/Leanote)
 
 # Features
 - [x] Sign in/up
@@ -24,11 +24,7 @@ This is a third party Android client for Leanote.
 - [x] Search by note's title
 
 # TODO
-- [x] Chinese language support
-- [ ] Quick note
-- [x] Integration of tinnyMCE
 - [ ] Searching for full-text fields
-- [ ] Import html file
 
 # Contributors
 - [xingstarx](https://github.com/xingstarx)
