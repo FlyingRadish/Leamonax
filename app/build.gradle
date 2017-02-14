@@ -34,7 +34,7 @@ android {
     compileSdkVersion 24
     buildToolsVersion "25.0.1"
     defaultConfig {
-        applicationId "org.houxg.leamonax"
+        applicationId "com.leanote.android"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode ciCode
