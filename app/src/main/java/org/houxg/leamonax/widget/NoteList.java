@@ -18,6 +18,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class NoteList {
+    public static final String DEFAULT_TYPE = "simple";
     public static final int TYPE_SIMPLE = 0;
     public static final int TYPE_DETAIL = 1;
 
@@ -55,11 +56,10 @@ public class NoteList {
         setType(mCurrentType);
     }
 
-    public void setType(int type) {
+    private void setType(int type) {
         mAdapter.setType(type);
         mNoteListView.removeItemDecoration(mItemDecoration);
-        if (type == TYPE_SIMPLE) {
-        } else if (type == TYPE_DETAIL) {
+        if (type == TYPE_DETAIL) {
             mNoteListView.addItemDecoration(mItemDecoration);
         }
         mAdapter.notifyDataSetChanged();
@@ -68,6 +68,30 @@ public class NoteList {
     public void toggleType() {
         mCurrentType = mCurrentType == TYPE_SIMPLE ? TYPE_DETAIL : TYPE_SIMPLE;
         setType(mCurrentType);
+    }
+
+    public String getType() {
+        switch (mCurrentType) {
+            case TYPE_SIMPLE:
+                return "simple";
+            case TYPE_DETAIL:
+                return "detail";
+            default:
+                return "simple";
+        }
+    }
+
+    public void setType(String type) {
+        int newType;
+        switch (type) {
+            case "detail":
+                newType = TYPE_DETAIL;
+                break;
+            case "simple":
+            default:
+                newType = TYPE_SIMPLE;
+        }
+        setType(newType);
     }
 
     public void render(List<Note> notes) {

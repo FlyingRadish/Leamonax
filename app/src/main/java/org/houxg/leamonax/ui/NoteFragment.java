@@ -33,6 +33,7 @@ import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.ActionModeHandler;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
+import org.houxg.leamonax.utils.SharedPreferenceUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.NoteList;
 
@@ -54,6 +55,7 @@ import static org.houxg.leamonax.R.menu.note;
 public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterListener, ActionModeHandler.Callback<Note> {
 
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
+    private static final String SP_VIEW_TYPE = "sp_viewType";
 
     @BindView(R.id.recycler_view)
     RecyclerView mNoteListView;
@@ -86,6 +88,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_view_type) {
             mNoteList.toggleType();
+            SharedPreferenceUtils.write(SharedPreferenceUtils.CONFIG, SP_VIEW_TYPE, mNoteList.getType());
         }
         return super.onOptionsItemSelected(item);
     }
@@ -96,6 +99,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         ButterKnife.bind(this, view);
         mNoteList = new NoteList(container.getContext(), view, this);
+        mNoteList.setType(SharedPreferenceUtils.read(SharedPreferenceUtils.CONFIG, SP_VIEW_TYPE, NoteList.DEFAULT_TYPE));
         return view;
     }
 
