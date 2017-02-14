@@ -213,7 +213,9 @@ public class MainActivity extends BaseActivity implements NotebookAdapter.Notebo
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        addNotebook(mEdit.getText().toString(), parentNotebookId);
+                        if (!TextUtils.isEmpty(mEdit.getText())) {
+                            addNotebook(mEdit.getText().toString(), parentNotebookId);
+                        }
                     }
                 })
                 .show();
