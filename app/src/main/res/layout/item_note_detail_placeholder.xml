@@ -31,25 +31,26 @@
                 android:layout_marginBottom="4dp"
                 tools:text="Leanote API" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="match_parent"
+                android:background="@drawable/shape_placeholder"
+                android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/tv_content"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:maxHeight="120dp"
-                    android:textColor="@color/transparent"
-                    android:background="@drawable/shape_placeholder"
-                    android:maxLines="6"
-                    android:textSize="14sp"
-                    android:text="Enim consequat enim pariatur id anim Ut Excepteur dolor in laborum incididunt veniam quis proident. in consequat aliquip in minim adipisicing exercitation sunt sed qui pariatur consequat commodo ea do." />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/shape_placeholder"
+                android:textSize="14sp" />
 
-            </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/shape_placeholder"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
