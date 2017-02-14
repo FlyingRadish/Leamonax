@@ -12,16 +12,23 @@ import android.text.style.BackgroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
+import org.houxg.leamonax.model.NoteFile;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.service.AccountService;
+import org.houxg.leamonax.service.NoteFileService;
+import org.houxg.leamonax.utils.FileUtils;
 import org.houxg.leamonax.utils.TimeUtils;
 import org.houxg.leamonax.widget.NoteList;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -115,6 +122,21 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
     }
 
     private void renderDetail(NoteHolder holder, final Note note) {
+        List<NoteFile> noteFiles = NoteFileService.getRelatedNoteFiles(note.getId());
+        holder.imageView.setImageDrawable(null);
+        for (NoteFile noteFile : noteFiles) {
+            if (TextUtils.isEmpty(noteFile.getLocalPath())) {
+                continue;
+            }
+            File file = new File(noteFile.getLocalPath());
+            if (FileUtils.isImageFile(file)) {
+                Glide.with(holder.container.getContext())
+                        .load(file)
+                        .fitCenter()
+                        .into(holder.imageView);
+                break;
+            }
+        }
         if (TextUtils.isEmpty(note.getTitle())) {
             holder.titleTv.setText(R.string.untitled);
         } else {
@@ -247,6 +269,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         TextView dirtyTv;
         @BindView(R.id.container)
         View container;
+        @Nullable
+        @BindView(R.id.iv_image)
+        ImageView imageView;
 
         public NoteHolder(View itemView) {
             super(itemView);

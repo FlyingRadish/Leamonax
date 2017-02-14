@@ -28,20 +28,36 @@
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/primary_text_light"
                 android:textSize="20sp"
+                android:layout_marginBottom="4dp"
                 tools:text="Leanote API" />
 
-            <TextView
-                android:id="@+id/tv_content"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:fontFamily="sans-serif"
-                android:maxHeight="120dp"
-                android:maxLines="4"
-                android:textColor="#9E9E9E"
-                android:textSize="14sp"
-                tools:text="Enim consequat enim pariatur id anim Ut Excepteur dolor in laborum incididunt veniam quis proident. in consequat aliquip in minim adipisicing exercitation sunt sed qui pariatur consequat commodo ea do." />
+                android:orientation="horizontal">
 
+                <TextView
+                    android:id="@+id/tv_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_title"
+                    android:fontFamily="sans-serif"
+                    android:maxHeight="120dp"
+                    android:maxLines="6"
+                    android:textColor="#9E9E9E"
+                    android:textSize="14sp"
+                    tools:text="Enim consequat enim pariatur id anim Ut Excepteur dolor in laborum incididunt veniam quis proident. in consequat aliquip in minim adipisicing exercitation sunt sed qui pariatur consequat commodo ea do." />
+
+                <ImageView
+                    android:id="@+id/iv_image"
+                    android:layout_width="wrap_content"
+                    android:maxWidth="100dp"
+                    android:maxHeight="100dp"
+                    android:adjustViewBounds="true"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
