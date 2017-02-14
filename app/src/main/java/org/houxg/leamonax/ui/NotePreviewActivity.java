@@ -166,7 +166,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
 
     @OnClick(R.id.tv_revert)
     void revert() {
-        if (!NetworkUtils.isNetworkAvailable(this)) {
+        if (!NetworkUtils.isNetworkAvailable()) {
             ToastUtils.showNetworkUnavailable(this);
             return;
         }

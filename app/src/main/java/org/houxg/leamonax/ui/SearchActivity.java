@@ -14,6 +14,7 @@ import android.transition.Slide;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 
@@ -21,6 +22,8 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NoteAdapter;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
+import org.houxg.leamonax.utils.ActionModeHandler;
+import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.DividerDecoration;
@@ -32,11 +35,13 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdapterListener {
+public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdapterListener, ActionModeHandler.Callback<Note> {
 
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
 
@@ -49,7 +54,7 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
 
     List<Note> mNotes = new ArrayList<>();
     private NoteAdapter mAdapter;
-
+    private ActionModeHandler<Note> mActionModeHandler;
     private float mScrollPosition;
 
     @Override
@@ -62,12 +67,12 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         ButterKnife.bind(this);
         initToolBar(mToolbar, true);
         setTitle("");
+        mActionModeHandler = new ActionModeHandler<>(this, this, R.menu.delete);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         mNoteListView.setLayoutManager(layoutManager);
         mNoteListView.setItemAnimator(new DefaultItemAnimator());
-        
-        mNoteListView.addItemDecoration(new DividerDecoration(DisplayUtils.dp2px(8)));
+
         mAdapter = new NoteAdapter(this);
         mNoteListView.setAdapter(mAdapter);
         mNoteListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -139,36 +144,31 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
 
     @Override
     public void onClickNote(Note note) {
-        startActivity(NotePreviewActivity.getOpenIntent(this, note.getId()));
+        if (mActionModeHandler.isActionMode()) {
+            boolean isSelected = mActionModeHandler.chooseItem(note);
+            mAdapter.setSelected(note, isSelected);
+        } else {
+            startActivity(NotePreviewActivity.getOpenIntent(this, note.getId()));
+        }
     }
 
     @Override
     public void onLongClickNote(final Note note) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.delete_note)
-                .setMessage(String.format(Locale.US, getString(R.string.are_you_sure_to_delete_note), TextUtils.isEmpty(note.getTitle()) ? "this note" : note.getTitle()))
-                .setCancelable(true)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        deleteNote(note);
-                    }
-                })
-                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
+        boolean isSelected = mActionModeHandler.chooseItem(note);
+        mAdapter.setSelected(note, isSelected);
     }
 
-    private void deleteNote(final Note note) {
-        NoteService.deleteNote(note)
+    private void deleteNote(final List<Note> notes) {
+        Observable.from(notes)
+                .flatMap(new Func1<Note, Observable<Note>>() {
+                    @Override
+                    public rx.Observable<Note> call(Note note) {
+                        return NoteService.deleteNote(note);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Void>() {
+                .subscribe(new Observer<Note>() {
                     @Override
                     public void onCompleted() {
 
@@ -180,10 +180,50 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
                     }
 
                     @Override
-                    public void onNext(Void aVoid) {
+                    public void onNext(Note note) {
                         mAdapter.delete(note);
                     }
                 });
     }
 
+    @Override
+    public boolean onAction(int actionId, List<Note> pendingItems) {
+        if (CollectionUtils.isEmpty(pendingItems)) {
+            ToastUtils.show(this, R.string.no_note_was_selected);
+            return false;
+        }
+        final List<Note> waitToDelete = new ArrayList<>();
+        for (int i = 0; i < pendingItems.size(); i++) {
+            waitToDelete.add(pendingItems.get(i));
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete_note)
+                .setMessage(R.string.are_you_sure_to_delete_note)
+                .setCancelable(true)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        mActionModeHandler.dismiss();
+                        deleteNote(waitToDelete);
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        mActionModeHandler.dismiss();
+                        mAdapter.invalidateAllSelected();
+                    }
+                })
+                .show();
+        return true;
+    }
+
+    @Override
+    public void onDestroy(List<Note> pendingItems) {
+        if (CollectionUtils.isNotEmpty(pendingItems)) {
+            mAdapter.invalidateAllSelected();
+        }
+    }
 }

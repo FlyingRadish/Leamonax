@@ -5,9 +5,11 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:background="@drawable/note_selector"
         android:orientation="vertical">
 
         <LinearLayout

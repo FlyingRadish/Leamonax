@@ -74,8 +74,16 @@ public class NoteList {
         mAdapter.delete(note);
     }
 
+    public void setSelected(Note note, boolean isSelected) {
+        mAdapter.setSelected(note, isSelected);
+    }
+
     public int getScrollPosition() {
         return mScrollPosition;
+    }
+
+    public void invalidateAllSelected() {
+        mAdapter.invalidateAllSelected();
     }
 
     public void setScrollPosition(int position) {

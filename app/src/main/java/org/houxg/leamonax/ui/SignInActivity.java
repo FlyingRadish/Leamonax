@@ -37,6 +37,8 @@ import rx.schedulers.Schedulers;
 
 public class SignInActivity extends BaseActivity implements TextWatcher {
 
+    public static final String ACTION_ADD_ACCOUNT = "action.addAccount:";
+    private static final String EXTRA_ACCOUNT_LOCAL_ID = "extra.account.LocalId";
     private static final String TAG = "SignInActivity:";
 
     private static final String LEANOTE_HOST = "https://leanote.com";
@@ -66,12 +68,13 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     @BindView(R.id.rl_sign_up)
     View mSignUpPanel;
     @BindView(R.id.tv_example)
-    TextView mEampleTv;
+    TextView mExampleTv;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
+        setResult(RESULT_CANCELED);
         ButterKnife.bind(this);
         mEmailEt.addTextChangedListener(this);
         mPasswordEt.addTextChangedListener(this);
@@ -103,7 +106,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
 
             @Override
             public void afterTextChanged(Editable s) {
-                mEampleTv.setText(String.format(Locale.US, "For example, login api will be:\n%s/api/login", s.toString()));
+                mExampleTv.setText(String.format(Locale.US, "For example, login api will be:\n%s/api/login", s.toString()));
             }
         });
     }
@@ -126,7 +129,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
     void switchHost() {
         boolean isCustomHost = !(boolean) mCustomHostBtn.getTag();
         mCustomHostBtn.setTag(isCustomHost);
-        mEampleTv.setVisibility(isCustomHost ? View.VISIBLE : View.GONE);
+        mExampleTv.setVisibility(isCustomHost ? View.VISIBLE : View.GONE);
         if (isCustomHost) {
             mCustomHostBtn.setText(R.string.use_leanote_host);
             mHostEt.animate()
@@ -215,11 +218,17 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                     @Override
                     public void onNext(Authentication authentication) {
                         if (authentication.isOk()) {
-                            AccountService.saveToAccount(authentication, host);
-                            Intent intent = MainActivity.getOpenIntent(SignInActivity.this, true);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            finish();
+                            long localId = AccountService.saveToAccount(authentication, host);
+                            if (ACTION_ADD_ACCOUNT.equals(getIntent().getAction())) {
+                                Intent intent = new Intent();
+                                intent.putExtra(EXTRA_ACCOUNT_LOCAL_ID, localId);
+                                setResult(RESULT_OK, intent);
+                            } else {
+                                Intent intent = MainActivity.getOpenIntent(SignInActivity.this, true);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+                            }
                         } else {
                             ToastUtils.show(SignInActivity.this, R.string.email_or_password_incorrect);
                         }
@@ -292,6 +301,19 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
                         }
                     }
                 });
+    }
+
+    /**
+     *
+     * @param data
+     * @return account local id or -1
+     */
+    public static long getAccountIdFromData(Intent data) {
+        if (data == null) {
+            return -1;
+        } else {
+            return data.getLongExtra(EXTRA_ACCOUNT_LOCAL_ID, -1);
+        }
     }
 
     private Observable<String> initHost() {

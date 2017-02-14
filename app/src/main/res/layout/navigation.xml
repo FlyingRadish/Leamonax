@@ -9,6 +9,8 @@
     android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/rl_info"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -18,22 +20,29 @@
             android:id="@+id/iv_avatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/iv_other_account"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@id/iv_avatar"
             android:scaleType="centerCrop" />
 
         <LinearLayout
+            android:id="@+id/ll_account_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/iv_avatar"
             android:layout_centerVertical="true"
-            android:layout_marginStart="8dp"
-            android:layout_toEndOf="@id/iv_avatar"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
                 android:textColor="@color/secondary_text_light"
                 android:textSize="14sp"
                 tools:text="exercitation" />
@@ -48,16 +57,30 @@
 
         </LinearLayout>
 
+        <org.houxg.leamonax.widget.TriangleView
+            android:id="@+id/tr_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/ll_account_info"
+            android:layout_alignParentEnd="true"
+            android:padding="8dp" />
+
     </RelativeLayout>
 
     <include layout="@layout/divider" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_account"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/rl_recent_notes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -105,29 +128,21 @@
             android:textColor="@color/hint_text_light"
             android:textSize="14sp" />
 
-        <ImageView
-            android:id="@+id/iv_notebook_triangle"
+        <org.houxg.leamonax.widget.TriangleView
+            android:id="@+id/tr_notebook"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:src="@drawable/ic_triangle" />
+            android:padding="8dp" />
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/rl_notebook_list"
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_notebook"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_notebook"
-            android:layout_width="240dp"
-            android:layout_height="match_parent" />
-
-    </RelativeLayout>
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/rl_tag"
@@ -155,20 +170,20 @@
             android:textColor="@color/hint_text_light"
             android:textSize="14sp" />
 
-        <ImageView
-            android:id="@+id/iv_tag_triangle"
+        <org.houxg.leamonax.widget.TriangleView
+            android:id="@+id/tr_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:src="@drawable/ic_triangle" />
+            android:padding="8dp" />
     </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_tag"
         android:layout_width="240dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <View
         android:layout_width="wrap_content"
@@ -181,8 +196,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -207,8 +222,8 @@
         android:id="@+id/rl_about"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
 
         <ImageView
             android:layout_width="wrap_content"

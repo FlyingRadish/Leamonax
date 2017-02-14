@@ -11,7 +11,7 @@
     <string name="link">Link</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <string name="are_you_sure_to_delete_note">Are you sure to delete %s?</string>
+    <string name="are_you_sure_to_delete_note">Are you sure to delete these notes?</string>
     <string name="delete_note">Delete note</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -83,8 +83,8 @@
     <string name="continue_download">Continue download</string>
     <string name="continue_text">Continue</string>
     <string name="download_error">Download failed</string>
-    <string name="download_successful">Dowload finished</string>
-    <string name="downloading">Dowloading</string>
+    <string name="download_successful">Download finished</string>
+    <string name="downloading">Downloading</string>
     <string name="what_s_new">What\'s new</string>
     <string name="file_size">File size</string>
     <string name="have_new_version">Have new version</string>
@@ -98,5 +98,13 @@
     <string name="your_are_the_latest_version">You are using latest version</string>
     <string name="cant_open_url">Can\'t open this url</string>
     <string name="view_type">View type</string>
+    <string name="delete">Delete</string>
+    <string name="no_note_was_selected">No note was selected</string>
+    <string name="add_account">Add account</string>
+    <string name="leanote">Leanote</string>
+    <string name="https_material_io_icons" translatable="false">https://material.io/icons/</string>
+    <string name="gnu_general_public_license_v3" translatable="false">GNU GENERAL PUBLIC LICENSE V3</string>
+    <string name="github" translatable="false">Github</string>
+    <string name="generate_random_note">Generate random note</string>
 
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_about"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context="org.houxg.leamonax.ui.AboutActivity">
+
+    <com.github.piasy.biv.view.BigImageView
+        android:id="@+id/big_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</FrameLayout>

@@ -22,13 +22,13 @@ public class NetworkUtils {
         return cm.getActiveNetworkInfo();
     }
 
-    public static boolean isNetworkAvailable(Context context) {
-        NetworkInfo info = getActiveNetworkInfo(context);
+    public static boolean isNetworkAvailable() {
+        NetworkInfo info = getActiveNetworkInfo(Leamonax.getContext());
         return (info != null && info.isConnected());
     }
 
     public static void checkNetwork() throws NetworkUnavailableException {
-        if (!isNetworkAvailable(Leamonax.getContext())) {
+        if (!isNetworkAvailable()) {
             throw new NetworkUnavailableException();
         }
     }

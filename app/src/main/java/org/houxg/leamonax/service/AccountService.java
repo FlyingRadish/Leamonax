@@ -1,12 +1,17 @@
 package org.houxg.leamonax.service;
 
+import com.raizlabs.android.dbflow.sql.language.Select;
+
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
+import org.houxg.leamonax.model.Account_Table;
 import org.houxg.leamonax.model.Authentication;
 import org.houxg.leamonax.model.BaseResponse;
 import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.network.ApiProvider;
 import org.houxg.leamonax.utils.RetrofitUtils;
+
+import java.util.List;
 
 import rx.Observable;
 
@@ -24,7 +29,7 @@ public class AccountService {
         return RetrofitUtils.create(ApiProvider.getInstance().getUserApi().getInfo(userId));
     }
 
-    public static void saveToAccount(Authentication authentication, String host) {
+    public static long saveToAccount(Authentication authentication, String host) {
         Account localAccount = AppDataBase.getAccount(authentication.getEmail(), host);
         if (localAccount == null) {
             localAccount = new Account();
@@ -35,6 +40,7 @@ public class AccountService {
         localAccount.setUserId(authentication.getUserId());
         localAccount.setUserName(authentication.getUserName());
         localAccount.save();
+        return localAccount.getLocalUserId();
     }
 
     public static void saveToAccount(User user, String host) {
@@ -67,6 +73,17 @@ public class AccountService {
 
     public static Account getCurrent() {
         return AppDataBase.getAccountWithToken();
+    }
+
+    public static List<Account> getAccountList() {
+        return AppDataBase.getAccountListWithToken();
+    }
+
+    public static Account getAccountById(long id) {
+        return new Select()
+                .from(Account.class)
+                .where(Account_Table.id.eq(id))
+                .querySingle();
     }
 
     public static boolean isSignedIn() {

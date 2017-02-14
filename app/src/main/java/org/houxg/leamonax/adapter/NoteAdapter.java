@@ -22,6 +22,7 @@ import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.TimeUtils;
 import org.houxg.leamonax.widget.NoteList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,12 +35,12 @@ import butterknife.ButterKnife;
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
 
 
-
     private List<Note> mData;
     private Map<String, String> mNotebookId2TitleMaps;
     private NoteAdapterListener mListener;
     private Pattern mTitleHighlight;
     private int mCurrentType = NoteList.TYPE_SIMPLE;
+    private List<Long> mSelectedNotes = new ArrayList<>();
 
     public NoteAdapter(NoteAdapterListener listener) {
         mListener = listener;
@@ -61,6 +62,21 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
 
     public void setType(int type) {
         mCurrentType = type;
+    }
+
+    public void setSelected(Note note, boolean isSelected) {
+        if (!isSelected ) {
+            mSelectedNotes.remove(note.getId());
+            notifyDataSetChanged();
+        } else if (!mSelectedNotes.contains(note.getId())){
+            mSelectedNotes.add(note.getId());
+            notifyDataSetChanged();
+        }
+    }
+
+    public void invalidateAllSelected() {
+        mSelectedNotes.clear();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -95,6 +111,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         } else {
             renderSimple(holder, note);
         }
+        holder.container.setSelected(mSelectedNotes.contains(note.getId()));
     }
 
     private void renderDetail(NoteHolder holder, final Note note) {
@@ -146,7 +163,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         });
     }
 
-    private void renderSimple(NoteHolder holder, final Note note) {
+    private void renderSimple(final NoteHolder holder, final Note note) {
         if (TextUtils.isEmpty(note.getTitle())) {
             holder.titleTv.setText(R.string.untitled);
         } else {
@@ -228,6 +245,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
         TextView updateTimeTv;
         @BindView(R.id.tv_dirty)
         TextView dirtyTv;
+        @BindView(R.id.container)
+        View container;
 
         public NoteHolder(View itemView) {
             super(itemView);
