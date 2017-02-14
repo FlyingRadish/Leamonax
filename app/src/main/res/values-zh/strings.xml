@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Leamonax</string>
+    <string name="app_name">蚂蚁笔记</string>
     <string name="add_notebook">添加笔记本</string>
     <string name="apply">应用</string>
     <string name="are_you_sure_to_delete_all_data_in_this_account">你确定要删除该账户所有的数据吗？</string>

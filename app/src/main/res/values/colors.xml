@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#9E9E9E</color>
+    <color name="colorPrimary">#1d89b7</color>
     <color name="colorPrimaryDark">#616161</color>
     <color name="colorAccent">#03A9F4</color>
 
-    <color name="toolbar">#9E9E9E</color>
+    <color name="toolbar">#1d89b7</color>
     <color name="menu_text">#FAFAFA</color>
     <color name="drawer_divider">#BDBDBD</color>
     <color name="drawer_divider_light">#E0E0E0</color>

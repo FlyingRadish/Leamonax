@@ -13129,7 +13129,6 @@ else
             alt_text = escapeCharacters(attributeEncode(alt_text), "*_[]()");
             url = escapeCharacters(url, "*_");
             var result = "<img src=\"" + url + "\" alt=\"" + alt_text + "\"";
-
             // attacklab: Markdown.pl adds empty title attributes to images.
             // Replicate this bug.
 
