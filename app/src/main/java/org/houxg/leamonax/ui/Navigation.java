@@ -35,6 +35,7 @@ import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
 import org.houxg.leamonax.utils.DisplayUtils;
+import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.AlphabetDrawable;
 import org.houxg.leamonax.widget.TriangleView;
 
@@ -297,8 +298,13 @@ public class Navigation {
                         .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                addNotebook(mEdit.getText().toString(), parentNotebookId);
+                                String newName = mEdit.getText().toString();
+                                if (TextUtils.isEmpty(newName)) {
+                                    ToastUtils.show(mActivity, R.string.notebook_name_cant_be_empty);
+                                } else {
+                                    dialog.dismiss();
+                                    addNotebook(newName, parentNotebookId);
+                                }
                             }
                         })
                         .show();

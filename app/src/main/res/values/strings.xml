@@ -108,5 +108,6 @@
     <string name="generate_random_note">Generate random note</string>
     <string name="conflict_occurs">Oops! Conflicts occurs</string>
     <string name="host_example">For example, login api will be:\n%s/api/auth/login</string>
+    <string name="notebook_name_cant_be_empty">Notebook\'s name can\'t be empty</string>
 
 </resources>
