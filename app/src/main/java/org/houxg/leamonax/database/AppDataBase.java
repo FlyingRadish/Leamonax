@@ -238,21 +238,19 @@ public class AppDataBase {
     }
 
     public static Notebook getRecentNoteBook(String userId) {
-        List<Note> recentNotes = SQLite.select()
+        Note recentNotes = SQLite.select()
                 .from(Note.class)
                 .where(Note_Table.userId.eq(userId))
                 .and(Note_Table.notebookId.notEq(""))
                 .orderBy(Note_Table.updatedTime, false)
-                .queryList();
-
-        if (CollectionUtils.isNotEmpty(recentNotes)) {
-            for (Note note : recentNotes) {
-                Notebook notebook = getNotebookByServerId(note.getNoteBookId());
-                if (!notebook.isDeleted()) {
-                    return notebook;
-                }
+                .querySingle();
+        if (recentNotes != null) {
+            Notebook notebook = getNotebookByServerId(recentNotes.getNoteBookId());
+            if (notebook != null && !notebook.isDeleted()) {
+                return notebook;
             }
         }
+
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
