@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 
 import okio.BufferedSource;
@@ -70,6 +71,10 @@ public class NoteFileService {
         } else {
             return null;
         }
+    }
+
+    public static List<NoteFile> getRelatedNoteFiles(long noteLocalId) {
+        return AppDataBase.getAllRelatedFile(noteLocalId);
     }
 
     public static InputStream getImage(String localId) {
