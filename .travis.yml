@@ -29,5 +29,7 @@ deploy:
   api_key:
     secure: Wleh7ixPa196mNHED/Cf5hJytw86aMjFbnDZxFo72OSalCy0nS8pgzjR6y8j/lLv3wG49yyKQfTfo1QIY5xottJKjFYFiAATVGuz3VBjAJ9djHLOv9V890SjtNOX/GMy+momXVlTfwgoCNrWY6PwmJh/5C/USY/MMPcps0ESEx7NYWBbD8auRQ6b/Wz6fTuRCjg/9hcDMRxJ/i140uZtUaFAiljvSPN7iCYnV0EmHFMY85cpZzD9OavQTM8I0Lo7w40CxKB6N7mnhJMYPS1BVboO10+qAdn4l6qFwENtIXRx4b8Mm7Yb/kivWueRFpcoUcEFs8M/kS3+/yjivoYHKActLoBBNrw+djxwqChcnqTjOo/hVsgDw9EqCnlccbba7wfBb2eyyPuc/Dr8+ixQd+myjR8uEqARB4IWi9+tihUoV416A12AUdGXQ0RX9H+qD0Gc0ZTG4pqBKTu5q+YofLz8eYao7jijLtprxvCgtihuxEc4PzerN58MuZ5FyqA+l7t4o+PNziCVOj6c7FwTAZJxWhLYsPnkHXvse7DEH5IahJH3qXPem8ZSewyrhVIK2hFtomgTtavwMQeVa6dkFL7OOfgaFRoaR0/lKFfxd0tEH4VfZe/kkThB4acO7qvLzzawb3D/MSuc1cKGB9WtZ8HROja7dYa4nxFPZq+xzK4=
   file: app/build/outputs/apk/Leanote.apk
+  skip_cleanup: true
   on:
     repo: leanote/leanote-android
+    tags: true
