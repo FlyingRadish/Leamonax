@@ -143,6 +143,7 @@ public class Navigation {
             @Override
             public void onClickAddAccount() {
                 Intent intent = new Intent(mActivity, SignInActivity.class);
+                intent.setAction(SignInActivity.ACTION_ADD_ACCOUNT);
                 mActivity.startActivityForResult(intent, REQ_ADD_ACCOUNT);
             }
         }

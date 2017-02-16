@@ -217,21 +217,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
 
                     @Override
                     public void onNext(Authentication authentication) {
-                        if (authentication.isOk()) {
-                            long localId = AccountService.saveToAccount(authentication, host);
-                            if (ACTION_ADD_ACCOUNT.equals(getIntent().getAction())) {
-                                Intent intent = new Intent();
-                                intent.putExtra(EXTRA_ACCOUNT_LOCAL_ID, localId);
-                                setResult(RESULT_OK, intent);
-                            } else {
-                                Intent intent = MainActivity.getOpenIntent(SignInActivity.this, true);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                                finish();
-                            }
-                        } else {
-                            ToastUtils.show(SignInActivity.this, R.string.email_or_password_incorrect);
-                        }
+                        handleAuthResponse(authentication, host);
                     }
                 });
     }
@@ -290,17 +276,27 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
 
                     @Override
                     public void onNext(Authentication authentication) {
-                        if (authentication.isOk()) {
-                            AccountService.saveToAccount(authentication, host);
-                            Intent intent = MainActivity.getOpenIntent(SignInActivity.this, true);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            ToastUtils.show(SignInActivity.this, R.string.email_or_password_incorrect);
-                        }
+                        handleAuthResponse(authentication, host);
                     }
                 });
+    }
+
+    private void handleAuthResponse(Authentication authentication, String host) {
+        if (authentication.isOk()) {
+            long localId = AccountService.saveToAccount(authentication, host);
+            if (ACTION_ADD_ACCOUNT.equals(getIntent().getAction())) {
+                Intent intent = new Intent();
+                intent.putExtra(EXTRA_ACCOUNT_LOCAL_ID, localId);
+                setResult(RESULT_OK, intent);
+            } else {
+                Intent intent = MainActivity.getOpenIntent(SignInActivity.this, true);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+            finish();
+        } else {
+            ToastUtils.show(SignInActivity.this, R.string.email_or_password_incorrect);
+        }
     }
 
     /**
