@@ -41,6 +41,7 @@ android {
         versionCode ciCode
         versionName ciName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "BUGLY_KEY", String.format("\"%s\"", buglyPrdKey)
     }
 
     lintOptions {
@@ -57,7 +58,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
-            buildConfigField "String", "BUGLY_KEY", String.format("\"%s\"", buglyPrdKey)
         }
     }
 }
