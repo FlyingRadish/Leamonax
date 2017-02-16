@@ -21,7 +21,6 @@ public class Account extends BaseModel {
 
     @Column(name = "id")
     @PrimaryKey(autoincrement = true)
-    @SerializedName("LocalUserId")
     long localUserId;
     @Column(name = "userId")
     @SerializedName("UserId")
@@ -50,6 +49,8 @@ public class Account extends BaseModel {
     int noteUsn;
     @Column(name = "notebookUsn")
     int notebookUsn;
+    @Column(name = "lastUseTime")
+    long lastUseTime;
 
     @Deprecated
     @Column(name = "lastUsn")
@@ -159,6 +160,10 @@ public class Account extends BaseModel {
 
     public void setNotebookUsn(int notebookUsn) {
         this.notebookUsn = notebookUsn;
+    }
+
+    public void updateLastUseTime() {
+        lastUseTime = System.currentTimeMillis() / 1000;
     }
 
     @Override

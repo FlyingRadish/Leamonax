@@ -63,7 +63,7 @@ public class ApiProvider {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
                 @Override
                 public void log(String message) {
-                    XLog.i(message);
+                    XLog.d(message);
                 }
             });
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

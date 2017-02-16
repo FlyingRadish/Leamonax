@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Database(name = "leanote_db", version = 3)
+@Database(name = "leanote_db", version = 4)
 public class AppDataBase {
 
     private static final String TAG = "AppDataBase:";
@@ -127,6 +127,48 @@ public class AppDataBase {
         }
     }
 
+    @Migration(version = 4, priority = 1, database = AppDataBase.class)
+    public static class AddColLastUseTime extends AlterTableMigration<Account> {
+
+        public AddColLastUseTime(Class<Account> table) {
+            super(table);
+        }
+
+        @Override
+        public void onPreMigrate() {
+            super.onPreMigrate();
+            addColumn(SQLiteType.INTEGER, "lastUseTime");
+        }
+    }
+
+    @Migration(version = 4, priority =  0, database = AppDataBase.class)
+    public static class UpdateLastUseTime extends BaseMigration {
+
+        @Override
+        public void migrate(DatabaseWrapper database) {
+            Cursor cursor = SQLite.select()
+                    .from(Account.class)
+                    .where(Account_Table.token.notEq(""))
+                    .query(database);
+            if (cursor == null) {
+                return;
+            }
+            int idIndex = cursor.getColumnIndex("id");
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(idIndex);
+                Account account = SQLite.select()
+                        .from(Account.class)
+                        .where(Account_Table.id.eq(id))
+                        .querySingle(database);
+                if (account != null) {
+                    account.updateLastUseTime();
+                    account.update(database);
+                }
+            }
+            cursor.close();
+        }
+    }
+
     public static void deleteNoteByLocalId(long localId) {
         SQLite.delete().from(Note.class)
                 .where(Note_Table.id.eq(localId))
@@ -196,23 +238,19 @@ public class AppDataBase {
     }
 
     public static Notebook getRecentNoteBook(String userId) {
-        List<Note> recentNotes = SQLite.select()
+        Note recentNotes = SQLite.select()
                 .from(Note.class)
                 .where(Note_Table.userId.eq(userId))
                 .and(Note_Table.notebookId.notEq(""))
                 .orderBy(Note_Table.updatedTime, false)
-                .queryList();
-
-        if (CollectionUtils.isNotEmpty(recentNotes)) {
-            for (Note note : recentNotes) {
-                Notebook notebook = getNotebookByServerId(note.getNoteBookId());
-                if (notebook != null) {
-                   if (!notebook.isDeleted()) {
-                       return notebook;
-                   }
-                }
+                .querySingle();
+        if (recentNotes != null) {
+            Notebook notebook = getNotebookByServerId(recentNotes.getNoteBookId());
+            if (notebook != null && !notebook.isDeleted()) {
+                return notebook;
             }
         }
+
         return SQLite.select()
                 .from(Notebook.class)
                 .where(Notebook_Table.userId.eq(userId))
@@ -288,7 +326,16 @@ public class AppDataBase {
         return SQLite.select()
                 .from(Account.class)
                 .where(Account_Table.token.notEq(""))
+                .orderBy(Account_Table.lastUseTime, false)
                 .querySingle();
+    }
+
+    public static List<Account> getAccountListWithToken() {
+        return SQLite.select()
+                .from(Account.class)
+                .where(Account_Table.token.notEq(""))
+                .orderBy(Account_Table.lastUseTime, false)
+                .queryList();
     }
 
     public static List<Tag> getTagByNoteLocalId(long noteLocalId) {

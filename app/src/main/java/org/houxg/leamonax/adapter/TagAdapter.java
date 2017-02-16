@@ -32,22 +32,6 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.TagHolder> {
         notifyDataSetChanged();
     }
 
-    public void toggle() {
-        int size = getItemCount();
-        if (size == 0) {
-            mData = AppDataBase.getAllTags(AccountService.getCurrent().getUserId());
-            int newSize = getItemCount();
-            if (newSize != 0) {
-                notifyItemRangeInserted(0, newSize);
-            } else {
-                notifyDataSetChanged();
-            }
-        } else {
-            mData = new ArrayList<>();
-            notifyItemRangeRemoved(0, size);
-        }
-    }
-
     @Override
     public TagHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;

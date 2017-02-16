@@ -4,10 +4,13 @@ package org.houxg.leamonax;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.TextUtils;
 
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
 import com.facebook.stetho.Stetho;
+import com.github.piasy.biv.BigImageViewer;
+import com.github.piasy.biv.loader.glide.GlideImageLoader;
 import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.tencent.bugly.Bugly;
@@ -31,16 +34,20 @@ public class Leamonax extends Application {
         super.onCreate();
         mContext = this;
         XLog.init(BuildConfig.DEBUG ? LogLevel.ALL : LogLevel.NONE);
-        initBugly();
-
+        if (!TextUtils.isEmpty(BuildConfig.BUGLY_KEY)) {
+            initBugly();
+        }
+        BigImageViewer.initialize(GlideImageLoader.with(this));
         EventBus.builder()
                 .logNoSubscriberMessages(false)
                 .sendNoSubscriberEvent(false)
                 .throwSubscriberException(true)
                 .installDefaultEventBus();
         FlowManager.init(new FlowConfig.Builder(this).build());
-        Stetho.initializeWithDefaults(this);
         JodaTimeAndroid.init(this);
+        if (BuildConfig.DEBUG) {
+            Stetho.initializeWithDefaults(this);
+        }
     }
 
     private void initBugly() {

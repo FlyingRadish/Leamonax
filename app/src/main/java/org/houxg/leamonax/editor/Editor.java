@@ -80,6 +80,7 @@ public abstract class Editor {
         void onFormatChanged(Map<Format, Object> enabledFormats);
         void onCursorChanged(Map<Format, Object> enabledFormats);
         void linkTo(String url);
+        void onClickedImage(String url);
     }
 
     protected class EditorClient extends WebViewClient {

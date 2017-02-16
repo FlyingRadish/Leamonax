@@ -408,11 +408,11 @@ public class NoteService {
         return localIds;
     }
 
-    public static Observable<Void> deleteNote(final Note note) {
+    public static Observable<Note> deleteNote(final Note note) {
         return Observable.create(
-                new Observable.OnSubscribe<Void>() {
+                new Observable.OnSubscribe<Note>() {
                     @Override
-                    public void call(Subscriber<? super Void> subscriber) {
+                    public void call(Subscriber<? super Note> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             if (TextUtils.isEmpty(note.getNoteId())) {
                                 AppDataBase.deleteNoteByLocalId(note.getId());
@@ -426,7 +426,7 @@ public class NoteService {
                                     throw new IllegalStateException(response.getMsg());
                                 }
                             }
-                            subscriber.onNext(null);
+                            subscriber.onNext(note);
                             subscriber.onCompleted();
                         }
                     }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:id="@+id/container"
@@ -31,32 +31,26 @@
                 android:layout_marginBottom="4dp"
                 tools:text="Leanote API" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="match_parent"
+                android:background="@drawable/shape_placeholder"
+                android:textSize="14sp" />
 
-                <TextView
-                    android:id="@+id/tv_content"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:maxHeight="120dp"
-                    android:maxLines="6"
-                    android:textColor="@color/hint_text_light"
-                    android:textSize="14sp"
-                    tools:text="Enim consequat enim pariatur id anim Ut Excepteur dolor in laborum incididunt veniam quis proident. in consequat aliquip in minim adipisicing exercitation sunt sed qui pariatur consequat commodo ea do." />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/shape_placeholder"
+                android:textSize="14sp" />
 
-                <ImageView
-                    android:id="@+id/iv_image"
-                    android:layout_width="wrap_content"
-                    android:maxWidth="100dp"
-                    android:maxHeight="100dp"
-                    android:adjustViewBounds="true"
-                    android:layout_height="wrap_content"/>
-
-            </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/shape_placeholder"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
@@ -111,8 +105,6 @@
 
         </LinearLayout>
 
-
     </LinearLayout>
-
 
 </android.support.v7.widget.CardView>

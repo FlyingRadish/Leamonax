@@ -73,7 +73,7 @@
                     style="@style/SettingsStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="GNU GENERAL PUBLIC LICENSE V3" />
+                    android:text="@string/gnu_general_public_license_v3" />
 
             </LinearLayout>
 
@@ -93,13 +93,13 @@
                     style="@style/SettingsStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Leanote" />
+                    android:text="@string/leanote" />
 
                 <TextView
                     style="@style/SettingsStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="https://material.io/icons/" />
+                    android:text="@string/https_material_io_icons" />
 
             </LinearLayout>
 
@@ -114,7 +114,7 @@
                     style="@style/SettingsSecondaryText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Github" />
+                    android:text="@string/github" />
 
             </LinearLayout>
 
@@ -151,7 +151,7 @@
                         style="@style/SettingsSecondaryText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Generate random note" />
+                        android:text="@string/generate_random_note" />
 
                 </LinearLayout>
 

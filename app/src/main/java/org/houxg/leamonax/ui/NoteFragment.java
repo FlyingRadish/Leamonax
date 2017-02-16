@@ -7,11 +7,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -28,53 +30,67 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.SyncEvent;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteService;
-import org.houxg.leamonax.utils.DisplayUtils;
+import org.houxg.leamonax.utils.ActionModeHandler;
+import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
+import org.houxg.leamonax.utils.SharedPreferenceUtils;
 import org.houxg.leamonax.utils.ToastUtils;
-import org.houxg.leamonax.widget.DividerDecoration;
+import org.houxg.leamonax.widget.NoteList;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterListener {
+import static org.houxg.leamonax.R.menu.note;
 
-    private static final String TAG = "NoteFragment:";
+public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterListener, ActionModeHandler.Callback<Note> {
+
     private static final String EXT_SCROLL_POSITION = "ext_scroll_position";
-    private static final String EXT_SHOULD_FETCH_NOTES = "ext_should_fetch_notes";
-
-    private Mode mCurrentMode = Mode.RECENT_NOTES;
+    private static final String SP_VIEW_TYPE = "sp_viewType";
 
     @BindView(R.id.recycler_view)
     RecyclerView mNoteListView;
-    @BindView(R.id.swiperefresh)
-    SwipeRefreshLayout mSwipeRefresh;
 
     List<Note> mNotes;
-    private NoteAdapter mAdapter;
-    private OnSyncFinishListener mSyncFinishListener;
-
-    private float mScrollPosition;
+    ActionModeHandler<Note> mActionModeHandler;
+    NoteList mNoteList;
 
     public NoteFragment() {
     }
 
-    public static NoteFragment newInstance(boolean shouldFetchNotes) {
+    public static NoteFragment newInstance() {
         NoteFragment fragment = new NoteFragment();
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(EXT_SHOULD_FETCH_NOTES, shouldFetchNotes);
-        fragment.setArguments(bundle);
         return fragment;
     }
 
-    public void setSyncFinishListener(OnSyncFinishListener listener) {
-        mSyncFinishListener = listener;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(note, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_view_type) {
+            mNoteList.toggleType();
+            SharedPreferenceUtils.write(SharedPreferenceUtils.CONFIG, SP_VIEW_TYPE, mNoteList.getType());
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Nullable
@@ -82,77 +98,29 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         ButterKnife.bind(this, view);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(container.getContext());
-        mNoteListView.setLayoutManager(layoutManager);
-        mNoteListView.setItemAnimator(new DefaultItemAnimator());
-        mNoteListView.addItemDecoration(new DividerDecoration(DisplayUtils.dp2px(8)));
-        mAdapter = new NoteAdapter(this);
-        mNoteListView.setAdapter(mAdapter);
-
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                syncNotes();
-            }
-        });
-
-        mNoteListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                mScrollPosition = dy;
-            }
-        });
+        mNoteList = new NoteList(container.getContext(), view, this);
+        mNoteList.setType(SharedPreferenceUtils.read(SharedPreferenceUtils.CONFIG, SP_VIEW_TYPE, NoteList.DEFAULT_TYPE));
         return view;
-    }
-
-    private void syncNotes() {
-        if (!NetworkUtils.isNetworkAvailable(getActivity())) {
-            ToastUtils.showNetworkUnavailable(getActivity());
-            mSwipeRefresh.setRefreshing(false);
-            return;
-        }
-        NoteSyncService.startServiceForNote(getActivity());
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        EventBus.getDefault().register(this);
-        if (savedInstanceState == null) {
-            refreshNotes();
-            if (getArguments().getBoolean(EXT_SHOULD_FETCH_NOTES, false)) {
-                mSwipeRefresh.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        XLog.i(TAG + "fetch notes");
-                        mSwipeRefresh.setRefreshing(true);
-                        syncNotes();
-                    }
-                }, 200);
-            }
-        }
         if (savedInstanceState != null) {
-            mScrollPosition = savedInstanceState.getFloat(EXT_SCROLL_POSITION, 0);
+            mNoteList.setScrollPosition(savedInstanceState.getInt(EXT_SCROLL_POSITION, 0));
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mNoteListView.scrollTo(0, (int) mScrollPosition);
-        refreshNotes();
+        mActionModeHandler = new ActionModeHandler<>(getActivity(), this, R.menu.delete);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putFloat(EXT_SCROLL_POSITION, mScrollPosition);
+        outState.putInt(EXT_SCROLL_POSITION, mNoteList.getScrollPosition());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -161,75 +129,39 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         EventBus.getDefault().unregister(this);
     }
 
-    public void loadRecentNotes() {
-        mCurrentMode = Mode.RECENT_NOTES;
-        refreshNotes();
-    }
-
-    public void loadFromNotebook(long notebookId) {
-        mCurrentMode = Mode.NOTEBOOK;
-        mCurrentMode.notebookId = notebookId;
-        refreshNotes();
-    }
-
-    public void loadFromTag(String tagText) {
-        mCurrentMode = Mode.TAG;
-        mCurrentMode.tagText = tagText;
-        refreshNotes();
-    }
-
-    public Mode getCurrentMode() {
-        return mCurrentMode;
-    }
-
-    private void refreshNotes() {
-        XLog.i(TAG + "refresh:" + mCurrentMode);
-        switch (mCurrentMode) {
-            case RECENT_NOTES:
-                mNotes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
-                break;
-            case NOTEBOOK:
-                mNotes = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), mCurrentMode.notebookId);
-                break;
-            case TAG:
-                mNotes = AppDataBase.getNotesByTagText(mCurrentMode.tagText, AccountService.getCurrent().getUserId());
-        }
+    public void setNotes(List<Note> notes) {
+        mNotes = notes;
         Collections.sort(mNotes, new Note.UpdateTimeComparetor());
-        mAdapter.load(mNotes);
+        mNoteList.render(mNotes);
     }
 
     @Override
     public void onClickNote(Note note) {
-        startActivity(NotePreviewActivity.getOpenIntent(getActivity(), note.getId()));
+        if (mActionModeHandler.isActionMode()) {
+            boolean isSelected = mActionModeHandler.chooseItem(note);
+            mNoteList.setSelected(note, isSelected);
+        } else {
+            startActivity(NotePreviewActivity.getOpenIntent(getActivity(), note.getId()));
+        }
     }
 
     @Override
     public void onLongClickNote(final Note note) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.delete_note)
-                .setMessage(String.format(Locale.US, getString(R.string.are_you_sure_to_delete_note), TextUtils.isEmpty(note.getTitle()) ? "this note" : note.getTitle()))
-                .setCancelable(true)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        deleteNote(note);
-                    }
-                })
-                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
+        boolean isSelected = mActionModeHandler.chooseItem(note);
+        mNoteList.setSelected(note, isSelected);
     }
 
-    private void deleteNote(final Note note) {
-        NoteService.deleteNote(note)
+    private void deleteNote(final List<Note> notes) {
+        Observable.from(notes)
+                .flatMap(new Func1<Note, rx.Observable<Note>>() {
+                    @Override
+                    public rx.Observable<Note> call(Note note) {
+                        return NoteService.deleteNote(note);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Void>() {
+                .subscribe(new Observer<Note>() {
                     @Override
                     public void onCompleted() {
 
@@ -238,56 +170,56 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     @Override
                     public void onError(Throwable e) {
                         ToastUtils.show(getActivity(), R.string.delete_note_failed);
+                        mNoteList.invalidateAllSelected();
                     }
 
                     @Override
-                    public void onNext(Void aVoid) {
-                        mAdapter.delete(note);
+                    public void onNext(Note note) {
+                        mNoteList.remove(note);
                     }
                 });
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(SyncEvent event) {
-        XLog.i(TAG + "RequestNotes rcv: isSucceed=" + event.isSucceed());
-        if (isAdded()) {
-            mSwipeRefresh.setRefreshing(false);
-            if (mSyncFinishListener != null) {
-                mSyncFinishListener.onSyncFinish(event);
-            }
-            refreshNotes();
-            if (!event.isSucceed()) {
-                ToastUtils.show(getActivity(), R.string.sync_notes_failed);
-            }
+
+    @Override
+    public boolean onAction(int actionId, List<Note> pendingItems) {
+        if (CollectionUtils.isEmpty(pendingItems)) {
+            ToastUtils.show(getActivity(), R.string.no_note_was_selected);
+            return false;
+        }
+        final List<Note> waitToDelete = new ArrayList<>();
+        for (int i = 0; i < pendingItems.size(); i++) {
+            waitToDelete.add(pendingItems.get(i));
+        }
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.delete_note)
+                .setMessage(R.string.are_you_sure_to_delete_note)
+                .setCancelable(true)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        mActionModeHandler.dismiss();
+                        deleteNote(waitToDelete);
+                    }
+                })
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        mActionModeHandler.dismiss();
+                        mNoteList.invalidateAllSelected();
+                    }
+                })
+                .show();
+        return true;
+    }
+
+    @Override
+    public void onDestroy(List<Note> pendingItems) {
+        if (CollectionUtils.isNotEmpty(pendingItems)) {
+            mNoteList.invalidateAllSelected();
         }
     }
 
-    public interface OnSyncFinishListener {
-        void onSyncFinish(SyncEvent event);
-    }
-
-    public enum Mode {
-        RECENT_NOTES,
-        NOTEBOOK,
-        TAG;
-
-        long notebookId;
-        String tagText;
-
-        public void setNotebookId(long notebookId) {
-            this.notebookId = notebookId;
-        }
-
-        public void setTagText(String tagText) {
-            this.tagText = tagText;
-        }
-
-        @Override
-        public String toString() {
-            return name() + "{" +
-                    "notebookId=" + notebookId +
-                    ", tagText='" + tagText + '\'' +
-                    '}';
-        }
-    }
 }

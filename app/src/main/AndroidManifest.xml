@@ -45,6 +45,8 @@
         <activity
             android:name=".ui.AboutActivity"
             android:label="@string/about" />
+        <activity
+            android:name=".ui.PictureViewerActivity" />
 
         <service
             android:name=".background.NoteSyncService"

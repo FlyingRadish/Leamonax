@@ -25,6 +25,8 @@ public class TinnyMceCallback {
 
         void linkTo(String url);
 
+        void onClickedImage(String url);
+
         void onCursorChanged(Map<Editor.Format, Object> enabledFormats);
     }
 
@@ -40,6 +42,13 @@ public class TinnyMceCallback {
     public void linkTo(String url) {
         if (mListener != null) {
             mListener.linkTo(url);
+        }
+    }
+
+    @JavascriptInterface
+    public void onClickedImage(String url) {
+        if (mListener != null) {
+            mListener.onClickedImage(url);
         }
     }
 

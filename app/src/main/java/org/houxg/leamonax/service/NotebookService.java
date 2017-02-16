@@ -13,7 +13,7 @@ public class NotebookService {
 
     private static final String TAG = "NotebookService:";
 
-    public static void addNotebook(String title, String parentNotebookId) {
+    public static Notebook addNotebook(String title, String parentNotebookId) {
         Notebook notebook = RetrofitUtils.excute(ApiProvider.getInstance().getNotebookApi().addNotebook(title, parentNotebookId));
         if (notebook == null) {
             throw new IllegalStateException("Network error");
@@ -26,6 +26,7 @@ public class NotebookService {
                 account.save();
             }
             notebook.insert();
+            return notebook;
         } else {
             throw new IllegalStateException(notebook.getMsg());
         }

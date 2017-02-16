@@ -31,6 +31,8 @@ import org.houxg.leamonax.model.Tag_Table;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.ToastUtils;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -99,9 +101,12 @@ public class SettingsActivity extends BaseActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         AccountService.logout();
-                        Intent intent = new Intent(SettingsActivity.this, SignInActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                        List<Account> remainingAccount = AccountService.getAccountList();
+                        if (remainingAccount.size() == 0) {
+                            Intent intent = new Intent(SettingsActivity.this, SignInActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
                         finish();
                     }
                 })

@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 
 import okio.BufferedSource;
@@ -56,6 +57,24 @@ public class NoteFileService {
 
     public static boolean isLocalImageUri(Uri uri) {
         return SCHEME.equals(uri.getScheme()) && IMAGE_PATH_WITH_SLASH.equals(uri.getPath());
+    }
+
+    public static String getImagePath(Uri uri) {
+        String localId = uri.getQueryParameter("id");
+        NoteFile noteFile = AppDataBase.getNoteFileByLocalId(localId);
+        if (noteFile == null) {
+            return null;
+        }
+        if (!TextUtils.isEmpty(noteFile.getLocalPath())) {
+            File file = new File(noteFile.getLocalPath());
+            return file.isFile() ? noteFile.getLocalPath() : null;
+        } else {
+            return null;
+        }
+    }
+
+    public static List<NoteFile> getRelatedNoteFiles(long noteLocalId) {
+        return AppDataBase.getAllRelatedFile(noteLocalId);
     }
 
     public static InputStream getImage(String localId) {
