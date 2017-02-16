@@ -27,7 +27,7 @@ android {
         config {
             keyAlias System.getenv('KEY_ALIAS')
             keyPassword System.getenv('KEY_PWD')
-            storeFile file(projectDir.parentFile.absolutePath + '/houxg-leamonax.jks')
+            storeFile file(projectDir.parentFile.absolutePath + '/leanote-android-new.jks')
             storePassword System.getenv('KEYSTORE_PWD')
         }
     }
