@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
+import org.houxg.leamonax.widget.AlphabetDrawable;
 
 import java.util.List;
 
@@ -71,6 +72,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountH
                         .centerCrop()
                         .bitmapTransform(new CropCircleTransformation(holder.avatarIv.getContext()))
                         .into(holder.avatarIv);
+            } else {
+                holder.mAlphabetDrawable.setAlphabet(account.getEmail());
+                holder.avatarIv.setImageDrawable(holder.mAlphabetDrawable);
             }
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -109,6 +113,8 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountH
         @Nullable
         @BindView(R.id.iv_avatar)
         ImageView avatarIv;
+
+        AlphabetDrawable mAlphabetDrawable = new AlphabetDrawable();
 
         public AccountHolder(View itemView) {
             super(itemView);

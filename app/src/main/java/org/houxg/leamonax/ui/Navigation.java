@@ -38,6 +38,7 @@ import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
 import org.houxg.leamonax.utils.DisplayUtils;
+import org.houxg.leamonax.widget.AlphabetDrawable;
 import org.houxg.leamonax.widget.TriangleView;
 
 import butterknife.BindView;
@@ -87,6 +88,7 @@ public class Navigation {
     private NotebookAdapter mNotebookAdapter;
     private AccountAdapter mAccountAdapter;
     private TagAdapter mTagAdapter;
+    private AlphabetDrawable mAlphabetDrawable = new AlphabetDrawable();
 
     private Mode mCurrentMode = Mode.RECENT_NOTES;
 
@@ -122,6 +124,7 @@ public class Navigation {
                     public void onNext(User user) {
                         AccountService.saveToAccount(user, AccountService.getCurrent().getHost());
                         refreshUserInfo(AccountService.getCurrent());
+                        mAccountAdapter.notifyDataSetChanged();
                     }
                 });
     }
@@ -348,6 +351,9 @@ public class Navigation {
                     .centerCrop()
                     .bitmapTransform(new CropCircleTransformation(mActivity))
                     .into(mAvatarIv);
+        } else {
+            mAlphabetDrawable.setAlphabet(account.getEmail());
+            mAvatarIv.setImageDrawable(mAlphabetDrawable);
         }
     }
 
