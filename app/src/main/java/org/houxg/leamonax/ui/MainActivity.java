@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -127,7 +126,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
             return true;
         } else if (item.getItemId() == R.id.action_search) {
             Intent intent = new Intent(this, SearchActivity.class);
-            startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

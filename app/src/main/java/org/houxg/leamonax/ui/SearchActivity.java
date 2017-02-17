@@ -3,19 +3,12 @@ package org.houxg.leamonax.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.transition.Slide;
-import android.transition.Transition;
-import android.transition.TransitionInflater;
-import android.view.Gravity;
-import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 
 import org.houxg.leamonax.R;
@@ -24,14 +17,11 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.ActionModeHandler;
 import org.houxg.leamonax.utils.CollectionUtils;
-import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.ToastUtils;
-import org.houxg.leamonax.widget.DividerDecoration;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,9 +49,6 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        getWindow().setEnterTransition(new Slide(Gravity.END));
-        getWindow().setReturnTransition(new Slide(Gravity.END));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         ButterKnife.bind(this);
