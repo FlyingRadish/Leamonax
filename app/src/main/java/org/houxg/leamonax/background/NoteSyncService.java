@@ -54,18 +54,19 @@ public class NoteSyncService extends Service {
         if (intent == null) return START_NOT_STICKY;
 
         Observable.create(
-                new Observable.OnSubscribe<Boolean>() {
+                new Observable.OnSubscribe<Void>() {
                     @Override
-                    public void call(Subscriber<? super Boolean> subscriber) {
+                    public void call(Subscriber<? super Void> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(NoteService.fetchFromServer());
+                            NoteService.fetchFromServer();
+                            subscriber.onNext(null);
                             subscriber.onCompleted();
                         }
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
-                .subscribe(new Observer<Boolean>() {
+                .subscribe(new Observer<Void>() {
                     @Override
                     public void onCompleted() {
                         stopSelf();
@@ -79,7 +80,7 @@ public class NoteSyncService extends Service {
                     }
 
                     @Override
-                    public void onNext(Boolean isSucceed) {
+                    public void onNext(Void val) {
                         EventBus.getDefault().post(new SyncEvent(true));
                     }
                 });

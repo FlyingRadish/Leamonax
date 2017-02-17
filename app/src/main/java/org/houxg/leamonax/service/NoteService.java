@@ -45,9 +45,10 @@ public class NoteService {
     private static final String TRUE = "1";
     private static final String FALSE = "0";
     private static final String MULTIPART_FORM_DATA = "multipart/form-data";
+    private static final String CONFLICT_SUFFIX = "--conflict";
     private static final int MAX_ENTRY = 20;
 
-    public static boolean fetchFromServer() {
+    public static void fetchFromServer() {
         //sync notebook
         int notebookUsn = AccountService.getCurrent().getNotebookUsn();
         List<Notebook> notebooks;
@@ -78,10 +79,7 @@ public class NoteService {
         do {
             notes = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getSyncNotes(noteUsn, MAX_ENTRY));
             for (Note noteMeta : notes) {
-                Note remoteNote = RetrofitUtils.excute(ApiProvider.getInstance().getNoteApi().getNoteAndContent(noteMeta.getNoteId()));
-                if (remoteNote == null) {
-                    return false;
-                }
+                Note remoteNote = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getNoteAndContent(noteMeta.getNoteId()));
                 Note localNote = AppDataBase.getNoteByServerId(noteMeta.getNoteId());
                 noteUsn = remoteNote.getUsn();
                 long localId;
@@ -95,7 +93,7 @@ public class NoteService {
                         XLog.w(TAG + "note conflict, usn=" + remoteNote.getUsn() + ", id=" + remoteNote.getNoteId());
                         //save local version as a local note
                         localNote.setId(null);
-                        localNote.setTitle(localNote.getTitle() + "--conflict");
+                        localNote.setTitle(localNote.getTitle() + CONFLICT_SUFFIX);
                         localNote.setNoteId("");
                         localNote.insert();
                     }
@@ -118,9 +116,6 @@ public class NoteService {
                 account.save();
             }
         } while (notes.size() == MAX_ENTRY);
-
-
-        return true;
     }
 
     private static void handleFile(long noteLocalId, List<NoteFile> remoteFiles) {
