@@ -1,5 +1,7 @@
 package org.houxg.leamonax.model;
 
+import android.text.TextUtils;
+
 import com.elvishew.xlog.XLog;
 import com.google.gson.annotations.SerializedName;
 import com.raizlabs.android.dbflow.annotation.Column;
@@ -191,6 +193,14 @@ public class Note extends BaseModel implements Serializable {
 
     public List<String> getTagData() {
         return tagData;
+    }
+
+    public boolean isTotalEmpty() {
+        return TextUtils.isEmpty(title) && TextUtils.isEmpty(content);
+    }
+
+    public boolean isLocalNote() {
+        return TextUtils.isEmpty(noteId);
     }
 
     public void updateTags() {

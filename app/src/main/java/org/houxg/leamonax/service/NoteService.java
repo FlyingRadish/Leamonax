@@ -445,7 +445,26 @@ public class NoteService {
         return ApiProvider.getInstance().getNoteApi().delete(noteId, usn);
     }
 
-    public static void updateTagsToLocal(long noteLocalId, List<String> tags) {
+    public static Note saveAsDraft(Note note, List<String> tags, boolean isNewNote) {
+        XLog.i(TAG + "saveAsDraft(), local id=" + note.getId());
+        Note noteFromDb = AppDataBase.getNoteByLocalId(note.getId());
+        noteFromDb.setContent(note.getContent());
+        noteFromDb.setTitle(note.getTitle());
+        noteFromDb.setNoteBookId(note.getNoteBookId());
+        noteFromDb.setIsPublicBlog(note.isPublicBlog());
+        noteFromDb.setIsDirty(true);
+        long updateTime = System.currentTimeMillis();
+        noteFromDb.setUpdatedTimeVal(updateTime);
+        if (isNewNote) {
+            noteFromDb.setCreatedTimeVal(updateTime);
+        }
+        noteFromDb.update();
+
+        updateTagsToLocal(note.getId(), tags);
+        return noteFromDb;
+    }
+
+    private static void updateTagsToLocal(long noteLocalId, List<String> tags) {
         String currentUid = AccountService.getCurrent().getUserId();
         if (tags == null) {
             tags = new ArrayList<>();

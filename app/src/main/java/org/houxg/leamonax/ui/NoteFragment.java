@@ -30,6 +30,7 @@ import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.SyncEvent;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteService;
+import org.houxg.leamonax.ui.edit.NoteEditActivity;
 import org.houxg.leamonax.utils.ActionModeHandler;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.NetworkUtils;
@@ -141,7 +142,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
             boolean isSelected = mActionModeHandler.chooseItem(note);
             mNoteList.setSelected(note, isSelected);
         } else {
-            startActivity(NotePreviewActivity.getOpenIntent(getActivity(), note.getId()));
+            startActivity(NoteEditActivity.getOpenIntent(getActivity(), note.getId(), false));
         }
     }
 
