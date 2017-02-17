@@ -114,6 +114,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
         mEditorFragment = (EditorFragment) getSupportFragmentManager().findFragmentByTag(savedInstanceState.getString(TAG_EDITOR));
         mSettingsFragment = (SettingFragment) getSupportFragmentManager().findFragmentByTag(savedInstanceState.getString(TAG_SETTING));
         mIsPreview = savedInstanceState.getBoolean(STATE_IS_PREVIEW, false);
+        setEditable(mIsPreview);
     }
 
     @Override
