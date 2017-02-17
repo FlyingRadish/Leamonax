@@ -128,7 +128,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                     public void call(Subscriber<? super Long> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             NetworkUtils.checkNetwork();
-                            NoteService.updateNote(mNote.getId());
+                            NoteService.saveNote(mNote.getId());
                             subscriber.onNext(mNote.getId());
                             subscriber.onCompleted();
                         }

@@ -106,5 +106,6 @@
     <string name="gnu_general_public_license_v3" translatable="false">GNU GENERAL PUBLIC LICENSE V3</string>
     <string name="github" translatable="false">Github</string>
     <string name="generate_random_note">Generate random note</string>
+    <string name="conflict_occurs">Oops! Conflicts occurs</string>
 
 </resources>

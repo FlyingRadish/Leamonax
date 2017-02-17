@@ -10,6 +10,8 @@ import com.elvishew.xlog.XLog;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.bson.types.ObjectId;
+import org.houxg.leamonax.R;
+import org.houxg.leamonax.ReadableException;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
@@ -196,19 +198,32 @@ public class NoteService {
                 }, noteLocalId);
     }
 
-    public static void updateNote(final long noteLocalId) {
-        Note localNote = AppDataBase.getNoteByLocalId(noteLocalId);
-        NoteService.updateNote(localNote);
-    }
+    public static void saveNote(final long noteLocalId) {
+        Note modifiedNote = AppDataBase.getNoteByLocalId(noteLocalId);
 
-    private static void updateNote(final Note modifiedNote) throws IllegalStateException {
-        Note note;
+        Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modifiedNote);
+        List<MultipartBody.Part> fileBodies = handleFileBodies(modifiedNote, requestBodyMap);
+        Call<Note> call;
         if (modifiedNote.getUsn() == 0) {
-            note = RetrofitUtils.excuteWithException(addNote(modifiedNote));
+            call = ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
         } else {
             Note remoteNote = RetrofitUtils.excuteWithException(getNoteByServerId(modifiedNote.getNoteId()));
-            note = RetrofitUtils.excuteWithException(updateNote(remoteNote, modifiedNote));
+            if (remoteNote.getUsn() != modifiedNote.getUsn()) {
+                remoteNote.setId(modifiedNote.getId());
+                remoteNote.update();
+                modifiedNote.setId(null);
+                modifiedNote.setTitle(modifiedNote.getTitle() + CONFLICT_SUFFIX);
+                modifiedNote.setNoteId("");
+                modifiedNote.setIsDirty(true);
+                modifiedNote.insert();
+                throw new ReadableException(ReadableException.Error.CONFLICT, R.string.conflict_occurs);
+            } else {
+                requestBodyMap.put("NoteId", createPartFromString(modifiedNote.getNoteId()));
+                requestBodyMap.put("Usn", createPartFromString(String.valueOf(modifiedNote.getUsn())));
+                call = ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
+            }
         }
+        Note note = RetrofitUtils.excuteWithException(call);
         if (note.isOk()) {
             note.setId(modifiedNote.getId());
             note.setNoteBookId(modifiedNote.getNoteBookId());
@@ -295,23 +310,7 @@ public class NoteService {
         return true;
     }
 
-    private static Call<Note> addNote(Note note) {
-        Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(note);
-        List<MultipartBody.Part> fileBodies = handleFileBodies(note, requestBodyMap);
-        return ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
-    }
 
-    private static Call<Note> updateNote(Note original, Note modified) {
-        Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modified);
-        requestBodyMap.put("NoteId", createPartFromString(original.getNoteId()));
-        requestBodyMap.put("Usn", createPartFromString(String.valueOf(original.getUsn())));
-        List<MultipartBody.Part> fileBodies = handleFileBodies(modified, requestBodyMap);
-
-        if (original.isTrash() != modified.isTrash()) {
-            requestBodyMap.put("IsTrash", createPartFromString(getBooleanString(modified.isTrash())));
-        }
-        return ApiProvider.getInstance().getNoteApi().update(requestBodyMap, fileBodies);
-    }
 
     @NonNull
     private static Map<String, RequestBody> generateCommonBodyMap(Note note) {
