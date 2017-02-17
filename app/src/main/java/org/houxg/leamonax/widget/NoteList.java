@@ -57,6 +57,7 @@ public class NoteList {
     }
 
     private void setType(int type) {
+        mCurrentType = type;
         mAdapter.setType(type);
         mNoteListView.removeItemDecoration(mItemDecoration);
         if (type == TYPE_DETAIL) {
@@ -66,8 +67,8 @@ public class NoteList {
     }
 
     public void toggleType() {
-        mCurrentType = mCurrentType == TYPE_SIMPLE ? TYPE_DETAIL : TYPE_SIMPLE;
-        setType(mCurrentType);
+        int newType = mCurrentType == TYPE_SIMPLE ? TYPE_DETAIL : TYPE_SIMPLE;
+        setType(newType);
     }
 
     public String getType() {
