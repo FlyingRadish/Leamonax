@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.ImageView;
 
 import org.houxg.leamonax.R;
@@ -90,9 +91,14 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
 
         ImageView searchCloseIcon = (ImageView) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
         searchCloseIcon.setImageResource(R.drawable.ic_clear);
-        ImageView searchIcon = (ImageView) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
-        searchIcon.setImageResource(R.drawable.ic_search);
-
+        final ImageView searchIcon = (ImageView) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        mSearchView.post(new Runnable() {
+            @Override
+            public void run() {
+                searchIcon.setImageDrawable(null);
+                searchIcon.setVisibility(View.GONE);
+            }
+        });
         SearchView.SearchAutoComplete searchAutoComplete = (SearchView.SearchAutoComplete) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
         searchAutoComplete.setHintTextColor(getResources().getColor(R.color.menu_text));
         searchAutoComplete.setTextColor(getResources().getColor(R.color.menu_text));
