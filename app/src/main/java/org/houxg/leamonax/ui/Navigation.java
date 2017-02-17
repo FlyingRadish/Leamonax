@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.Build;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.graphics.drawable.DrawableWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -204,11 +206,12 @@ public class Navigation {
                                  public void onAnimationEnd(Animator animation) {
                                      //trigger quick ripple effect
                                      mInfoPanel.setBackground(mAccountRipple);
-                                     mAccountRipple.setHotspot(mAvatarIv.getLeft() + mAvatarIv.getWidth() / 2, mAvatarIv.getTop() + mAvatarIv.getHeight() / 2);
-                                     mAccountRipple.setHotspotBounds(0, 0, mInfoPanel.getWidth(), mInfoPanel.getHeight());
-                                     mInfoPanel.setPressed(true);
-                                     mInfoPanel.setPressed(false);
-
+                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                         mAccountRipple.setHotspot(mAvatarIv.getLeft() + mAvatarIv.getWidth() / 2, mAvatarIv.getTop() + mAvatarIv.getHeight() / 2);
+                                         mAccountRipple.setHotspotBounds(0, 0, mInfoPanel.getWidth(), mInfoPanel.getHeight());
+                                         mInfoPanel.setPressed(true);
+                                         mInfoPanel.setPressed(false);
+                                     }
                                      refreshUserInfo(account);
                                      rootView.removeView(animateView);
                                      mInfoPanel.postDelayed(new Runnable() {

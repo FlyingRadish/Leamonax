@@ -1,14 +1,13 @@
 package org.houxg.leamonax.ui;
 
 
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,20 +19,17 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.background.NoteSyncService;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.SyncEvent;
-import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
-import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -131,7 +127,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
             return true;
         } else if (item.getItemId() == R.id.action_search) {
             Intent intent = new Intent(this, SearchActivity.class);
-            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+            startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this).toBundle());
         }
         return super.onOptionsItemSelected(item);
     }
