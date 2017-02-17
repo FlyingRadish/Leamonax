@@ -118,9 +118,10 @@ public class AppDataBase {
                         .where(Account_Table.id.eq(id))
                         .querySingle(database);
                 if (account != null) {
-                    account.setNoteUsn(lastUsn);
-                    account.setNotebookUsn(lastUsn);
-                    account.update(database);
+                    SQLite.update(Account.class)
+                            .set(Account_Table.notebookUsn.eq(lastUsn), Account_Table.noteUsn.eq(lastUsn))
+                            .where(Account_Table.id.eq(account.getLocalUserId()))
+                            .execute(database);
                 }
             }
             cursor.close();
@@ -162,7 +163,10 @@ public class AppDataBase {
                         .querySingle(database);
                 if (account != null) {
                     account.updateLastUseTime();
-                    account.update(database);
+                    SQLite.update(Account.class)
+                            .set(Account_Table.lastUseTime.eq(account.getLastUseTime()))
+                            .where(Account_Table.id.eq(account.getLocalUserId()))
+                            .execute(database);
                 }
             }
             cursor.close();
