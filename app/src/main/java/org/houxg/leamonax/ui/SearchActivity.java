@@ -197,6 +197,7 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                        mActionModeHandler.getPendingItems().clear();
                         mActionModeHandler.dismiss();
                         deleteNote(waitToDelete);
                     }
