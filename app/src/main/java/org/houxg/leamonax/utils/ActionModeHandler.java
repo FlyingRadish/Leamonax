@@ -43,11 +43,7 @@ public class ActionModeHandler<T> {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            boolean isProceed = mCallback.onAction(item.getItemId(), mPendingItems);
-            if (isProceed) {
-                mPendingItems.clear();
-            }
-            return isProceed;
+            return mCallback.onAction(item.getItemId(), mPendingItems);
         }
 
         @Override
@@ -64,6 +60,10 @@ public class ActionModeHandler<T> {
         mContext = activity;
         mMenuId = menuId;
         mCallback = callback;
+    }
+
+    public List<T> getPendingItems() {
+        return mPendingItems;
     }
 
     /**
