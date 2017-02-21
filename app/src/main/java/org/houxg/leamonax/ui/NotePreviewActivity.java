@@ -110,12 +110,19 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_EDIT && resultCode == RESULT_OK) {
-            mNote = AppDataBase.getNoteByLocalId(mNote.getId());
-            if (mNote == null) {
-                finish();
-            } else {
-                refresh();
+        if (requestCode == REQ_EDIT) {
+            switch (resultCode) {
+                case RESULT_OK:
+                    mNote = AppDataBase.getNoteByLocalId(mNote.getId());
+                    if (mNote == null) {
+                        finish();
+                    } else {
+                        refresh();
+                    }
+                    break;
+                case NoteEditActivity.RESULT_CONFLICT:
+                    finish();
+                    break;
             }
         }
     }

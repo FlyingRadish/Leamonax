@@ -14,7 +14,9 @@ import android.view.ViewGroup;
 
 import com.elvishew.xlog.XLog;
 
+import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.ReadableException;
 import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Tag;
@@ -43,6 +45,7 @@ import rx.schedulers.Schedulers;
 public class NoteEditActivity extends BaseActivity implements EditorFragment.EditorFragmentListener, SettingFragment.SettingFragmentListener {
 
     private static final String TAG = "NoteEditActivity:";
+    public static final int RESULT_CONFLICT = 525;
     public static final String EXT_NOTE_LOCAL_ID = "ext_note_local_id";
     public static final String EXT_IS_NEW_NOTE = "ext_is_new_note";
     public static final String TAG_EDITOR = "tag_editor_tag";
@@ -142,8 +145,11 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
                             @Override
                             public void onError(Throwable e) {
                                 DialogDisplayer.dismissProgress();
-                                ToastUtils.show(NoteEditActivity.this, e.getMessage());
+                                ToastUtils.show(Leamonax.getContext(), e.getMessage());
                                 if (e instanceof NetworkUtils.NetworkUnavailableException) {
+                                    finish();
+                                } else if (e instanceof ReadableException) {
+                                    setResult(RESULT_CONFLICT);
                                     finish();
                                 }
                             }
