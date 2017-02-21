@@ -37,6 +37,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -162,8 +163,17 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         Observable.from(notes)
                 .flatMap(new Func1<Note, Observable<Note>>() {
                     @Override
-                    public rx.Observable<Note> call(Note note) {
-                        return NoteService.deleteNote(note);
+                    public rx.Observable<Note> call(final Note note) {
+                        return Observable.create(new Observable.OnSubscribe<Note>() {
+                            @Override
+                            public void call(Subscriber<? super Note> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    NoteService.deleteNote(note);
+                                    subscriber.onNext(note);
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        });
                     }
                 })
                 .subscribeOn(Schedulers.io())

@@ -388,33 +388,24 @@ public class NoteService {
         return localIds;
     }
 
-    //TODO:change to synchonous
-    public static Observable<Note> deleteNote(final Note note) {
-        return Observable.create(
-                new Observable.OnSubscribe<Note>() {
-                    @Override
-                    public void call(Subscriber<? super Note> subscriber) {
-                        if (!subscriber.isUnsubscribed()) {
-                            if (TextUtils.isEmpty(note.getNoteId())) {
-                                AppDataBase.deleteNoteByLocalId(note.getId());
-                            } else {
-                                UpdateRe response = RetrofitUtils.excuteWithException(
-                                        ApiProvider.getInstance().getNoteApi().delete(note.getNoteId(), note.getUsn()));
-                                if (response.isOk()) {
-                                    AppDataBase.deleteNoteByLocalId(note.getId());
-                                    updateNoteUsnIfNeed(response.getUsn());
-                                } else {
-                                    throw new IllegalStateException(response.getMsg());
-                                }
-                            }
-                            subscriber.onNext(note);
-                            subscriber.onCompleted();
-                        }
-                    }
-                });
+    public static void deleteNote(Note note) {
+        if (note.isLocalNote()) {
+            AppDataBase.deleteNoteByLocalId(note.getId());
+        } else {
+            Call<UpdateRe> call = ApiProvider.getInstance().getNoteApi().delete(note.getNoteId(), note.getUsn());
+            UpdateRe response = RetrofitUtils.excuteWithException(call);
+            if (response.isOk()) {
+                AppDataBase.deleteNoteByLocalId(note.getId());
+                updateNoteUsnIfNeed(response.getUsn());
+            } else {
+                throw new IllegalStateException(response.getMsg());
+            }
+        }
     }
 
-    //TODO:delete this method
+    /**
+     * if new usn equals to (current usn + 1), then just simply update usn without syncing.
+     */
     private static void updateNoteUsnIfNeed(int newUsn) {
         Account account = AccountService.getCurrent();
         if (newUsn - account.getNoteUsn() == 1) {
