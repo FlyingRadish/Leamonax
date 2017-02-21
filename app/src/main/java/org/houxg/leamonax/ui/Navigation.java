@@ -28,6 +28,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.elvishew.xlog.XLog;
+import com.tencent.bugly.Bugly;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.AccountAdapter;
@@ -165,6 +167,11 @@ public class Navigation {
 
     private void animateChangeAccount(View v, final Account account) {
         ImageView itemAvatar = (ImageView) v.findViewById(R.id.iv_avatar);
+        if (itemAvatar.getDrawable() == null) {
+            CrashReport.postCatchedException(new IllegalStateException("account item's drawable is null"));
+            changeAccount(account);
+            return;
+        }
         final ViewGroup rootView = (ViewGroup) mActivity.getWindow().getDecorView().getRootView();
 
         float preSize = DisplayUtils.dp2px(30);
@@ -353,6 +360,7 @@ public class Navigation {
             Glide.with(mActivity)
                     .load(account.getAvatar())
                     .centerCrop()
+                    .placeholder(mAlphabetDrawable)
                     .bitmapTransform(new CropCircleTransformation(mActivity))
                     .into(mAvatarIv);
         } else {

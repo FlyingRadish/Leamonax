@@ -192,12 +192,12 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     }
 
     private Observable<Long> uploadToServer(final long noteLocalId) {
-       return Observable.create(
+        return Observable.create(
                 new Observable.OnSubscribe<Long>() {
                     @Override
                     public void call(Subscriber<? super Long> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
-                            NoteService.updateNote(noteLocalId);
+                            NoteService.saveNote(noteLocalId);
                             subscriber.onNext(noteLocalId);
                             subscriber.onCompleted();
                         }

@@ -166,6 +166,10 @@ public class Account extends BaseModel {
         lastUseTime = System.currentTimeMillis() / 1000;
     }
 
+    public long getLastUseTime() {
+        return lastUseTime;
+    }
+
     @Override
     public String toString() {
         return "Account{" +

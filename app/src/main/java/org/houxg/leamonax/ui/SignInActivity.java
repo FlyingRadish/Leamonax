@@ -106,7 +106,7 @@ public class SignInActivity extends BaseActivity implements TextWatcher {
 
             @Override
             public void afterTextChanged(Editable s) {
-                mExampleTv.setText(String.format(Locale.US, "For example, login api will be:\n%s/api/login", s.toString()));
+                mExampleTv.setText(String.format(Locale.US, getString(R.string.host_example), s.toString()));
             }
         });
     }
