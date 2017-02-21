@@ -204,7 +204,7 @@ public class NoteService {
         Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modifiedNote);
         List<MultipartBody.Part> fileBodies = handleFileBodies(modifiedNote, requestBodyMap);
         Call<Note> call;
-        if (modifiedNote.getUsn() == 0) {
+        if (modifiedNote.isLocalNote()) {
             call = ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
         } else {
             Note remoteNote = RetrofitUtils.excuteWithException(getNoteByServerId(modifiedNote.getNoteId()));
