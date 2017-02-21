@@ -220,7 +220,7 @@ public class NoteService {
             } else {
                 requestBodyMap.put("NoteId", createPartFromString(modifiedNote.getNoteId()));
                 requestBodyMap.put("Usn", createPartFromString(String.valueOf(modifiedNote.getUsn())));
-                call = ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
+                call = ApiProvider.getInstance().getNoteApi().update(requestBodyMap, fileBodies);
             }
         }
         Note note = RetrofitUtils.excuteWithException(call);
