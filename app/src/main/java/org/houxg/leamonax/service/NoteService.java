@@ -207,7 +207,7 @@ public class NoteService {
         if (modifiedNote.isLocalNote()) {
             call = ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
         } else {
-            Note remoteNote = RetrofitUtils.excuteWithException(getNoteByServerId(modifiedNote.getNoteId()));
+            Note remoteNote = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getNoteAndContent(modifiedNote.getNoteId()));
             if (remoteNote.getUsn() != modifiedNote.getUsn()) {
                 remoteNote.setId(modifiedNote.getId());
                 remoteNote.update();
@@ -274,20 +274,8 @@ public class NoteService {
                 });
     }
 
-    private static Call<List<Note>> getSyncNotes(int afterUsn, int maxEntry) {
-        return ApiProvider.getInstance().getNoteApi().getSyncNotes(afterUsn, maxEntry);
-    }
-
-    private static Call<List<Notebook>> getSyncNotebooks(int afterUsn, int maxEntry) {
-        return ApiProvider.getInstance().getNotebookApi().getSyncNotebooks(afterUsn, maxEntry);
-    }
-
-    public static Call<Note> getNoteByServerId(String serverId) {
-        return ApiProvider.getInstance().getNoteApi().getNoteAndContent(serverId);
-    }
-
     public static boolean revertNote(String serverId) {
-        Note serverNote = RetrofitUtils.excute(NoteService.getNoteByServerId(serverId));
+        Note serverNote = RetrofitUtils.excute(ApiProvider.getInstance().getNoteApi().getNoteAndContent(serverId));
         if (serverNote == null) {
             return false;
         }
@@ -309,8 +297,6 @@ public class NoteService {
         serverNote.save();
         return true;
     }
-
-
 
     @NonNull
     private static Map<String, RequestBody> generateCommonBodyMap(Note note) {
@@ -402,6 +388,7 @@ public class NoteService {
         return localIds;
     }
 
+    //TODO:change to synchonous
     public static Observable<Note> deleteNote(final Note note) {
         return Observable.create(
                 new Observable.OnSubscribe<Note>() {
@@ -427,16 +414,13 @@ public class NoteService {
                 });
     }
 
+    //TODO:delete this method
     private static void updateNoteUsnIfNeed(int newUsn) {
         Account account = AccountService.getCurrent();
         if (newUsn - account.getNoteUsn() == 1) {
             account.setNoteUsn(newUsn);
             account.update();
         }
-    }
-
-    public static Call<UpdateRe> deleteNote(String noteId, int usn) {
-        return ApiProvider.getInstance().getNoteApi().delete(noteId, usn);
     }
 
     public static void updateTagsToLocal(long noteLocalId, List<String> tags) {
@@ -480,7 +464,6 @@ public class NoteService {
             );
         }
     }
-
 
     private static RequestBody createPartFromString(String content) {
         return RequestBody.create(MediaType.parse(MULTIPART_FORM_DATA), content);
