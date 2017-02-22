@@ -75,6 +75,11 @@ public class DialogUtils {
             public void onClickedAddNotebook(String parentNotebookId) {
 
             }
+
+            @Override
+            public void onEditNotebook(Notebook notebook) {
+
+            }
         });
         dialog.show();
 

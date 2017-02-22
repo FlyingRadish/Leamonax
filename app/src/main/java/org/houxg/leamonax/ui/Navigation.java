@@ -43,6 +43,7 @@ import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.OpenUtils;
+import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.AlphabetDrawable;
 import org.houxg.leamonax.widget.TriangleView;
 
@@ -312,6 +313,25 @@ public class Navigation {
                         })
                         .show();
             }
+
+            @Override
+            public void onEditNotebook(final Notebook notebook) {
+                View view = LayoutInflater.from(mActivity).inflate(R.layout.dialog_sigle_edittext, null);
+                final EditText mEdit = (EditText) view.findViewById(R.id.edit);
+                mEdit.setText(notebook.getTitle());
+                mEdit.setSelection(notebook.getTitle().length());
+                new AlertDialog.Builder(mActivity)
+                        .setTitle(R.string.update_notebook_title)
+                        .setView(view)
+                        .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                updateNotebook(mEdit.getText().toString(), notebook);
+                            }
+                        })
+                        .show();
+            }
         });
         mNotebookRv.setAdapter(mNotebookAdapter);
         mNotebookAdapter.refresh();
@@ -323,7 +343,47 @@ public class Navigation {
         });
     }
 
+    private void updateNotebook(final String title, final Notebook notebook) {
+        if (TextUtils.isEmpty(title)) {
+            ToastUtils.show(mActivity, R.string.toast_notebook_title_not_empty);
+            return;
+        }
+        Observable.create(
+                new Observable.OnSubscribe<Notebook>() {
+                    @Override
+                    public void call(Subscriber<? super Notebook> subscriber) {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(NotebookService.updateNotebook(title, notebook));
+                            subscriber.onCompleted();
+                        }
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Notebook>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Notebook isSucceed) {
+                        mNotebookAdapter.refresh();
+                    }
+                });
+
+    }
+
     private void addNotebook(final String title, final String parentNotebookId) {
+        if (TextUtils.isEmpty(title)) {
+            ToastUtils.show(mActivity, R.string.toast_notebook_title_not_empty);
+            return;
+        }
         Observable.create(
                 new Observable.OnSubscribe<Notebook>() {
                     @Override

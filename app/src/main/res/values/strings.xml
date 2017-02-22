@@ -110,4 +110,6 @@
     <string name="host_example">For example, login api will be:\n%s/api/login</string>
     <string name="my_blog">My Blog</string>
     <string name="explore">Leanote Explore</string>
+    <string name="toast_notebook_title_not_empty">the notebook title can\'t empty</string>
+    <string name="update_notebook_title">Update notebook title</string>
 </resources>

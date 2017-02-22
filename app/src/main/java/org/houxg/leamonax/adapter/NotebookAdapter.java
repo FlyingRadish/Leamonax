@@ -14,6 +14,7 @@ import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.CollectionUtils;
+import org.houxg.leamonax.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,14 +114,16 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         String notebookId = notebook.getNotebookId();
         boolean isSuper = isSuper(notebookId);
         boolean isSuperOrRoot = isSuper | mStack.isEmpty();
-        boolean hasChild = hasChild(notebookId);
+        final boolean hasChild = hasChild(notebookId);
         holder.placeholder.setVisibility(isSuperOrRoot ? View.GONE : View.VISIBLE);
-        holder.navigator.setVisibility(mCanOpenEmpty | hasChild ? View.VISIBLE : View.INVISIBLE);
         holder.navigator.setImageResource(isSuper ? R.drawable.ic_expanding : R.drawable.ic_expandable);
         holder.navigator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO: arrow animation
+                if (!hasChild) {
+                    return;
+                }
                 if (isSuper(notebook.getNotebookId())) {
                     listUpper();
                 } else {
@@ -132,9 +135,17 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    listChild(notebook);
                     mListener.onClickedNotebook(notebook);
                 }
+            }
+        });
+        holder.titleTv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (mListener != null) {
+                    mListener.onEditNotebook(notebook);
+                }
+                return true;
             }
         });
     }
@@ -197,6 +208,8 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         void onClickedNotebook(Notebook notebook);
 
         void onClickedAddNotebook(String parentNotebookId);
+
+        void onEditNotebook(Notebook notebook);
     }
 
     static class NotebookHolder extends RecyclerView.ViewHolder {
