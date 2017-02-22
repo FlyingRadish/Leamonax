@@ -35,6 +35,7 @@ import org.houxg.leamonax.utils.ToastUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -156,9 +157,19 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         Account account = AccountService.getCurrent();
         Note newNote = new Note();
         newNote.setUserId(account.getUserId());
-        Notebook recentNotebook = AppDataBase.getRecentNoteBook(AccountService.getCurrent().getUserId());
-        if (recentNotebook != null) {
-            newNote.setNoteBookId(recentNotebook.getNotebookId());
+        Notebook notebook;
+        Navigation.Mode currentMode = mNavigation.getCurrentMode();
+        if (currentMode == Navigation.Mode.NOTEBOOK) {
+            notebook = AppDataBase.getNotebookByLocalId(currentMode.notebookId);
+        } else {
+            notebook = AppDataBase.getRecentNoteBook(AccountService.getCurrent().getUserId());
+        }
+        if (notebook != null) {
+            newNote.setNoteBookId(notebook.getNotebookId());
+        } else {
+            Exception exception = new IllegalStateException(
+                    String.format(Locale.US, "notebook is null, mode:%s, notebookLocalId:%d", currentMode, currentMode.notebookId));
+            CrashReport.postCatchedException(exception);
         }
         newNote.setIsMarkDown(account.getDefaultEditor() == Account.EDITOR_MARKDOWN);
         newNote.save();
