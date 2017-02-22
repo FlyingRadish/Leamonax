@@ -369,6 +369,10 @@ public class Navigation {
         }
     }
 
+    public Mode getCurrentMode() {
+        return mCurrentMode;
+    }
+
     public void refresh() {
         refreshUserInfo(AccountService.getCurrent());
         mAccountAdapter.load(AccountService.getAccountList());
