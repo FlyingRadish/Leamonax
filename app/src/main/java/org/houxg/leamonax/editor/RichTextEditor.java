@@ -32,7 +32,7 @@ public class RichTextEditor extends Editor implements TinnyMceCallback.TinnyMceL
         mWebView.setWebViewClient(new EditorClient());
         mWebView.setWebChromeClient(new EditorChromeClient());
         mWebView.addJavascriptInterface(new TinnyMceCallback(this), JS_CALLBACK_HANDLER);
-        mWebView.loadUrl("file:///android_asset/RichTextEditor/editor.html");
+        mWebView.loadUrl("file:///android_asset/RichTextEditor/editor.html?lang=" + Locale.getDefault().getLanguage());
     }
 
     private void execJs(final String script) {

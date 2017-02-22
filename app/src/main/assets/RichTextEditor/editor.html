@@ -1,48 +1,18 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+    <meta charset="utf-8">
     <title>RichTextEditor</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <script src="./tinymce/tinymce.min.js"></script>
-    <script src="jquery-3.1.1.min.js"></script>
-    <style type="text/css">
-        .without-border {outline: 0px solid transparent;}
-        .ace-tomorrow {
-            overflow: auto;
-            font-family: monospace, monospace;
-            font-size: 18px;
-            border: 1px solid rgb(221, 219, 204);
-            border-top-left-radius: 3px;
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-            border-bottom-left-radius: 3px;
-            margin-top: 0px;
-            margin-bottom: 40px;
-            padding: 15px 20px;
-            color: rgb(66, 66, 66);
-            line-height: normal;
-            widows: 1;
-            background-color: rgb(241, 240, 234);
-            background-position: initial initial;
-            background-repeat: initial initial;
-        }
-
-        html, body {
-            height: 100%;
-        }
-
-        img {
-            max-width: 100%;
-        }
-
-    </style>
+    <script src="./jquery-3.1.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 
 <body>
-    <h3 id="title" style="outline: 0px solid transparent;" class="without-border" contenteditable="true"></h3>
-    <hr id="hr" />
-    <div id="content" style="outline: 0px solid transparent;"></div>
+    <div id="title" style="outline: 0px solid transparent;" class="without-border field" placeholderText="Title" contenteditable="true"></div>
+    <div contenteditable=false id=separatorDiv><hr></div>
+    <div id="content" class="field" placeholderText="Content"></div>
     <p id="dummyP" style="display:none;"></p>
 </body>
 
@@ -61,13 +31,24 @@
                         - parseInt(hr.css('marginBottom'));
     $('#content').css('height', contentHeight + 'px');
 
+    // lang
+    var ms = location.href.match(/lang=(.+)/);
+    var lang = 'en';
+    if (ms) {
+        lang = ms[1].toLowerCase();
+    }
+    if (lang.indexOf('zh') >= 0) {
+        $('#title').attr('placeholderText', '标题')
+        $('#content').attr('placeholderText', '内容')
+    }
+
     var titleDiv = document.getElementById('title');
     function getTitle() {
-        return titleDiv.innerHTML;
+        return titleDiv.innerText;
     }
 
     function setTitle(title) {
-        return titleDiv.innerHTML = title;
+        return titleDiv.innerText = title;
     }
 
     tinymce.init({
@@ -128,6 +109,8 @@
     }
 
     function getSelectedContent() {
+        return $("#content").html();
+        // 因为历史原因, mindMap的data-src="-", 如果这样, 就导致mindMap的src="-", 所以直接返回html
         return tinyMCE.editors[0].selection.getContent();
     }
 
