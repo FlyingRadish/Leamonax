@@ -42,6 +42,7 @@ import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
 import org.houxg.leamonax.utils.DisplayUtils;
+import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.widget.AlphabetDrawable;
 import org.houxg.leamonax.widget.TriangleView;
 
@@ -505,5 +506,22 @@ public class Navigation {
                     ", tagText='" + tagText + '\'' +
                     '}';
         }
+    }
+
+    @OnClick(R.id.rl_blog)
+    void clickedMyBlog() {
+        Account current = AccountService.getCurrent();
+        String host = current.getHost();
+        if (host == null || host.equals("")) {
+            host = "https://leanote.com";
+        }
+
+        host = host.replace("https://", "http://");
+        OpenUtils.openUrl(mActivity, host + "/blog/" + current.getUserId());
+    }
+
+    @OnClick(R.id.rl_explore)
+    void clickedExplore() {
+        OpenUtils.openUrl(mActivity, "http://lea.leanote.com");
     }
 }

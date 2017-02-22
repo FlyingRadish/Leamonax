@@ -106,4 +106,6 @@
     <string name="leanote">蚂蚁笔记</string>
     <string name="conflict_occurs">糟糕，笔记冲突</string>
     <string name="host_example">登录接口地址将会是:\n%s/api/login</string>
+    <string name="my_blog">我的博客</string>
+    <string name="explore">蚂蚁笔记探索</string>
 </resources>

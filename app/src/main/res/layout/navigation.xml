@@ -191,6 +191,60 @@
 
     <include layout="@layout/divider" />
 
+
+
+    <RelativeLayout
+        android:id="@+id/rl_blog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_blog" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="48dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/my_blog"
+            android:textColor="@color/primary_text_light"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_explore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="16dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_leanote" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="48dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/explore"
+            android:textColor="@color/primary_text_light"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
     <RelativeLayout
         android:id="@+id/rl_settings"
         android:layout_width="match_parent"
@@ -217,7 +271,7 @@
             android:textColor="@color/primary_text_light"
             android:textSize="14sp" />
     </RelativeLayout>
-
+    
     <RelativeLayout
         android:id="@+id/rl_about"
         android:layout_width="match_parent"

@@ -80,12 +80,17 @@ public class AboutActivity extends BaseActivity {
 
     @OnClick(R.id.ll_github)
     void clickedGithub() {
-        OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax");
+        OpenUtils.openUrl(this, "https://github.com/leanote/leanote-android");
     }
 
     @OnClick(R.id.ll_feedback)
     void clickedFeedback() {
-        OpenUtils.openUrl(this, "https://github.com/houxg/Leamonax/issues");
+        OpenUtils.openUrl(this, "https://github.com/leanote/leanote-android/issues");
+    }
+
+    @OnClick(R.id.thanks)
+    void clickedThanks() {
+        OpenUtils.openUrl(this, "https://github.com/leanote/leanote-android/graphs/contributors");
     }
 
 }
