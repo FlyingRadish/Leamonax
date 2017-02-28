@@ -4,9 +4,12 @@ import com.google.gson.annotations.SerializedName;
 import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
 import org.houxg.leamonax.database.AppDataBase;
+
+import java.util.List;
 
 /**
  * Created by binnchx on 11/1/15.
@@ -176,5 +179,73 @@ public class Notebook extends BaseModel {
 
     public String getMsg() {
         return msg;
+    }
+
+    public static List<Notebook> getAllNotebooks(String userId) {
+        return SQLite.select()
+                .from(Notebook.class)
+                .where(Notebook_Table.userId.eq(userId))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
+                .queryList();
+    }
+
+    public static Notebook getByLocalId(long localId) {
+        return SQLite.select()
+                .from(Notebook.class)
+                .where(Notebook_Table.id.eq(localId))
+                .querySingle();
+    }
+
+    public static Notebook getByServerId(String serverId) {
+        return SQLite.select()
+                .from(Notebook.class)
+                .where(Notebook_Table.notebookId.eq(serverId))
+                .querySingle();
+    }
+
+    public static Notebook getRecentNoteBook(String userId) {
+        Note recentNotes = SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.userId.eq(userId))
+                .and(Note_Table.notebookId.notEq(""))
+                .orderBy(Note_Table.updatedTime, false)
+                .querySingle();
+        if (recentNotes != null) {
+            Notebook notebook = getByServerId(recentNotes.getNoteBookId());
+            if (notebook != null && !notebook.isDeleted()) {
+                return notebook;
+            }
+        }
+
+        return SQLite.select()
+                .from(Notebook.class)
+                .where(Notebook_Table.userId.eq(userId))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
+                .querySingle();
+    }
+
+    public static List<Notebook> getRootNotebooks(String userId) {
+        return SQLite.select()
+                .from(Notebook.class)
+                .where(Notebook_Table.userId.eq(userId))
+                .and(Notebook_Table.parentNotebookId.eq(""))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
+                .queryList();
+    }
+
+    public static List<Notebook> getChildNotebook(String notebookId, String userId) {
+        return SQLite.select()
+                .from(Notebook.class)
+                .where(Notebook_Table.userId.eq(userId))
+                .and(Notebook_Table.parentNotebookId.eq(notebookId))
+                .and(Notebook_Table.isDeletedOnServer.eq(false))
+                .queryList();
+    }
+
+    public static void deleteAll(String userId) {
+        SQLite.delete()
+                .from(Notebook.class)
+                .where(Notebook_Table.userId.eq(userId))
+                .execute();
     }
 }

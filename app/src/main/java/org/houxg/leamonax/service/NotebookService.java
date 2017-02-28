@@ -33,7 +33,7 @@ public class NotebookService {
     }
 
     public static String getTitle(long notebookLocalId) {
-        Notebook notebook = AppDataBase.getNotebookByLocalId(notebookLocalId);
+        Notebook notebook = Notebook.getByLocalId(notebookLocalId);
         return notebook != null ? notebook.getTitle() : "";
     }
 }

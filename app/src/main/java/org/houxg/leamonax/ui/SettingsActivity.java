@@ -192,26 +192,14 @@ public class SettingsActivity extends BaseActivity {
                     public void call(Subscriber<? super Void> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             Account currentUser = AccountService.getCurrent();
-                            SQLite.delete()
-                                    .from(Note.class)
-                                    .where(Note_Table.userId.eq(currentUser.getUserId()))
-                                    .execute();
-                            SQLite.delete()
-                                    .from(Notebook.class)
-                                    .where(Notebook_Table.userId.eq(currentUser.getUserId()))
-                                    .execute();
-                            SQLite.delete()
-                                    .from(Tag.class)
-                                    .where(Tag_Table.userId.eq(currentUser.getUserId()))
-                                    .execute();
-                            SQLite.delete()
-                                    .from(RelationshipOfNoteTag.class)
-                                    .where(RelationshipOfNoteTag_Table.userId.eq(currentUser.getUserId()))
-                                    .execute();
-                            Account account = AccountService.getCurrent();
-                            account.setNoteUsn(0);
-                            account.setNotebookUsn(0);
-                            account.update();
+                            String userId = currentUser.getUserId();
+                            Note.deleteAll(userId);
+                            Notebook.deleteAll(userId);
+                            Tag.deleteAll(userId);
+                            RelationshipOfNoteTag.deleteAll(userId);
+                            currentUser.setNoteUsn(0);
+                            currentUser.setNotebookUsn(0);
+                            currentUser.update();
                             subscriber.onNext(null);
                             subscriber.onCompleted();
                         }

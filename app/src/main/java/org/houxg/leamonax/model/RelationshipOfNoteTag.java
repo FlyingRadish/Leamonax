@@ -4,6 +4,7 @@ package org.houxg.leamonax.model;
 import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
 import org.houxg.leamonax.database.AppDataBase;
@@ -42,5 +43,12 @@ public class RelationshipOfNoteTag extends BaseModel {
 
     public long getTagLocalId() {
         return tagLocalId;
+    }
+
+    public static void deleteAll(String userId) {
+        SQLite.delete()
+                .from(RelationshipOfNoteTag.class)
+                .where(RelationshipOfNoteTag_Table.userId.eq(userId))
+                .execute();
     }
 }

@@ -28,7 +28,7 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.TagHolder> {
     }
 
     public void refresh() {
-        mData = AppDataBase.getAllTags(AccountService.getCurrent().getUserId());
+        mData = Tag.getAllTags(AccountService.getCurrent().getUserId());
         notifyDataSetChanged();
     }
 

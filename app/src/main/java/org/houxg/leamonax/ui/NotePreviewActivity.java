@@ -56,7 +56,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
         ButterKnife.bind(this);
         initToolBar((Toolbar) findViewById(R.id.toolbar), true);
         long noteLocalId = getIntent().getLongExtra(EXT_NOTE_LOCAL_ID, -1);
-        mNote = AppDataBase.getNoteByLocalId(noteLocalId);
+        mNote = Note.getByLocalId(noteLocalId);
         if (mNote == null) {
             ToastUtils.show(this, R.string.note_not_found);
             CrashReport.postCatchedException(new IllegalStateException("Note not found while preview, localId=" + noteLocalId));
@@ -113,7 +113,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
         if (requestCode == REQ_EDIT) {
             switch (resultCode) {
                 case RESULT_OK:
-                    mNote = AppDataBase.getNoteByLocalId(mNote.getId());
+                    mNote = Note.getByLocalId(mNote.getId());
                     if (mNote == null) {
                         finish();
                     } else {
@@ -163,7 +163,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
 
                     @Override
                     public void onNext(Long aLong) {
-                        mNote = AppDataBase.getNoteByLocalId(mNote.getId());
+                        mNote = Note.getByLocalId(mNote.getId());
                         mNote.setIsDirty(false);
                         mNote.save();
                         refresh();
@@ -205,7 +205,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                     @Override
                     public void call(Boolean isSucceed) {
                         if (isSucceed) {
-                            mNote = AppDataBase.getNoteByServerId(mNote.getNoteId());
+                            mNote = Note.getByServerId(mNote.getNoteId());
                             refresh();
                         }
                     }

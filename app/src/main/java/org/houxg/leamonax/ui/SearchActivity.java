@@ -136,7 +136,7 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         if (TextUtils.isEmpty(keyword)) {
             mNotes = new ArrayList<>();
         } else {
-            mNotes = NoteService.searchNoteWithTitle(keyword);
+            mNotes = Note.searchByTitle(keyword);
             Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         }
         mAdapter.setHighlight(keyword);

@@ -416,7 +416,7 @@ public class Navigation {
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_ADD_ACCOUNT) {
             if (resultCode == RESULT_OK) {
-                Account account = AccountService.getAccountById(SignInActivity.getAccountIdFromData(data));
+                Account account = Account.getAccountById(SignInActivity.getAccountIdFromData(data));
                 if (account != null) {
                     changeAccount(account);
                 }

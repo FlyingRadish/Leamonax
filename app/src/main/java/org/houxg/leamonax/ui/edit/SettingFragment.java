@@ -63,7 +63,7 @@ public class SettingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, view);
-        List<Tag> tags = AppDataBase.getAllTags(AccountService.getCurrent().getUserId());
+        List<Tag> tags = Tag.getAllTags(AccountService.getCurrent().getUserId());
         String[] tagTexts = new String[tags.size()];
         int i = 0;
         for (Tag tag : tags) {
@@ -136,7 +136,7 @@ public class SettingFragment extends Fragment {
     public void setNotebookId(String notebookId) {
         mNoteBookId = notebookId;
         if (!TextUtils.isEmpty(mNoteBookId)) {
-            Notebook notebook = AppDataBase.getNotebookByServerId(mNoteBookId);
+            Notebook notebook = Notebook.getByServerId(mNoteBookId);
             if (notebook != null) {
                 mNotebookTv.setText(notebook.getTitle());
             }

@@ -7,15 +7,22 @@ import com.google.gson.annotations.SerializedName;
 import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.sql.language.Join;
+import com.raizlabs.android.dbflow.sql.language.NameAlias;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.raizlabs.android.dbflow.sql.language.property.IProperty;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
 import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.TimeUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by binnchx on 10/18/15.
@@ -255,6 +262,86 @@ public class Note extends BaseModel implements Serializable {
 
     //TODO:delete this
     public void setPublicTime(String publicTime) {
+    }
+
+    public static List<Note> searchByTitle(String keyword) {
+        keyword = String.format(Locale.US, "%%%s%%", keyword);
+        return SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.userId.eq(AccountService.getCurrent().getUserId()))
+                .and(Note_Table.title.like(keyword))
+                .and(Note_Table.isTrash.eq(false))
+                .and(Note_Table.isDeleted.eq(false))
+                .queryList();
+    }
+
+    public static Note getByServerId(String serverId) {
+        return SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.noteId.eq(serverId))
+                .querySingle();
+    }
+
+    public static Note getByLocalId(long localId) {
+        return SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.id.eq(localId))
+                .querySingle();
+    }
+
+    public static List<Note> getAllNotes(String userId) {
+        return SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.userId.eq(userId))
+                .and(Note_Table.isTrash.eq(false))
+                .and(Note_Table.isDeleted.eq(false))
+                .and(Note_Table.isTrash.eq(false))
+                .queryList();
+    }
+
+    public static List<Note> getNotesFromNotebook(String userId, long localNotebookId) {
+        Notebook notebook = Notebook.getByLocalId(localNotebookId);
+        if (notebook == null) {
+            return new ArrayList<>();
+        }
+        return SQLite.select()
+                .from(Note.class)
+                .where(Note_Table.notebookId.eq(notebook.getNotebookId()))
+                .and(Note_Table.userId.eq(userId))
+                .and(Note_Table.isTrash.eq(false))
+                .and(Note_Table.isDeleted.eq(false))
+                .and(Note_Table.isTrash.eq(false))
+                .queryList();
+    }
+
+    public static List<Note> getByTagText(String tagText, String userId) {
+        Tag tag = Tag.getByText(tagText, userId);
+        if (tag == null) {
+            return new ArrayList<>();
+        }
+        return getNotesByTagId(tag.getId());
+    }
+
+    private static List<Note> getNotesByTagId(long tagId) {
+        IProperty[] properties = Note_Table.ALL_COLUMN_PROPERTIES;
+        NameAlias nameAlias = NameAlias.builder("N").build();
+        for (int i = 0; i < properties.length; i++) {
+            properties[i] = properties[i].withTable(nameAlias);
+        }
+        return SQLite.select(properties)
+                .from(Note.class).as("N")
+                .join(RelationshipOfNoteTag.class, Join.JoinType.INNER).as("R")
+                .on(Tag_Table.id.withTable(NameAlias.builder("N").build())
+                        .eq(RelationshipOfNoteTag_Table.noteLocalId.withTable(NameAlias.builder("R").build())))
+                .where(RelationshipOfNoteTag_Table.tagLocalId.withTable(NameAlias.builder("R").build()).eq(tagId))
+                .queryList();
+    }
+
+    public static void deleteAll(String userId) {
+        SQLite.delete()
+                .from(Note.class)
+                .where(Note_Table.userId.eq(userId))
+                .execute();
     }
 
     @Override

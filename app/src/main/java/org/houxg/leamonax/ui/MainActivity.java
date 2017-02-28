@@ -160,9 +160,9 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         Notebook notebook;
         Navigation.Mode currentMode = mNavigation.getCurrentMode();
         if (currentMode == Navigation.Mode.NOTEBOOK) {
-            notebook = AppDataBase.getNotebookByLocalId(currentMode.notebookId);
+            notebook = Notebook.getByLocalId(currentMode.notebookId);
         } else {
-            notebook = AppDataBase.getRecentNoteBook(AccountService.getCurrent().getUserId());
+            notebook = Notebook.getRecentNoteBook(AccountService.getCurrent().getUserId());
         }
         if (notebook != null) {
             newNote.setNoteBookId(notebook.getNotebookId());
@@ -192,13 +192,13 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         List<Note> notes;
         switch (mode) {
             case RECENT_NOTES:
-                notes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
+                notes = Note.getAllNotes(AccountService.getCurrent().getUserId());
                 break;
             case NOTEBOOK:
-                notes = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), mode.notebookId);
+                notes = Note.getNotesFromNotebook(AccountService.getCurrent().getUserId(), mode.notebookId);
                 break;
             case TAG:
-                notes = AppDataBase.getNotesByTagText(mode.tagText, AccountService.getCurrent().getUserId());
+                notes = Note.getByTagText(mode.tagText, AccountService.getCurrent().getUserId());
                 break;
             default:
                 return false;
