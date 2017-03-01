@@ -20,6 +20,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.background.NoteSyncService;
+import org.houxg.leamonax.component.PullToRefresh;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
@@ -44,9 +45,8 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
 
     @BindView(R.id.drawer)
     View mNavigationView;
-    @BindView(R.id.swiperefresh)
-    SwipeRefreshLayout mSwipeRefresh;
 
+    PullToRefresh mPullToRefresh;
     Navigation mNavigation;
 
     public static Intent getOpenIntent(Context context, boolean shouldReload) {
@@ -77,31 +77,26 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
             mNoteFragment = (NoteFragment) getSupportFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);
         }
 
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                syncNotes();
-            }
-        });
+        mPullToRefresh = new PullToRefresh(
+                (SwipeRefreshLayout) findViewById(R.id.swiperefresh),
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        syncNotes();
+                    }
+                });
 
         EventBus.getDefault().register(this);
 
         if (shouldReload) {
-            mSwipeRefresh.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    XLog.i("fetching notes");
-                    mSwipeRefresh.setRefreshing(true);
-                    syncNotes();
-                }
-            }, 200);
+            mPullToRefresh.forceRefresh();
         }
     }
 
     private void syncNotes() {
         if (!NetworkUtils.isNetworkAvailable()) {
             ToastUtils.showNetworkUnavailable(MainActivity.this);
-            mSwipeRefresh.setRefreshing(false);
+            mPullToRefresh.stopRefreshing();
             return;
         }
         NoteSyncService.startServiceForNote(MainActivity.this);
@@ -176,7 +171,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         account.updateLastUseTime();
         account.update();
         mNavigation.refresh();
-        mSwipeRefresh.setRefreshing(true);
+        mPullToRefresh.stopRefreshing();
         syncNotes();
         return true;
     }
@@ -216,7 +211,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(SyncEvent event) {
         XLog.i("RequestNotes rcv: isSucceed=" + event.isSucceed());
-        mSwipeRefresh.setRefreshing(false);
+        mPullToRefresh.stopRefreshing();
         if (event.isSucceed()) {
             mNavigation.refresh();
         } else {
