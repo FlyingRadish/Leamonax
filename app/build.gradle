@@ -104,4 +104,6 @@ dependencies {
     compile 'com.elvishew:xlog:1.3.0'
     compile 'com.github.piasy:BigImageViewer:1.2.5'
     compile 'com.github.piasy:GlideImageLoader:1.2.5'
+    compile 'com.weiwangcn.betterspinner:library-material:1.1.0'
+
 }

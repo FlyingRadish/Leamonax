@@ -36,4 +36,24 @@ public class NotebookService {
         Notebook notebook = AppDataBase.getNotebookByLocalId(notebookLocalId);
         return notebook != null ? notebook.getTitle() : "";
     }
+
+    public static Notebook updateNotebook(String title, Notebook notebook) {
+        Notebook newNotebook = RetrofitUtils.excute(ApiProvider.getInstance().getNotebookApi().
+                updateNotebook(notebook.getNotebookId(), title, notebook.getParentNotebookId(), notebook.getSeq(), notebook.getUsn()));
+        if (newNotebook == null) {
+            throw new IllegalStateException("Network error");
+        }
+        if (newNotebook.isOk()) {
+            Account account = AccountService.getCurrent();
+            if (notebook.getUsn() - account.getNotebookUsn() == 1) {
+                account.setNotebookUsn(notebook.getUsn());
+                account.save();
+            }
+            newNotebook.setId(notebook.getId());
+            newNotebook.update();
+            return notebook;
+        } else {
+            throw new IllegalStateException(notebook.getMsg());
+        }
+    }
 }

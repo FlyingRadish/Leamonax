@@ -110,4 +110,8 @@
     <string name="host_example">For example, login api will be:\n%s/api/login</string>
     <string name="my_blog">My Blog</string>
     <string name="explore">Leanote Explore</string>
+    <string name="toast_notebook_title_not_empty">the notebook title can\'t empty</string>
+    <string name="update_notebook_title">Update notebook title</string>
+    <string name="notebook_choose_notebook_hint">选择该笔记本所在的上一级笔记本目录 Choose current Notebook \'s parentNotebook directory</string>
+    <string name="notebook_default_root_notebook_title">Empty directory</string>
 </resources>

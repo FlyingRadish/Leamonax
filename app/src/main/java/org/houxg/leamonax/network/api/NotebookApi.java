@@ -19,4 +19,9 @@ public interface NotebookApi {
 
     @POST("notebook/addNotebook")
     Call<Notebook> addNotebook(@Query("title") String title, @Query("parentNotebookId") String parentId);
+
+    @POST("notebook/updateNotebook")
+    Call<Notebook> updateNotebook(@Query("notebookId") String notebookId, @Query("title") String title,
+                                  @Query("parentNotebookId") String parentId, @Query("seq") int seq, @Query("usn") int usn);
+
 }

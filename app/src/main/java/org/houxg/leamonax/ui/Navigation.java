@@ -6,18 +6,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.graphics.drawable.DrawableWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +22,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.elvishew.xlog.XLog;
-import com.tencent.bugly.Bugly;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
 
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.AccountAdapter;
@@ -41,10 +35,17 @@ import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.model.User;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NotebookService;
+import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.DisplayUtils;
 import org.houxg.leamonax.utils.OpenUtils;
+import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.AlphabetDrawable;
 import org.houxg.leamonax.widget.TriangleView;
+import org.houxg.leamonax.widget.spinner.SpinnerArrayAdapter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -297,9 +298,24 @@ public class Navigation {
             }
 
             @Override
-            public void onClickedAddNotebook(final String parentNotebookId) {
-                View view = LayoutInflater.from(mActivity).inflate(R.layout.dialog_sigle_edittext, null);
+            public void onClickedAddNotebook(final String parentNotebookId, List<Notebook> notebooks) {
+                View view = LayoutInflater.from(mActivity).inflate(R.layout.dialog_add_notebook, null);
                 final EditText mEdit = (EditText) view.findViewById(R.id.edit);
+                final MaterialBetterSpinner spinner = (MaterialBetterSpinner) view.findViewById(R.id.spinner);
+                final List<Notebook> tempNotebooks = new ArrayList<>();
+                tempNotebooks.clear();
+                tempNotebooks.addAll(notebooks);
+                Notebook rootNoteBook = new Notebook();
+                rootNoteBook.setTitle(mActivity.getString(R.string.notebook_default_root_notebook_title));
+                tempNotebooks.add(0, rootNoteBook);
+                SpinnerArrayAdapter<Notebook> adapter = new SpinnerArrayAdapter<Notebook>(view.getContext(), tempNotebooks) {
+                    @Override
+                    public String itemToString(Notebook item) {
+                        return item.getTitle();
+                    }
+                };
+                spinner.setAdapter(adapter);
+                spinner.setText(rootNoteBook.getTitle());
                 new AlertDialog.Builder(mActivity)
                         .setTitle(R.string.add_notebook)
                         .setView(view)
@@ -307,7 +323,35 @@ public class Navigation {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                addNotebook(mEdit.getText().toString(), parentNotebookId);
+                                addNotebook(mEdit.getText().toString(), getNotebookId(tempNotebooks, spinner.getText().toString()));
+                            }
+                        })
+                        .show();
+            }
+
+            private String getNotebookId(List<Notebook> notebooks, String title) {
+                for (Notebook notebook : notebooks) {
+                    if (TextUtils.equals(notebook.getTitle(), title)) {
+                        return notebook.getNotebookId();
+                    }
+                }
+                return "";
+            }
+
+            @Override
+            public void onEditNotebook(final Notebook notebook) {
+                View view = LayoutInflater.from(mActivity).inflate(R.layout.dialog_sigle_edittext, null);
+                final EditText mEdit = (EditText) view.findViewById(R.id.edit);
+                mEdit.setText(notebook.getTitle());
+                mEdit.setSelection(notebook.getTitle().length());
+                new AlertDialog.Builder(mActivity)
+                        .setTitle(R.string.update_notebook_title)
+                        .setView(view)
+                        .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                updateNotebook(mEdit.getText().toString(), notebook);
                             }
                         })
                         .show();
@@ -323,7 +367,47 @@ public class Navigation {
         });
     }
 
+    private void updateNotebook(final String title, final Notebook notebook) {
+        if (TextUtils.isEmpty(title)) {
+            ToastUtils.show(mActivity, R.string.toast_notebook_title_not_empty);
+            return;
+        }
+        Observable.create(
+                new Observable.OnSubscribe<Notebook>() {
+                    @Override
+                    public void call(Subscriber<? super Notebook> subscriber) {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(NotebookService.updateNotebook(title, notebook));
+                            subscriber.onCompleted();
+                        }
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Notebook>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Notebook isSucceed) {
+                        mNotebookAdapter.refresh();
+                    }
+                });
+
+    }
+
     private void addNotebook(final String title, final String parentNotebookId) {
+        if (TextUtils.isEmpty(title)) {
+            ToastUtils.show(mActivity, R.string.toast_notebook_title_not_empty);
+            return;
+        }
         Observable.create(
                 new Observable.OnSubscribe<Notebook>() {
                     @Override
