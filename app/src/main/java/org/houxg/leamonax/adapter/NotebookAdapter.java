@@ -101,7 +101,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
                 @Override
                 public void onClick(View v) {
                     if (mListener != null) {
-                        mListener.onClickedAddNotebook(getCurrentParentId());
+                        mListener.onClickedAddNotebook(getCurrentParentId(), mData);
                     }
                 }
             });
@@ -207,7 +207,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     public interface NotebookAdapterListener {
         void onClickedNotebook(Notebook notebook);
 
-        void onClickedAddNotebook(String parentNotebookId);
+        void onClickedAddNotebook(String parentNotebookId, List<Notebook> notebooks);
 
         void onEditNotebook(Notebook notebook);
     }

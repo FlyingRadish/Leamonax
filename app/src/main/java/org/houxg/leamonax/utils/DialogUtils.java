@@ -15,6 +15,8 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.model.Notebook;
 
+import java.util.List;
+
 public class DialogUtils {
 
     public static void editLink(Context context, String title, String link, @NonNull final ChangedListener listener) {
@@ -72,7 +74,7 @@ public class DialogUtils {
             }
 
             @Override
-            public void onClickedAddNotebook(String parentNotebookId) {
+            public void onClickedAddNotebook(String parentNotebookId, List<Notebook> notebooks) {
 
             }
 

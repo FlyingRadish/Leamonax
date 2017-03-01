@@ -110,4 +110,6 @@
     <string name="explore">蚂蚁笔记探索</string>
     <string name="toast_notebook_title_not_empty">笔记本的名称不能为空</string>
     <string name="update_notebook_title">修改笔记本的名称</string>
+    <string name="notebook_choose_notebook_hint">选择该笔记本所在的上一级笔记本目录</string>
+    <string name="notebook_default_root_notebook_title">空目录(最顶层目录)</string>
 </resources>
