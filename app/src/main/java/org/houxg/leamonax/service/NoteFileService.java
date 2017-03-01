@@ -7,6 +7,7 @@ import com.elvishew.xlog.XLog;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.Leamonax;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.NoteFile;
 
 import java.io.File;
@@ -50,7 +51,7 @@ public class NoteFileService {
     }
 
     public static Uri getServerImageUri(String serverId) {
-        Uri uri = Uri.parse(AccountService.getCurrent().getHost());
+        Uri uri = Uri.parse(Account.getCurrent().getHost());
         return uri.buildUpon().appendEncodedPath("api/file/getImage").appendQueryParameter("fileId", serverId).build();
     }
 
@@ -86,7 +87,7 @@ public class NoteFileService {
             filePath = noteFile.getLocalPath();
             XLog.i(TAG + "use local image, path=" + filePath);
         } else {
-            String url = NoteFileService.getUrl(AccountService.getCurrent().getHost(), noteFile.getServerId(), AccountService.getCurrent().getAccessToken());
+            String url = NoteFileService.getUrl(Account.getCurrent().getHost(), noteFile.getServerId(), Account.getCurrent().getAccessToken());
             XLog.i(TAG + "use server image, url=" + url);
             try {
                 filePath = NoteFileService.getImageFromServer(Uri.parse(url), Leamonax.getContext().getCacheDir());

@@ -6,16 +6,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +21,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.elvishew.xlog.XLog;
-import com.tencent.bugly.Bugly;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.R;
@@ -108,7 +102,7 @@ public class Navigation {
     }
 
     private void fetchInfo() {
-        AccountService.getInfo(AccountService.getCurrent().getUserId())
+        AccountService.getInfo(Account.getCurrent().getUserId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<User>() {
@@ -124,8 +118,8 @@ public class Navigation {
 
                     @Override
                     public void onNext(User user) {
-                        AccountService.saveToAccount(user, AccountService.getCurrent().getHost());
-                        refreshUserInfo(AccountService.getCurrent());
+                        AccountService.saveToAccount(user, Account.getCurrent().getHost());
+                        refreshUserInfo(Account.getCurrent());
                         mAccountAdapter.notifyDataSetChanged();
                     }
                 });
@@ -371,7 +365,7 @@ public class Navigation {
     }
 
     public void refresh() {
-        refreshUserInfo(AccountService.getCurrent());
+        refreshUserInfo(Account.getCurrent());
         mAccountAdapter.load(AccountService.getAccountList());
         mTagAdapter.refresh();
         mNotebookAdapter.refresh();

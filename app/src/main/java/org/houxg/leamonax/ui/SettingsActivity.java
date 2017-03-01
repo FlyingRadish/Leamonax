@@ -14,20 +14,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.BaseResponse;
 import org.houxg.leamonax.model.Note;
-import org.houxg.leamonax.model.RelationshipOfNoteTag;
-import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
-import org.houxg.leamonax.model.Notebook_Table;
-import org.houxg.leamonax.model.RelationshipOfNoteTag_Table;
+import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.Tag;
-import org.houxg.leamonax.model.Tag_Table;
 import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.ToastUtils;
 
@@ -76,11 +71,11 @@ public class SettingsActivity extends BaseActivity {
     void selectEditor() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.choose_editor)
-                .setSingleChoiceItems(mEditors, AccountService.getCurrent().getDefaultEditor(), new DialogInterface.OnClickListener() {
+                .setSingleChoiceItems(mEditors, Account.getCurrent().getDefaultEditor(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        Account account = AccountService.getCurrent();
+                        Account account = Account.getCurrent();
                         account.setDefaultEditor(which);
                         account.update();
                         mEditorTv.setText(mEditors[which]);
@@ -128,7 +123,7 @@ public class SettingsActivity extends BaseActivity {
     void clickedUserName() {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_sigle_edittext, null);
         final EditText mUserNameEt = (EditText) view.findViewById(R.id.edit);
-        mUserNameEt.setText(AccountService.getCurrent().getUserName());
+        mUserNameEt.setText(Account.getCurrent().getUserName());
         new AlertDialog.Builder(this)
                 .setTitle(R.string.change_user_name)
                 .setView(view)
@@ -191,7 +186,7 @@ public class SettingsActivity extends BaseActivity {
                     @Override
                     public void call(Subscriber<? super Void> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
-                            Account currentUser = AccountService.getCurrent();
+                            Account currentUser = Account.getCurrent();
                             String userId = currentUser.getUserId();
                             Note.deleteAll(userId);
                             Notebook.deleteAll(userId);
@@ -228,18 +223,18 @@ public class SettingsActivity extends BaseActivity {
                     @Override
                     public void onError(Throwable e) {
                         ToastUtils.showNetworkError(SettingsActivity.this);
-                        mUserNameTv.setText(AccountService.getCurrent().getUserName());
+                        mUserNameTv.setText(Account.getCurrent().getUserName());
                     }
 
                     @Override
                     public void onNext(BaseResponse baseResponse) {
                         if (baseResponse.isOk()) {
-                            Account account = AccountService.getCurrent();
+                            Account account = Account.getCurrent();
                             account.setUserName(username);
                             account.update();
                             ToastUtils.show(SettingsActivity.this, R.string.change_user_name_successful);
                         } else {
-                            mUserNameTv.setText(AccountService.getCurrent().getUserName());
+                            mUserNameTv.setText(Account.getCurrent().getUserName());
                             ToastUtils.show(SettingsActivity.this, R.string.change_user_name_failed);
                         }
                     }
@@ -273,7 +268,7 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private void refresh() {
-        Account current = AccountService.getCurrent();
+        Account current = Account.getCurrent();
         mEditorTv.setText(mEditors[current.getDefaultEditor()]);
         mUserNameTv.setText(current.getUserName());
         mEmailTv.setText(current.getEmail());

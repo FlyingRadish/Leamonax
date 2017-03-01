@@ -182,7 +182,7 @@ public class Account extends BaseModel {
                 .querySingle();
     }
 
-    public static Account getAccountWithToken() {
+    public static Account getCurrent() {
         return SQLite.select()
                 .from(Account.class)
                 .where(Account_Table.token.notEq(""))

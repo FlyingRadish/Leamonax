@@ -15,7 +15,7 @@ public class LaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
         Intent intent;
         if (AccountService.isSignedIn()) {
-            Account account = AccountService.getCurrent();
+            Account account = Account.getCurrent();
             ApiProvider.getInstance().init(account.getHost());
             intent = MainActivity.getOpenIntent(this, false);
         } else {

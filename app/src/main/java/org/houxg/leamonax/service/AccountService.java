@@ -54,7 +54,7 @@ public class AccountService {
     }
 
     public static void logout() {
-        Account account = getCurrent();
+        Account account = Account.getCurrent();
         account.setAccessToken("");
         account.update();
     }
@@ -67,15 +67,11 @@ public class AccountService {
         return RetrofitUtils.create(ApiProvider.getInstance().getUserApi().updateUsername(userName));
     }
 
-    public static Account getCurrent() {
-        return Account.getAccountWithToken();
-    }
-
     public static List<Account> getAccountList() {
         return Account.getAccountListWithToken();
     }
 
     public static boolean isSignedIn() {
-        return getCurrent() != null;
+        return Account.getCurrent() != null;
     }
 }

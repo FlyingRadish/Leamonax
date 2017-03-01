@@ -18,10 +18,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Tag;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.DialogUtils;
 import org.houxg.leamonax.utils.DisplayUtils;
@@ -63,7 +62,7 @@ public class SettingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         ButterKnife.bind(this, view);
-        List<Tag> tags = Tag.getAllTags(AccountService.getCurrent().getUserId());
+        List<Tag> tags = Tag.getAllTags(Account.getCurrent().getUserId());
         String[] tagTexts = new String[tags.size()];
         int i = 0;
         for (Tag tag : tags) {

@@ -15,7 +15,6 @@ import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.edit.EditorFragment;

@@ -3,7 +3,6 @@ package org.houxg.leamonax.service;
 
 import com.elvishew.xlog.XLog;
 
-import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.network.ApiProvider;
@@ -19,7 +18,7 @@ public class NotebookService {
             throw new IllegalStateException("Network error");
         }
         if (notebook.isOk()) {
-            Account account = AccountService.getCurrent();
+            Account account = Account.getCurrent();
             if (notebook.getUsn() - account.getNotebookUsn() == 1) {
                 XLog.d(TAG + "update usn=" + notebook.getUsn());
                 account.setNotebookUsn(notebook.getUsn());

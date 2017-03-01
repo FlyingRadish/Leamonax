@@ -14,7 +14,6 @@ import com.raizlabs.android.dbflow.sql.language.property.IProperty;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
 import org.houxg.leamonax.database.AppDataBase;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.TimeUtils;
 
@@ -268,7 +267,7 @@ public class Note extends BaseModel implements Serializable {
         keyword = String.format(Locale.US, "%%%s%%", keyword);
         return SQLite.select()
                 .from(Note.class)
-                .where(Note_Table.userId.eq(AccountService.getCurrent().getUserId()))
+                .where(Note_Table.userId.eq(Account.getCurrent().getUserId()))
                 .and(Note_Table.title.like(keyword))
                 .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))

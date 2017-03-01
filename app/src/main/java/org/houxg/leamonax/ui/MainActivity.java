@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,20 +19,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.background.NoteSyncService;
-import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.SyncEvent;
-import org.houxg.leamonax.model.Tag;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -69,7 +63,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         initToolBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white);
-        CrashReport.setUserId(AccountService.getCurrent().getUserId());
+        CrashReport.setUserId(Account.getCurrent().getUserId());
 
         mNavigation = new Navigation(this);
         mNavigation.init(this, mNavigationView);
@@ -154,7 +148,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
 
     @OnClick(R.id.fab)
     void clickedFab() {
-        Account account = AccountService.getCurrent();
+        Account account = Account.getCurrent();
         Note newNote = new Note();
         newNote.setUserId(account.getUserId());
         Notebook notebook;
@@ -162,7 +156,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         if (currentMode == Navigation.Mode.NOTEBOOK) {
             notebook = Notebook.getByLocalId(currentMode.notebookId);
         } else {
-            notebook = Notebook.getRecentNoteBook(AccountService.getCurrent().getUserId());
+            notebook = Notebook.getRecentNoteBook(Account.getCurrent().getUserId());
         }
         if (notebook != null) {
             newNote.setNoteBookId(notebook.getNotebookId());
@@ -192,13 +186,13 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         List<Note> notes;
         switch (mode) {
             case RECENT_NOTES:
-                notes = Note.getAllNotes(AccountService.getCurrent().getUserId());
+                notes = Note.getAllNotes(Account.getCurrent().getUserId());
                 break;
             case NOTEBOOK:
-                notes = Note.getNotesFromNotebook(AccountService.getCurrent().getUserId(), mode.notebookId);
+                notes = Note.getNotesFromNotebook(Account.getCurrent().getUserId(), mode.notebookId);
                 break;
             case TAG:
-                notes = Note.getByTagText(mode.tagText, AccountService.getCurrent().getUserId());
+                notes = Note.getByTagText(mode.tagText, Account.getCurrent().getUserId());
                 break;
             default:
                 return false;

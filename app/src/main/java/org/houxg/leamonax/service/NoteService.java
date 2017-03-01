@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
 import com.elvishew.xlog.XLog;
-import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.R;
@@ -15,7 +14,6 @@ import org.houxg.leamonax.ReadableException;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.NoteFile;
-import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.Tag;
@@ -49,7 +47,7 @@ public class NoteService {
 
     public static void fetchFromServer() {
         //sync notebook
-        int notebookUsn = AccountService.getCurrent().getNotebookUsn();
+        int notebookUsn = Account.getCurrent().getNotebookUsn();
         List<Notebook> notebooks;
         do {
             notebooks = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNotebookApi().getSyncNotebooks(notebookUsn, MAX_ENTRY));
@@ -65,7 +63,7 @@ public class NoteService {
                     remoteNotebook.update();
                 }
                 notebookUsn = remoteNotebook.getUsn();
-                Account account = AccountService.getCurrent();
+                Account account = Account.getCurrent();
                 account.setNotebookUsn(notebookUsn);
                 account.save();
             }
@@ -73,7 +71,7 @@ public class NoteService {
 
 
         //sync note
-        int noteUsn = AccountService.getCurrent().getNoteUsn();
+        int noteUsn = Account.getCurrent().getNoteUsn();
         List<Note> notes;
         do {
             notes = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getSyncNotes(noteUsn, MAX_ENTRY));
@@ -110,7 +108,7 @@ public class NoteService {
                 remoteNote.update();
                 handleFile(localId, remoteNote.getNoteFiles());
                 updateTagsToLocal(localId, remoteNote.getTagData());
-                Account account = AccountService.getCurrent();
+                Account account = Account.getCurrent();
                 account.setNoteUsn(noteUsn);
                 account.save();
             }
@@ -149,7 +147,7 @@ public class NoteService {
     private static String convertToLocalImageLinkForRichText(long noteLocalId, String noteContent) {
         return StringUtils.replace(noteContent,
                 "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>",
-                String.format(Locale.US, "\\ssrc\\s*=\\s*\"%s/api/file/getImage\\?fileId=.*?\"", AccountService.getCurrent().getHost()),
+                String.format(Locale.US, "\\ssrc\\s*=\\s*\"%s/api/file/getImage\\?fileId=.*?\"", Account.getCurrent().getHost()),
                 new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
@@ -174,8 +172,8 @@ public class NoteService {
 
     private static String convertToLocalImageLinkForMD(long noteLocalId, String noteContent) {
         return StringUtils.replace(noteContent,
-                String.format(Locale.US, "!\\[.*?\\]\\(%s/api/file/getImage\\?fileId=.*?\\)", AccountService.getCurrent().getHost()),
-                String.format(Locale.US, "\\(%s/api/file/getImage\\?fileId=.*?\\)", AccountService.getCurrent().getHost()),
+                String.format(Locale.US, "!\\[.*?\\]\\(%s/api/file/getImage\\?fileId=.*?\\)", Account.getCurrent().getHost()),
+                String.format(Locale.US, "\\(%s/api/file/getImage\\?fileId=.*?\\)", Account.getCurrent().getHost()),
                 new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
@@ -404,7 +402,7 @@ public class NoteService {
      * if new usn equals to (current usn + 1), then just simply update usn without syncing.
      */
     private static void updateNoteUsnIfNeed(int newUsn) {
-        Account account = AccountService.getCurrent();
+        Account account = Account.getCurrent();
         if (newUsn - account.getNoteUsn() == 1) {
             account.setNoteUsn(newUsn);
             account.update();
@@ -412,7 +410,7 @@ public class NoteService {
     }
 
     public static void updateTagsToLocal(long noteLocalId, List<String> tags) {
-        String currentUid = AccountService.getCurrent().getUserId();
+        String currentUid = Account.getCurrent().getUserId();
         if (tags == null) {
             tags = new ArrayList<>();
         }
