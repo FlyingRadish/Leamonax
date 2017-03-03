@@ -202,9 +202,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
             }
         }
         if (note.isMarkDown()) {
-            holder.contentTv.setText(note.getContent());
+            holder.contentTv.setText(note.getNoteAbstract());
         } else {
-            Spanned spannedContent = Html.fromHtml(note.getContent());
+            Spanned spannedContent = Html.fromHtml(note.getNoteAbstract());
             String contentStr = spannedContent.toString();
             contentStr = contentStr.replaceAll("\\n\\n+", "\n");
             holder.contentTv.setText(contentStr);

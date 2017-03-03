@@ -104,12 +104,15 @@ public class NoteService {
                     localId = localNote.getId();
                 }
                 remoteNote.setIsDirty(false);
+                String content;
                 if (remoteNote.isMarkDown()) {
-                    remoteNote.setContent(convertToLocalImageLinkForMD(localId, remoteNote.getContent()));
+                    content = convertToLocalImageLinkForMD(localId, remoteNote.getContent());
                 } else {
-                    remoteNote.setContent(convertToLocalImageLinkForRichText(localId, remoteNote.getContent()));
+                    content = convertToLocalImageLinkForRichText(localId, remoteNote.getContent());
                 }
                 XLog.i(TAG + "content=" + remoteNote.getContent());
+                remoteNote.setContent(content);
+                remoteNote.setNoteAbstract(content.length() < 500 ? content : content.substring(0, 500));
                 remoteNote.update();
                 handleFile(localId, remoteNote.getNoteFiles());
                 updateTagsToLocal(localId, remoteNote.getTagData());
