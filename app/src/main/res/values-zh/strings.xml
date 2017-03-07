@@ -105,5 +105,5 @@
     <string name="generate_random_note">生成随机笔记</string>
     <string name="leanote">蚂蚁笔记</string>
     <string name="conflict_occurs">糟糕，笔记冲突</string>
-    <string name="host_example">登录接口地址将会是:\n%s/api/login</string>
+    <string name="host_example">登录接口地址将会是:\n%s/api/auth/login</string>
 </resources>

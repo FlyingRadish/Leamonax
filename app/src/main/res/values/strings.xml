@@ -107,6 +107,6 @@
     <string name="github" translatable="false">Github</string>
     <string name="generate_random_note">Generate random note</string>
     <string name="conflict_occurs">Oops! Conflicts occurs</string>
-    <string name="host_example">For example, login api will be:\n%s/api/login</string>
+    <string name="host_example">For example, login api will be:\n%s/api/auth/login</string>
 
 </resources>
