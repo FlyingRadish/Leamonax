@@ -78,8 +78,8 @@ public class ApiProvider {
     }
 
     private static boolean shouldAddTokenToQuery(String path) {
-        return !path.startsWith("/api/auth/login")
-                && !path.startsWith("/api/auth/register");
+        return !path.endsWith("/api/auth/login")
+                && !path.endsWith("/api/auth/register");
     }
 
     public AuthApi getAuthApi() {
