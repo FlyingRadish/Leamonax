@@ -107,7 +107,7 @@
     <string name="github" translatable="false">Github</string>
     <string name="generate_random_note">Generate random note</string>
     <string name="conflict_occurs">Oops! Conflicts occurs</string>
-    <string name="host_example">For example, login api will be:\n%s/api/login</string>
+    <string name="host_example">For example, login api will be:\n%s/api/auth/login</string>
     <string name="my_blog">My Blog</string>
     <string name="explore">Leanote Explore</string>
     <string name="toast_notebook_title_not_empty">the notebook title can\'t empty</string>

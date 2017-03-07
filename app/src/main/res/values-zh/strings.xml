@@ -105,7 +105,7 @@
     <string name="generate_random_note">生成随机笔记</string>
     <string name="leanote">蚂蚁笔记</string>
     <string name="conflict_occurs">糟糕，笔记冲突</string>
-    <string name="host_example">登录接口地址将会是:\n%s/api/login</string>
+    <string name="host_example">登录接口地址将会是:\n%s/api/auth/login</string>
     <string name="my_blog">我的博客</string>
     <string name="explore">蚂蚁笔记探索</string>
     <string name="toast_notebook_title_not_empty">笔记本的名称不能为空</string>
