@@ -1,13 +1,19 @@
 package org.houxg.leamonax.network;
 
+import android.text.TextUtils;
+
 import com.elvishew.xlog.XLog;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.BuildConfig;
+import org.houxg.leamonax.Leamonax;
+import org.houxg.leamonax.R;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.network.api.AuthApi;
 import org.houxg.leamonax.network.api.NoteApi;
 import org.houxg.leamonax.network.api.NotebookApi;
 import org.houxg.leamonax.network.api.UserApi;
+import org.houxg.leamonax.utils.ToastUtils;
 
 import java.io.IOException;
 
@@ -77,8 +83,8 @@ public class ApiProvider {
     }
 
     private static boolean shouldAddTokenToQuery(String path) {
-        return !path.startsWith("/api/auth/login")
-                && !path.startsWith("/api/auth/register");
+        return !path.endsWith("/api/auth/login")
+                && !path.endsWith("/api/auth/register");
     }
 
     public AuthApi getAuthApi() {
