@@ -1,6 +1,7 @@
 package org.houxg.leamonax.network;
 
 import com.elvishew.xlog.XLog;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.model.Account;
@@ -68,6 +69,7 @@ public class ApiProvider {
             });
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             builder.addNetworkInterceptor(interceptor);
+            builder.addNetworkInterceptor(new StethoInterceptor());
         }
         OkHttpClient client = builder.build();
         mApiRetrofit = new Retrofit.Builder()
