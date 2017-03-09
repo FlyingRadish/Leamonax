@@ -17,6 +17,9 @@ import com.bumptech.glide.Glide;
 
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.database.NoteDataStore;
+import org.houxg.leamonax.database.NoteTagDataStore;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.BaseResponse;
 import org.houxg.leamonax.model.Note;
@@ -188,10 +191,10 @@ public class SettingsActivity extends BaseActivity {
                         if (!subscriber.isUnsubscribed()) {
                             Account currentUser = Account.getCurrent();
                             String userId = currentUser.getUserId();
-                            Note.deleteAll(userId);
-                            Notebook.deleteAll(userId);
+                            NoteDataStore.deleteAll(userId);
+                            NotebookDataStore.deleteAll(userId);
                             Tag.deleteAll(userId);
-                            RelationshipOfNoteTag.deleteAll(userId);
+                            NoteTagDataStore.deleteAll(userId);
                             currentUser.setNoteUsn(0);
                             currentUser.setNotebookUsn(0);
                             currentUser.update();

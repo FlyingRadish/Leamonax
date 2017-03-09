@@ -7,6 +7,7 @@ import com.elvishew.xlog.XLog;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.Leamonax;
+import org.houxg.leamonax.database.NoteFileDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.NoteFile;
 
@@ -32,7 +33,7 @@ public class NoteFileService {
     private static final String IMAGE_PATH_WITH_SLASH = "/getImage";
 
     public static String convertFromLocalIdToServerId(String localId) {
-        NoteFile noteFile = NoteFile.getByLocalId(localId);
+        NoteFile noteFile = NoteFileDataStore.getByLocalId(localId);
         return noteFile == null ? null : noteFile.getServerId();
     }
 
@@ -61,7 +62,7 @@ public class NoteFileService {
 
     public static String getImagePath(Uri uri) {
         String localId = uri.getQueryParameter("id");
-        NoteFile noteFile = NoteFile.getByLocalId(localId);
+        NoteFile noteFile = NoteFileDataStore.getByLocalId(localId);
         if (noteFile == null) {
             return null;
         }
@@ -74,11 +75,11 @@ public class NoteFileService {
     }
 
     public static List<NoteFile> getRelatedNoteFiles(long noteLocalId) {
-        return NoteFile.getAllRelated(noteLocalId);
+        return NoteFileDataStore.getAllRelated(noteLocalId);
     }
 
     public static InputStream getImage(String localId) {
-        NoteFile noteFile = NoteFile.getByLocalId(localId);
+        NoteFile noteFile = NoteFileDataStore.getByLocalId(localId);
         if (noteFile == null) {
             return null;
         }

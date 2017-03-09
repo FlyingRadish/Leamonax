@@ -15,6 +15,7 @@ import com.tencent.bugly.crashreport.CrashReport;
 
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.database.NoteDataStore;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.ui.edit.EditorFragment;
@@ -55,7 +56,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
         ButterKnife.bind(this);
         initToolBar((Toolbar) findViewById(R.id.toolbar), true);
         long noteLocalId = getIntent().getLongExtra(EXT_NOTE_LOCAL_ID, -1);
-        mNote = Note.getByLocalId(noteLocalId);
+        mNote = NoteDataStore.getByLocalId(noteLocalId);
         if (mNote == null) {
             ToastUtils.show(this, R.string.note_not_found);
             CrashReport.postCatchedException(new IllegalStateException("Note not found while preview, localId=" + noteLocalId));
@@ -112,7 +113,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
         if (requestCode == REQ_EDIT) {
             switch (resultCode) {
                 case RESULT_OK:
-                    mNote = Note.getByLocalId(mNote.getId());
+                    mNote = NoteDataStore.getByLocalId(mNote.getId());
                     if (mNote == null) {
                         finish();
                     } else {
@@ -162,7 +163,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
 
                     @Override
                     public void onNext(Long aLong) {
-                        mNote = Note.getByLocalId(mNote.getId());
+                        mNote = NoteDataStore.getByLocalId(mNote.getId());
                         mNote.setIsDirty(false);
                         mNote.save();
                         refresh();
@@ -204,7 +205,7 @@ public class NotePreviewActivity extends BaseActivity implements EditorFragment.
                     @Override
                     public void call(Boolean isSucceed) {
                         if (isSucceed) {
-                            mNote = Note.getByServerId(mNote.getNoteId());
+                            mNote = NoteDataStore.getByServerId(mNote.getNoteId());
                             refresh();
                         }
                     }

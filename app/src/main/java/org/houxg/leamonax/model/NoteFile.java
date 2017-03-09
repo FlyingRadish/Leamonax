@@ -107,34 +107,4 @@ public class NoteFile extends BaseModel {
     public void setIsAttach(boolean mIsAttach) {
         this.mIsAttach = mIsAttach;
     }
-
-    public static List<NoteFile> getAllRelated(long noteLocalId) {
-        return SQLite.select()
-                .from(NoteFile.class)
-                .where(NoteFile_Table.noteLocalId.eq(noteLocalId))
-                .queryList();
-    }
-
-    public static NoteFile getByLocalId(String localId) {
-        return SQLite.select()
-                .from(NoteFile.class)
-                .where(NoteFile_Table.localId.eq(localId))
-                .querySingle();
-    }
-
-    public static NoteFile getByServerId(String serverId) {
-        return SQLite.select()
-                .from(NoteFile.class)
-                .where(NoteFile_Table.serverId.eq(serverId))
-                .querySingle();
-    }
-
-    public static void deleteExcept(long noteLocalId, Collection<String> excepts) {
-        SQLite.delete()
-                .from(NoteFile.class)
-                .where(NoteFile_Table.noteLocalId.eq(noteLocalId))
-                .and(NoteFile_Table.localId.notIn(excepts))
-                .async()
-                .execute();
-    }
 }

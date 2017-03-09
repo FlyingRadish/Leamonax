@@ -21,6 +21,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.background.NoteSyncService;
 import org.houxg.leamonax.component.PullToRefresh;
+import org.houxg.leamonax.database.NoteDataStore;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
@@ -149,9 +151,9 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         Notebook notebook;
         Navigation.Mode currentMode = mNavigation.getCurrentMode();
         if (currentMode == Navigation.Mode.NOTEBOOK) {
-            notebook = Notebook.getByLocalId(currentMode.notebookId);
+            notebook = NotebookDataStore.getByLocalId(currentMode.notebookId);
         } else {
-            notebook = Notebook.getRecentNoteBook(Account.getCurrent().getUserId());
+            notebook = NotebookDataStore.getRecentNoteBook(Account.getCurrent().getUserId());
         }
         if (notebook != null) {
             newNote.setNoteBookId(notebook.getNotebookId());
@@ -181,13 +183,13 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         List<Note> notes;
         switch (mode) {
             case RECENT_NOTES:
-                notes = Note.getAllNotes(Account.getCurrent().getUserId());
+                notes = NoteDataStore.getAllNotes(Account.getCurrent().getUserId());
                 break;
             case NOTEBOOK:
-                notes = Note.getNotesFromNotebook(Account.getCurrent().getUserId(), mode.notebookId);
+                notes = NoteDataStore.getNotesFromNotebook(Account.getCurrent().getUserId(), mode.notebookId);
                 break;
             case TAG:
-                notes = Note.getByTagText(mode.tagText, Account.getCurrent().getUserId());
+                notes = NoteDataStore.getByTagText(mode.tagText, Account.getCurrent().getUserId());
                 break;
             default:
                 return false;

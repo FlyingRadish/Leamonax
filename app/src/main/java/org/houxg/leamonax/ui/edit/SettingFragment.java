@@ -18,6 +18,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Tag;
@@ -135,7 +136,7 @@ public class SettingFragment extends Fragment {
     public void setNotebookId(String notebookId) {
         mNoteBookId = notebookId;
         if (!TextUtils.isEmpty(mNoteBookId)) {
-            Notebook notebook = Notebook.getByServerId(mNoteBookId);
+            Notebook notebook = NotebookDataStore.getByServerId(mNoteBookId);
             if (notebook != null) {
                 mNotebookTv.setText(notebook.getTitle());
             }

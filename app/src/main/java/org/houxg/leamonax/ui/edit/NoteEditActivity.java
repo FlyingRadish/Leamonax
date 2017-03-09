@@ -17,6 +17,7 @@ import com.elvishew.xlog.XLog;
 import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.ReadableException;
+import org.houxg.leamonax.database.NoteDataStore;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Tag;
 import org.houxg.leamonax.service.NoteFileService;
@@ -81,8 +82,8 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
             return;
         }
         mIsNewNote = getIntent().getBooleanExtra(EXT_IS_NEW_NOTE, false);
-        mOriginal = new Wrapper(Note.getByLocalId(noteLocalId));
-        mModified = new Wrapper(Note.getByLocalId(noteLocalId));
+        mOriginal = new Wrapper(NoteDataStore.getByLocalId(noteLocalId));
+        mModified = new Wrapper(NoteDataStore.getByLocalId(noteLocalId));
         setResult(RESULT_CANCELED);
     }
 
@@ -155,7 +156,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
 
                             @Override
                             public void onNext(Long noteLocalId) {
-                                Note localNote = Note.getByLocalId(noteLocalId);
+                                Note localNote = NoteDataStore.getByLocalId(noteLocalId);
                                 localNote.setIsDirty(false);
                                 localNote.save();
                             }
@@ -286,7 +287,7 @@ public class NoteEditActivity extends BaseActivity implements EditorFragment.Edi
     private void saveAsDraft(Wrapper wrapper) {
         Note modifiedNote = wrapper.note;
         XLog.i(TAG + "saveAsDraft(), local id=" + modifiedNote.getId());
-        Note noteFromDb = Note.getByLocalId(modifiedNote.getId());
+        Note noteFromDb = NoteDataStore.getByLocalId(modifiedNote.getId());
         noteFromDb.setContent(modifiedNote.getContent());
         noteFromDb.setTitle(modifiedNote.getTitle());
         noteFromDb.setNoteBookId(modifiedNote.getNoteBookId());

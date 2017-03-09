@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.utils.CollectionUtils;
@@ -55,14 +56,14 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 
     private void getSafeNotebook(Stack<String> stack) {
         if (stack.isEmpty()) {
-           mData = Notebook.getRootNotebooks(Account.getCurrent().getUserId());
+           mData = NotebookDataStore.getRootNotebooks(Account.getCurrent().getUserId());
         } else {
-            Notebook parent = Notebook.getByServerId(stack.peek());
+            Notebook parent = NotebookDataStore.getByServerId(stack.peek());
             if (parent.isDeleted()) {
                 stack.pop();
                 getSafeNotebook(stack);
             } else {
-                mData = Notebook.getChildNotebook(mStack.peek(), Account.getCurrent().getUserId());
+                mData = NotebookDataStore.getChildNotebook(mStack.peek(), Account.getCurrent().getUserId());
                 mData.add(0, parent);
             }
         }
@@ -147,7 +148,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     }
 
     private boolean hasChild(String notebookId) {
-        return CollectionUtils.isNotEmpty(Notebook.getChildNotebook(notebookId, Account.getCurrent().getUserId()));
+        return CollectionUtils.isNotEmpty(NotebookDataStore.getChildNotebook(notebookId, Account.getCurrent().getUserId()));
     }
 
     private void listUpper() {
@@ -157,11 +158,11 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 
         mStack.pop();
         if (mStack.isEmpty()) {
-            mData = Notebook.getRootNotebooks(Account.getCurrent().getUserId());
+            mData = NotebookDataStore.getRootNotebooks(Account.getCurrent().getUserId());
         } else {
             String parentId = mStack.peek();
-            mData.add(Notebook.getByServerId(parentId));
-            mData.addAll(Notebook.getChildNotebook(parentId, Account.getCurrent().getUserId()));
+            mData.add(NotebookDataStore.getByServerId(parentId));
+            mData.addAll(NotebookDataStore.getChildNotebook(parentId, Account.getCurrent().getUserId()));
         }
         notifyItemRangeInserted(0, mData.size());
     }
@@ -180,7 +181,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         notifyItemChanged(0);
 
         mStack.push(notebook.getNotebookId());
-        List<Notebook> children = Notebook.getChildNotebook(notebook.getNotebookId(), Account.getCurrent().getUserId());
+        List<Notebook> children = NotebookDataStore.getChildNotebook(notebook.getNotebookId(), Account.getCurrent().getUserId());
         int childrenSize = children.size();
         mData.addAll(children);
         notifyItemRangeInserted(1, childrenSize);

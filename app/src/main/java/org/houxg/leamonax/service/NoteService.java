@@ -11,6 +11,9 @@ import com.elvishew.xlog.XLog;
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.ReadableException;
+import org.houxg.leamonax.database.NoteDataStore;
+import org.houxg.leamonax.database.NoteFileDataStore;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.NoteFile;
@@ -52,7 +55,7 @@ public class NoteService {
         do {
             notebooks = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNotebookApi().getSyncNotebooks(notebookUsn, MAX_ENTRY));
             for (Notebook remoteNotebook : notebooks) {
-                Notebook localNotebook = Notebook.getByServerId(remoteNotebook.getNotebookId());
+                Notebook localNotebook = NotebookDataStore.getByServerId(remoteNotebook.getNotebookId());
                 if (localNotebook == null) {
                     XLog.i(TAG + "notebook insert, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
                     remoteNotebook.insert();
@@ -77,7 +80,7 @@ public class NoteService {
             notes = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getSyncNotes(noteUsn, MAX_ENTRY));
             for (Note noteMeta : notes) {
                 Note remoteNote = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getNoteAndContent(noteMeta.getNoteId()));
-                Note localNote = Note.getByServerId(noteMeta.getNoteId());
+                Note localNote = NoteDataStore.getByServerId(noteMeta.getNoteId());
                 noteUsn = remoteNote.getUsn();
                 long localId;
                 if (localNote == null) {
@@ -124,9 +127,9 @@ public class NoteService {
         for (NoteFile remote : remoteFiles) {
             NoteFile local;
             if (TextUtils.isEmpty(remote.getLocalId())) {
-                local = NoteFile.getByServerId(remote.getServerId());
+                local = NoteFileDataStore.getByServerId(remote.getServerId());
             } else {
-                local = NoteFile.getByLocalId(remote.getLocalId());
+                local = NoteFileDataStore.getByLocalId(remote.getLocalId());
             }
             if (local != null) {
                 XLog.i(TAG + "has local file, id=" + remote.getServerId());
@@ -141,7 +144,7 @@ public class NoteService {
             local.save();
             excepts.add(local.getLocalId());
         }
-        NoteFile.deleteExcept(noteLocalId, excepts);
+        NoteFileDataStore.deleteExcept(noteLocalId, excepts);
     }
 
     private static String convertToLocalImageLinkForRichText(long noteLocalId, String noteContent) {
@@ -154,7 +157,7 @@ public class NoteService {
                         XLog.i(TAG + "in=" + original);
                         Uri linkUri = Uri.parse(original.substring(6, original.length() - 1));
                         String serverId = linkUri.getQueryParameter("fileId");
-                        NoteFile noteFile = NoteFile.getByServerId(serverId);
+                        NoteFile noteFile = NoteFileDataStore.getByServerId(serverId);
                         if (noteFile == null) {
                             noteFile = new NoteFile();
                             noteFile.setNoteId((Long) extraData[0]);
@@ -179,7 +182,7 @@ public class NoteService {
                     public String replaceWith(String original, Object... extraData) {
                         Uri linkUri = Uri.parse(original.substring(1, original.length() - 1));
                         String serverId = linkUri.getQueryParameter("fileId");
-                        NoteFile noteFile = NoteFile.getByServerId(serverId);
+                        NoteFile noteFile = NoteFileDataStore.getByServerId(serverId);
                         if (noteFile == null) {
                             noteFile = new NoteFile();
                             noteFile.setNoteId((Long) extraData[0]);
@@ -194,7 +197,7 @@ public class NoteService {
     }
 
     public static void saveNote(final long noteLocalId) {
-        Note modifiedNote = Note.getByLocalId(noteLocalId);
+        Note modifiedNote = NoteDataStore.getByLocalId(noteLocalId);
 
         Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modifiedNote);
         List<MultipartBody.Part> fileBodies = handleFileBodies(modifiedNote, requestBodyMap);
@@ -274,7 +277,7 @@ public class NoteService {
         if (serverNote == null) {
             return false;
         }
-        Note localNote = Note.getByServerId(serverId);
+        Note localNote = NoteDataStore.getByServerId(serverId);
         long localId;
         if (localNote == null) {
             localId = serverNote.insert();
@@ -332,8 +335,8 @@ public class NoteService {
         } else {
             imageLocalIds = getImagesFromContentForRichText(note.getContent());
         }
-        NoteFile.deleteExcept(note.getId(), imageLocalIds);
-        List<NoteFile> files = NoteFile.getAllRelated(note.getId());
+        NoteFileDataStore.deleteExcept(note.getId(), imageLocalIds);
+        List<NoteFile> files = NoteFileDataStore.getAllRelated(note.getId());
         if (CollectionUtils.isNotEmpty(files)) {
             int size = files.size();
             for (int index = 0; index < size; index++) {

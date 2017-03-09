@@ -1,5 +1,6 @@
 package org.houxg.leamonax.service;
 
+import org.houxg.leamonax.database.AccountDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Authentication;
 import org.houxg.leamonax.model.BaseResponse;
@@ -26,7 +27,7 @@ public class AccountService {
     }
 
     public static long saveToAccount(Authentication authentication, String host) {
-        Account localAccount = Account.getAccount(authentication.getEmail(), host);
+        Account localAccount = AccountDataStore.getAccount(authentication.getEmail(), host);
         if (localAccount == null) {
             localAccount = new Account();
         }
@@ -40,7 +41,7 @@ public class AccountService {
     }
 
     public static void saveToAccount(User user, String host) {
-        Account localAccount = Account.getAccount(user.getEmail(), host);
+        Account localAccount = AccountDataStore.getAccount(user.getEmail(), host);
         if (localAccount == null) {
             localAccount = new Account();
         }
@@ -68,7 +69,7 @@ public class AccountService {
     }
 
     public static List<Account> getAccountList() {
-        return Account.getAccountListWithToken();
+        return AccountDataStore.getAccountListWithToken();
     }
 
     public static boolean isSignedIn() {

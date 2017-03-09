@@ -44,11 +44,4 @@ public class RelationshipOfNoteTag extends BaseModel {
     public long getTagLocalId() {
         return tagLocalId;
     }
-
-    public static void deleteAll(String userId) {
-        SQLite.delete()
-                .from(RelationshipOfNoteTag.class)
-                .where(RelationshipOfNoteTag_Table.userId.eq(userId))
-                .execute();
-    }
 }

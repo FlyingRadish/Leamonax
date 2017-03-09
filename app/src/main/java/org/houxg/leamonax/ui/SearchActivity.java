@@ -16,6 +16,7 @@ import android.widget.ImageView;
 
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NoteAdapter;
+import org.houxg.leamonax.database.NoteDataStore;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.ActionModeHandler;
@@ -129,7 +130,7 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         if (TextUtils.isEmpty(keyword)) {
             mNotes = new ArrayList<>();
         } else {
-            mNotes = Note.searchByTitle(keyword);
+            mNotes = NoteDataStore.searchByTitle(keyword);
             Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         }
         mAdapter.setHighlight(keyword);

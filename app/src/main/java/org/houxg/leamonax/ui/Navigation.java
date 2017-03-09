@@ -27,6 +27,7 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.AccountAdapter;
 import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.adapter.TagAdapter;
+import org.houxg.leamonax.database.AccountDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Tag;
@@ -410,7 +411,7 @@ public class Navigation {
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_ADD_ACCOUNT) {
             if (resultCode == RESULT_OK) {
-                Account account = Account.getAccountById(SignInActivity.getAccountIdFromData(data));
+                Account account = AccountDataStore.getAccountById(SignInActivity.getAccountIdFromData(data));
                 if (account != null) {
                     changeAccount(account);
                 }
