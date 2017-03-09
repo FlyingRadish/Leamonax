@@ -38,6 +38,7 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import rx.Observable;
 
 public class NoteService {
 
@@ -47,6 +48,15 @@ public class NoteService {
     private static final String MULTIPART_FORM_DATA = "multipart/form-data";
     private static final String CONFLICT_SUFFIX = "--conflict";
     private static final int MAX_ENTRY = 20;
+
+    public static void pushToServer() {
+        List<Note> notes = NoteDataStore.getAllDirtyNotes(Account.getCurrent().getUserId());
+        for (Note note : notes) {
+            if (!note.getTitle().endsWith(CONFLICT_SUFFIX)) {
+                saveNote(note.getId());
+            }
+        }
+    }
 
     public static void fetchFromServer() {
         //sync notebook
@@ -310,6 +320,7 @@ public class NoteService {
         requestBodyMap.put("Content", createPartFromString(content));
         requestBodyMap.put("IsMarkdown", createPartFromString(getBooleanString(note.isMarkDown())));
         requestBodyMap.put("IsBlog", createPartFromString(getBooleanString(note.isPublicBlog())));
+        requestBodyMap.put("IsTrash", createPartFromString(getBooleanString(note.isTrash())));
         requestBodyMap.put("CreatedTime", createPartFromString(TimeUtils.toServerTime(note.getCreatedTimeVal())));
         requestBodyMap.put("UpdatedTime", createPartFromString(TimeUtils.toServerTime(note.getUpdatedTimeVal())));
 
@@ -384,6 +395,18 @@ public class NoteService {
                     }
                 });
         return localIds;
+    }
+
+    public static void trashNotesOnLocal(Note note) {
+        note.setIsTrash(true);
+        note.setIsDirty(true);
+        note.update();
+    }
+
+    public static void trashNote(Note note) {
+        if (!note.isLocalNote()) {
+            saveNote(note.getId());
+        }
     }
 
     public static void deleteNote(Note note) {

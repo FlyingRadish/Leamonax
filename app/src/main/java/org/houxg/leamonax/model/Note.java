@@ -96,7 +96,6 @@ public class Note extends BaseModel implements Serializable {
     long publicTime;
     @Column(name = "tags")
     String tags = "";
-    boolean uploadSucc = true;
 
     public long getCreatedTimeVal() {
         return createdTime;
@@ -172,14 +171,6 @@ public class Note extends BaseModel implements Serializable {
 
     public int getUsn() {
         return usn;
-    }
-
-    public boolean isUploadSucc() {
-        return uploadSucc;
-    }
-
-    public void setUploadSucc(boolean uploadSucc) {
-        this.uploadSucc = uploadSucc;
     }
 
     public void setUsn(int usn) {

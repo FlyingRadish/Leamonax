@@ -49,7 +49,6 @@ public class NoteDataStore {
         return SQLite.select()
                 .from(Note.class)
                 .where(Note_Table.userId.eq(userId))
-                .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
                 .and(Note_Table.isTrash.eq(false))
                 .queryList();
@@ -59,9 +58,7 @@ public class NoteDataStore {
         return SQLite.select()
                 .from(Note.class)
                 .where(Note_Table.userId.eq(userId))
-                .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
-                .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDirty.eq(true))
                 .queryList();
     }
@@ -75,7 +72,6 @@ public class NoteDataStore {
                 .from(Note.class)
                 .where(Note_Table.notebookId.eq(notebook.getNotebookId()))
                 .and(Note_Table.userId.eq(userId))
-                .and(Note_Table.isTrash.eq(false))
                 .and(Note_Table.isDeleted.eq(false))
                 .and(Note_Table.isTrash.eq(false))
                 .queryList();

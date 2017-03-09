@@ -107,4 +107,5 @@
     <string name="conflict_occurs">糟糕，笔记冲突</string>
     <string name="host_example">登录接口地址将会是:\n%s/api/auth/login</string>
     <string name="notebook_name_cant_be_empty">笔记本名称不能为空</string>
+    <string name="delete_network_error">网络不可用，将在下次同步时删除</string>
 </resources>

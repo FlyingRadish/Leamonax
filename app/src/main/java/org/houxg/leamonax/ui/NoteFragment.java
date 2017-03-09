@@ -15,12 +15,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.greenrobot.eventbus.EventBus;
+import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NoteAdapter;
+import org.houxg.leamonax.database.NoteDataStore;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.ActionModeHandler;
 import org.houxg.leamonax.utils.CollectionUtils;
+import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.SharedPreferenceUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.NoteList;
@@ -51,6 +55,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     List<Note> mNotes;
     ActionModeHandler<Note> mActionModeHandler;
     NoteList mNoteList;
+    Mode mCurrentMode;
 
     public NoteFragment() {
     }
@@ -117,7 +122,27 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         EventBus.getDefault().unregister(this);
     }
 
-    public void setNotes(List<Note> notes) {
+    public void setMode(Mode mode) {
+        mCurrentMode = mode;
+        List<Note> notes;
+        mNoteList.setHighlight("");
+        switch (mode) {
+            case RECENT_NOTES:
+                notes = NoteDataStore.getAllNotes(Account.getCurrent().getUserId());
+                break;
+            case NOTEBOOK:
+                notes = NoteDataStore.getNotesFromNotebook(Account.getCurrent().getUserId(), mode.notebookId);
+                break;
+            case TAG:
+                notes = NoteDataStore.getByTagText(mode.tagText, Account.getCurrent().getUserId());
+                break;
+            case SEARCH:
+                notes = NoteDataStore.searchByTitle(mode.keywords);
+                mNoteList.setHighlight(mode.keywords);
+                break;
+            default:
+                notes = new ArrayList<>();
+        }
         mNotes = notes;
         Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         mNoteList.render(mNotes);
@@ -139,7 +164,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         mNoteList.setSelected(note, isSelected);
     }
 
-    private void deleteNote(final List<Note> notes) {
+    private void deleteNote(List<Note> notes) {
         Observable.from(notes)
                 .flatMap(new Func1<Note, rx.Observable<Note>>() {
                     @Override
@@ -148,7 +173,30 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                             @Override
                             public void call(Subscriber<? super Note> subscriber) {
                                 if (!subscriber.isUnsubscribed()) {
-                                    NoteService.deleteNote(note);
+                                    NoteService.trashNotesOnLocal(note);
+                                    subscriber.onNext(note);
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        });
+                    }
+                })
+                .buffer(notes.size())
+                .flatMap(new Func1<List<Note>, Observable<Note>>() {
+                    @Override
+                    public Observable<Note> call(List<Note> notes) {
+                        NetworkUtils.checkNetwork();
+                        return Observable.from(notes);
+                    }
+                })
+                .flatMap(new Func1<Note, Observable<Note>>() {
+                    @Override
+                    public Observable<Note> call(final Note note) {
+                        return Observable.create(new Observable.OnSubscribe<Note>() {
+                            @Override
+                            public void call(Subscriber<? super Note> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    NoteService.saveNote(note.getId());
                                     subscriber.onNext(note);
                                     subscriber.onCompleted();
                                 }
@@ -166,8 +214,12 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
                     @Override
                     public void onError(Throwable e) {
-                        ToastUtils.show(getActivity(), R.string.delete_note_failed);
-                        mNoteList.invalidateAllSelected();
+                        if (e instanceof NetworkUtils.NetworkUnavailableException) {
+                            ToastUtils.show(Leamonax.getContext(), R.string.delete_network_error);
+                        } else {
+                            ToastUtils.show(Leamonax.getContext(), R.string.delete_note_failed);
+                        }
+                        refresh();
                     }
 
                     @Override
@@ -177,6 +229,9 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                 });
     }
 
+    private void refresh() {
+        setMode(mCurrentMode);
+    }
 
     @Override
     public boolean onAction(int actionId, List<Note> pendingItems) {
@@ -214,6 +269,37 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     public void onDestroy(List<Note> pendingItems) {
         if (CollectionUtils.isNotEmpty(pendingItems)) {
             mNoteList.invalidateAllSelected();
+        }
+    }
+
+    public enum Mode {
+        RECENT_NOTES,
+        NOTEBOOK,
+        TAG,
+        SEARCH;
+
+        long notebookId;
+        String tagText;
+        String keywords;
+
+        public void setNotebookId(long notebookId) {
+            this.notebookId = notebookId;
+        }
+
+        public void setTagText(String tagText) {
+            this.tagText = tagText;
+        }
+
+        public void setKeywords(String keywords) {
+            this.keywords = keywords;
+        }
+
+        @Override
+        public String toString() {
+            return name() + "{" +
+                    "notebookId=" + notebookId +
+                    ", tagText='" + tagText + '\'' +
+                    '}';
         }
     }
 

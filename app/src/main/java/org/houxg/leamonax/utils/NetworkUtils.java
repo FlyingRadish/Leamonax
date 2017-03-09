@@ -7,6 +7,10 @@ import android.net.NetworkInfo;
 
 import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.model.Note;
+
+import rx.Observable;
+import rx.Subscriber;
 
 public class NetworkUtils {
 
@@ -31,6 +35,18 @@ public class NetworkUtils {
         if (!isNetworkAvailable()) {
             throw new NetworkUnavailableException();
         }
+    }
+
+    public <T> Observable<T> checkNetwork(T data) {
+        return Observable.create(new Observable.OnSubscribe<T>() {
+            @Override
+            public void call(Subscriber<? super T> subscriber) {
+                if (!isNetworkAvailable()) {
+                    throw new NetworkUnavailableException();
+                }
+
+            }
+        });
     }
 
     public static class NetworkUnavailableException extends IllegalStateException {

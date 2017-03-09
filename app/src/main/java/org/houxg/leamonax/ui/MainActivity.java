@@ -21,7 +21,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.background.NoteSyncService;
 import org.houxg.leamonax.component.PullToRefresh;
-import org.houxg.leamonax.database.NoteDataStore;
 import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
@@ -31,7 +30,6 @@ import org.houxg.leamonax.ui.edit.NoteEditActivity;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
-import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -149,8 +147,8 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         Note newNote = new Note();
         newNote.setUserId(account.getUserId());
         Notebook notebook;
-        Navigation.Mode currentMode = mNavigation.getCurrentMode();
-        if (currentMode == Navigation.Mode.NOTEBOOK) {
+        NoteFragment.Mode currentMode = mNavigation.getCurrentMode();
+        if (currentMode == NoteFragment.Mode.NOTEBOOK) {
             notebook = NotebookDataStore.getByLocalId(currentMode.notebookId);
         } else {
             notebook = NotebookDataStore.getRecentNoteBook(Account.getCurrent().getUserId());
@@ -179,22 +177,8 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
     }
 
     @Override
-    public boolean onShowNotes(Navigation.Mode mode) {
-        List<Note> notes;
-        switch (mode) {
-            case RECENT_NOTES:
-                notes = NoteDataStore.getAllNotes(Account.getCurrent().getUserId());
-                break;
-            case NOTEBOOK:
-                notes = NoteDataStore.getNotesFromNotebook(Account.getCurrent().getUserId(), mode.notebookId);
-                break;
-            case TAG:
-                notes = NoteDataStore.getByTagText(mode.tagText, Account.getCurrent().getUserId());
-                break;
-            default:
-                return false;
-        }
-        mNoteFragment.setNotes(notes);
+    public boolean onShowNotes(NoteFragment.Mode mode) {
+        mNoteFragment.setMode(mode);
         return true;
     }
 

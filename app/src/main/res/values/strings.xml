@@ -109,5 +109,6 @@
     <string name="conflict_occurs">Oops! Conflicts occurs</string>
     <string name="host_example">For example, login api will be:\n%s/api/auth/login</string>
     <string name="notebook_name_cant_be_empty">Notebook\'s name can\'t be empty</string>
+    <string name="delete_network_error">Network is unavailable, these notes will be deleted in next sync</string>
 
 </resources>
