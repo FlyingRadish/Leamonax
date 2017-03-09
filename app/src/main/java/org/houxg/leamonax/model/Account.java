@@ -6,6 +6,7 @@ import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 
+import org.houxg.leamonax.database.AccountDataStore;
 import org.houxg.leamonax.database.AppDataBase;
 
 @Table(name = "Account", database = AppDataBase.class)
@@ -168,6 +169,10 @@ public class Account extends BaseModel {
 
     public long getLastUseTime() {
         return lastUseTime;
+    }
+
+    public static Account getCurrent() {
+        return AccountDataStore.getCurrent();
     }
 
     @Override

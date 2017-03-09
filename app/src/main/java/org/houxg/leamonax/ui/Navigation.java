@@ -29,6 +29,7 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.AccountAdapter;
 import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.adapter.TagAdapter;
+import org.houxg.leamonax.database.AccountDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Tag;
@@ -112,7 +113,7 @@ public class Navigation {
     }
 
     private void fetchInfo() {
-        AccountService.getInfo(AccountService.getCurrent().getUserId())
+        AccountService.getInfo(Account.getCurrent().getUserId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<User>() {
@@ -128,8 +129,8 @@ public class Navigation {
 
                     @Override
                     public void onNext(User user) {
-                        AccountService.saveToAccount(user, AccountService.getCurrent().getHost());
-                        refreshUserInfo(AccountService.getCurrent());
+                        AccountService.saveToAccount(user, Account.getCurrent().getHost());
+                        refreshUserInfo(Account.getCurrent());
                         mAccountAdapter.notifyDataSetChanged();
                     }
                 });
@@ -459,7 +460,7 @@ public class Navigation {
     }
 
     public void refresh() {
-        refreshUserInfo(AccountService.getCurrent());
+        refreshUserInfo(Account.getCurrent());
         mAccountAdapter.load(AccountService.getAccountList());
         mTagAdapter.refresh();
         mNotebookAdapter.refresh();
@@ -504,7 +505,7 @@ public class Navigation {
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_ADD_ACCOUNT) {
             if (resultCode == RESULT_OK) {
-                Account account = AccountService.getAccountById(SignInActivity.getAccountIdFromData(data));
+                Account account = AccountDataStore.getAccountById(SignInActivity.getAccountIdFromData(data));
                 if (account != null) {
                     changeAccount(account);
                 }
@@ -594,7 +595,7 @@ public class Navigation {
 
     @OnClick(R.id.rl_blog)
     void clickedMyBlog() {
-        Account current = AccountService.getCurrent();
+        Account current = Account.getCurrent();
         String host = current.getHost();
         if (host == null || host.equals("")) {
             host = "https://leanote.com";

@@ -6,10 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,22 +14,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.elvishew.xlog.XLog;
-
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NoteAdapter;
-import org.houxg.leamonax.background.NoteSyncService;
-import org.houxg.leamonax.database.AppDataBase;
 import org.houxg.leamonax.model.Note;
-import org.houxg.leamonax.model.SyncEvent;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.ActionModeHandler;
 import org.houxg.leamonax.utils.CollectionUtils;
-import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.SharedPreferenceUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.NoteList;
@@ -40,12 +28,12 @@ import org.houxg.leamonax.widget.NoteList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -155,8 +143,17 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         Observable.from(notes)
                 .flatMap(new Func1<Note, rx.Observable<Note>>() {
                     @Override
-                    public rx.Observable<Note> call(Note note) {
-                        return NoteService.deleteNote(note);
+                    public rx.Observable<Note> call(final Note note) {
+                        return Observable.create(new Observable.OnSubscribe<Note>() {
+                            @Override
+                            public void call(Subscriber<? super Note> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    NoteService.deleteNote(note);
+                                    subscriber.onNext(note);
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -208,8 +205,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        mActionModeHandler.dismiss();
-                        mNoteList.invalidateAllSelected();
                     }
                 })
                 .show();

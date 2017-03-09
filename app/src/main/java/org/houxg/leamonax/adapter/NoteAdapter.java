@@ -18,11 +18,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.database.NotebookDataStore;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.NoteFile;
 import org.houxg.leamonax.model.Notebook;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteFileService;
 import org.houxg.leamonax.utils.FileUtils;
 import org.houxg.leamonax.utils.TimeUtils;
@@ -107,7 +107,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteHolder> {
     }
 
     private void updateNotebookMap() {
-        List<Notebook> notebooks = AppDataBase.getAllNotebook(AccountService.getCurrent().getUserId());
+        List<Notebook> notebooks = NotebookDataStore.getAllNotebooks(Account.getCurrent().getUserId());
         mNotebookId2TitleMaps = new HashMap<>();
         for (Notebook notebook : notebooks) {
             mNotebookId2TitleMaps.put(notebook.getNotebookId(), notebook.getTitle());

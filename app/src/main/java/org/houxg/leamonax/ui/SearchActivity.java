@@ -14,6 +14,7 @@ import android.widget.ImageView;
 
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NoteAdapter;
+import org.houxg.leamonax.database.NoteDataStore;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.ActionModeHandler;
@@ -28,6 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -128,7 +130,7 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         if (TextUtils.isEmpty(keyword)) {
             mNotes = new ArrayList<>();
         } else {
-            mNotes = NoteService.searchNoteWithTitle(keyword);
+            mNotes = NoteDataStore.searchByTitle(keyword);
             Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         }
         mAdapter.setHighlight(keyword);
@@ -155,8 +157,17 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
         Observable.from(notes)
                 .flatMap(new Func1<Note, Observable<Note>>() {
                     @Override
-                    public rx.Observable<Note> call(Note note) {
-                        return NoteService.deleteNote(note);
+                    public rx.Observable<Note> call(final Note note) {
+                        return Observable.create(new Observable.OnSubscribe<Note>() {
+                            @Override
+                            public void call(Subscriber<? super Note> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    NoteService.deleteNote(note);
+                                    subscriber.onNext(note);
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -206,8 +217,6 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        mActionModeHandler.dismiss();
-                        mAdapter.invalidateAllSelected();
                     }
                 })
                 .show();

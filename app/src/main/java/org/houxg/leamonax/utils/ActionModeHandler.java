@@ -48,11 +48,12 @@ public class ActionModeHandler<T> {
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            mActionMode = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mContext.getWindow().setStatusBarColor(mContext.getResources().getColor(R.color.colorPrimary));
             }
             mCallback.onDestroy(mPendingItems);
+            mActionMode = null;
+            mPendingItems = null;
         }
     };
 

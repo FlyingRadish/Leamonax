@@ -3,7 +3,7 @@ package org.houxg.leamonax.service;
 
 import com.elvishew.xlog.XLog;
 
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.network.ApiProvider;
@@ -19,7 +19,7 @@ public class NotebookService {
             throw new IllegalStateException("Network error");
         }
         if (notebook.isOk()) {
-            Account account = AccountService.getCurrent();
+            Account account = Account.getCurrent();
             if (notebook.getUsn() - account.getNotebookUsn() == 1) {
                 XLog.d(TAG + "update usn=" + notebook.getUsn());
                 account.setNotebookUsn(notebook.getUsn());
@@ -33,7 +33,7 @@ public class NotebookService {
     }
 
     public static String getTitle(long notebookLocalId) {
-        Notebook notebook = AppDataBase.getNotebookByLocalId(notebookLocalId);
+        Notebook notebook = NotebookDataStore.getByLocalId(notebookLocalId);
         return notebook != null ? notebook.getTitle() : "";
     }
 
@@ -44,7 +44,7 @@ public class NotebookService {
             throw new IllegalStateException("Network error");
         }
         if (newNotebook.isOk()) {
-            Account account = AccountService.getCurrent();
+            Account account = Account.getCurrent();
             if (notebook.getUsn() - account.getNotebookUsn() == 1) {
                 account.setNotebookUsn(notebook.getUsn());
                 account.save();

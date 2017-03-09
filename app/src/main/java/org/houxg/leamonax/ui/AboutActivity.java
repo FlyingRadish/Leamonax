@@ -13,8 +13,8 @@ import org.bson.types.ObjectId;
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.OpenUtils;
 import org.houxg.leamonax.utils.TestUtils;
 
@@ -54,7 +54,7 @@ public class AboutActivity extends BaseActivity {
                 new Observable.OnSubscribe<Void>() {
                     @Override
                     public void call(Subscriber<? super Void> subscriber) {
-                        String userId = AccountService.getCurrent().getUserId();
+                        String userId = Account.getCurrent().getUserId();
                         SecureRandom random = new SecureRandom();
                         String notebookId = new ObjectId().toString();
                         List<Note> notes = new ArrayList<>(8000);
