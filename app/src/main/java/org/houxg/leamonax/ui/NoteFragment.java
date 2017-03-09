@@ -204,8 +204,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        mActionModeHandler.dismiss();
-                        mNoteList.invalidateAllSelected();
                     }
                 })
                 .show();

@@ -43,16 +43,13 @@ public class ActionModeHandler<T> {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            boolean isProceed = mCallback.onAction(item.getItemId(), mPendingItems);
-            if (isProceed) {
-                mPendingItems.clear();
-            }
-            return isProceed;
+            return mCallback.onAction(item.getItemId(), mPendingItems);
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mActionMode = null;
+            mPendingItems = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mContext.getWindow().setStatusBarColor(mContext.getResources().getColor(R.color.colorPrimary));
             }

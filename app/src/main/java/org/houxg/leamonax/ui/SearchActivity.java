@@ -216,8 +216,6 @@ public class SearchActivity extends BaseActivity implements NoteAdapter.NoteAdap
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        mActionModeHandler.dismiss();
-                        mAdapter.invalidateAllSelected();
                     }
                 })
                 .show();
