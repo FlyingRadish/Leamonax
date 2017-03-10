@@ -97,7 +97,7 @@ public class Navigation {
     private TagAdapter mTagAdapter;
     private AlphabetDrawable mAlphabetDrawable = new AlphabetDrawable();
 
-    private Mode mCurrentMode = Mode.RECENT_NOTES;
+    private NoteFragment.Mode mCurrentMode = NoteFragment.Mode.RECENT_NOTES;
 
     public Navigation(Callback callback) {
         mCallback = callback;
@@ -265,7 +265,7 @@ public class Navigation {
         mTagAdapter.setListener(new TagAdapter.TagAdapterListener() {
             @Override
             public void onClickedTag(Tag tag) {
-                mCurrentMode = Mode.TAG;
+                mCurrentMode = NoteFragment.Mode.TAG;
                 mCurrentMode.setTagText(tag.getText());
                 if (mCallback != null) {
                     if (mCallback.onShowNotes(mCurrentMode)) {
@@ -289,7 +289,7 @@ public class Navigation {
         mNotebookAdapter.setListener(new NotebookAdapter.NotebookAdapterListener() {
             @Override
             public void onClickedNotebook(Notebook notebook) {
-                mCurrentMode = Mode.NOTEBOOK;
+                mCurrentMode = NoteFragment.Mode.NOTEBOOK;
                 mCurrentMode.setNotebookId(notebook.getId());
                 if (mCallback != null) {
                     if (mCallback.onShowNotes(mCurrentMode)) {
@@ -455,7 +455,7 @@ public class Navigation {
         }
     }
 
-    public Mode getCurrentMode() {
+    public NoteFragment.Mode getCurrentMode() {
         return mCurrentMode;
     }
 
@@ -464,8 +464,8 @@ public class Navigation {
         mAccountAdapter.load(AccountService.getAccountList());
         mTagAdapter.refresh();
         mNotebookAdapter.refresh();
-        if (mCurrentMode == Mode.NOTEBOOK && TextUtils.isEmpty(mNotebookAdapter.getCurrentParentId())) {
-            mCurrentMode = Mode.RECENT_NOTES;
+        if (mCurrentMode == NoteFragment.Mode.NOTEBOOK && TextUtils.isEmpty(mNotebookAdapter.getCurrentParentId())) {
+            mCurrentMode = NoteFragment.Mode.RECENT_NOTES;
         }
         if (mCallback != null) {
             if (mCallback.onShowNotes(mCurrentMode)) {
@@ -546,7 +546,7 @@ public class Navigation {
 
     @OnClick(R.id.rl_recent_notes)
     void clickedRecent() {
-        mCurrentMode = Mode.RECENT_NOTES;
+        mCurrentMode = NoteFragment.Mode.RECENT_NOTES;
         if (mCallback != null) {
             if (mCallback.onShowNotes(mCurrentMode)) {
                 close();
@@ -561,36 +561,11 @@ public class Navigation {
          * @param mode
          * @return true if processed
          */
-        boolean onShowNotes(Mode mode);
+        boolean onShowNotes(NoteFragment.Mode mode);
 
         void onClickSetting();
 
         void onClickAbout();
-    }
-
-    public enum Mode {
-        RECENT_NOTES,
-        NOTEBOOK,
-        TAG;
-
-        long notebookId;
-        String tagText;
-
-        public void setNotebookId(long notebookId) {
-            this.notebookId = notebookId;
-        }
-
-        public void setTagText(String tagText) {
-            this.tagText = tagText;
-        }
-
-        @Override
-        public String toString() {
-            return name() + "{" +
-                    "notebookId=" + notebookId +
-                    ", tagText='" + tagText + '\'' +
-                    '}';
-        }
     }
 
     @OnClick(R.id.rl_blog)
