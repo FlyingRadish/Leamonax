@@ -7,7 +7,8 @@ import com.elvishew.xlog.XLog;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.Leamonax;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.database.NoteFileDataStore;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.NoteFile;
 
 import java.io.File;
@@ -32,7 +33,7 @@ public class NoteFileService {
     private static final String IMAGE_PATH_WITH_SLASH = "/getImage";
 
     public static String convertFromLocalIdToServerId(String localId) {
-        NoteFile noteFile = AppDataBase.getNoteFileByLocalId(localId);
+        NoteFile noteFile = NoteFileDataStore.getByLocalId(localId);
         return noteFile == null ? null : noteFile.getServerId();
     }
 
@@ -51,7 +52,7 @@ public class NoteFileService {
     }
 
     public static Uri getServerImageUri(String serverId) {
-        Uri uri = Uri.parse(AccountService.getCurrent().getHost());
+        Uri uri = Uri.parse(Account.getCurrent().getHost());
         return uri.buildUpon().appendEncodedPath("api/file/getImage").appendQueryParameter("fileId", serverId).build();
     }
 
@@ -61,7 +62,7 @@ public class NoteFileService {
 
     public static String getImagePath(Uri uri) {
         String localId = uri.getQueryParameter("id");
-        NoteFile noteFile = AppDataBase.getNoteFileByLocalId(localId);
+        NoteFile noteFile = NoteFileDataStore.getByLocalId(localId);
         if (noteFile == null) {
             return null;
         }
@@ -74,11 +75,11 @@ public class NoteFileService {
     }
 
     public static List<NoteFile> getRelatedNoteFiles(long noteLocalId) {
-        return AppDataBase.getAllRelatedFile(noteLocalId);
+        return NoteFileDataStore.getAllRelated(noteLocalId);
     }
 
     public static InputStream getImage(String localId) {
-        NoteFile noteFile = AppDataBase.getNoteFileByLocalId(localId);
+        NoteFile noteFile = NoteFileDataStore.getByLocalId(localId);
         if (noteFile == null) {
             return null;
         }
@@ -87,7 +88,7 @@ public class NoteFileService {
             filePath = noteFile.getLocalPath();
             XLog.i(TAG + "use local image, path=" + filePath);
         } else {
-            String url = NoteFileService.getUrl(AccountService.getCurrent().getHost(), noteFile.getServerId(), AccountService.getCurrent().getAccessToken());
+            String url = NoteFileService.getUrl(Account.getCurrent().getHost(), noteFile.getServerId(), Account.getCurrent().getAccessToken());
             XLog.i(TAG + "use server image, url=" + url);
             try {
                 filePath = NoteFileService.getImageFromServer(Uri.parse(url), Leamonax.getContext().getCacheDir());

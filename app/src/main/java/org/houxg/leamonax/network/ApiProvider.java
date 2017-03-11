@@ -9,7 +9,6 @@ import org.houxg.leamonax.network.api.AuthApi;
 import org.houxg.leamonax.network.api.NoteApi;
 import org.houxg.leamonax.network.api.NotebookApi;
 import org.houxg.leamonax.network.api.UserApi;
-import org.houxg.leamonax.service.AccountService;
 
 import java.io.IOException;
 
@@ -30,7 +29,7 @@ public class ApiProvider {
     }
 
     public static ApiProvider getInstance() {
-        Account account = AccountService.getCurrent();
+        Account account = Account.getCurrent();
         if (account != null && SingletonHolder.INSTANCE.mApiRetrofit == null) {
             SingletonHolder.INSTANCE.init(account.getHost());
         }
@@ -51,7 +50,7 @@ public class ApiProvider {
                         HttpUrl newUrl = url;
                         if (shouldAddTokenToQuery(path)) {
                             newUrl = url.newBuilder()
-                                    .addQueryParameter("token", AccountService.getCurrent().getAccessToken())
+                                    .addQueryParameter("token", Account.getCurrent().getAccessToken())
                                     .build();
                         }
                         Request newRequest = request.newBuilder()

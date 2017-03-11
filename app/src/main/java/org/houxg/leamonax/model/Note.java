@@ -17,9 +17,6 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Created by binnchx on 10/18/15.
- */
 @Table(name = "Note", database = AppDataBase.class)
 public class Note extends BaseModel implements Serializable {
 
@@ -93,7 +90,6 @@ public class Note extends BaseModel implements Serializable {
     long publicTime;
     @Column(name = "tags")
     String tags = "";
-    boolean uploadSucc = true;
 
     public long getCreatedTimeVal() {
         return createdTime;
@@ -171,14 +167,6 @@ public class Note extends BaseModel implements Serializable {
         return usn;
     }
 
-    public boolean isUploadSucc() {
-        return uploadSucc;
-    }
-
-    public void setUploadSucc(boolean uploadSucc) {
-        this.uploadSucc = uploadSucc;
-    }
-
     public void setUsn(int usn) {
         this.usn = usn;
     }
@@ -228,33 +216,6 @@ public class Note extends BaseModel implements Serializable {
 
     public List<NoteFile> getNoteFiles() {
         return noteFiles;
-    }
-
-    //TODO:delete this
-    public String getUpdatedTime() {
-        return updatedTimeData;
-    }
-
-    //TODO:delete this
-    public String getCreatedTime() {
-        return updatedTimeData;
-    }
-
-    //TODO:delete this
-    public String getPublicTime() {
-        return publicTimeData;
-    }
-
-    //TODO:delete this
-    public void setUpdatedTime(String v) {
-    }
-
-    //TODO:delete this
-    public void setCreatedTime(String v) {
-    }
-
-    //TODO:delete this
-    public void setPublicTime(String publicTime) {
     }
 
     @Override

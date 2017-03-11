@@ -87,7 +87,7 @@
                 android:paddingStart="4dp"
                 android:paddingTop="2dp"
                 android:text="@string/changed"
-                android:textColor="#fff"
+                android:textColor="@color/white"
                 android:textSize="12sp" />
 
             <TextView

@@ -59,6 +59,7 @@ public class NoteSyncService extends Service {
                     public void call(Subscriber<? super Void> subscriber) {
                         if (!subscriber.isUnsubscribed()) {
                             NoteService.fetchFromServer();
+                            NoteService.pushToServer();
                             subscriber.onNext(null);
                             subscriber.onCompleted();
                         }

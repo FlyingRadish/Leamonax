@@ -29,6 +29,7 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.AccountAdapter;
 import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.adapter.TagAdapter;
+import org.houxg.leamonax.database.AccountDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.Tag;
@@ -96,7 +97,7 @@ public class Navigation {
     private TagAdapter mTagAdapter;
     private AlphabetDrawable mAlphabetDrawable = new AlphabetDrawable();
 
-    private Mode mCurrentMode = Mode.RECENT_NOTES;
+    private NoteFragment.Mode mCurrentMode = NoteFragment.Mode.RECENT_NOTES;
 
     public Navigation(Callback callback) {
         mCallback = callback;
@@ -112,7 +113,7 @@ public class Navigation {
     }
 
     private void fetchInfo() {
-        AccountService.getInfo(AccountService.getCurrent().getUserId())
+        AccountService.getInfo(Account.getCurrent().getUserId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<User>() {
@@ -128,8 +129,8 @@ public class Navigation {
 
                     @Override
                     public void onNext(User user) {
-                        AccountService.saveToAccount(user, AccountService.getCurrent().getHost());
-                        refreshUserInfo(AccountService.getCurrent());
+                        AccountService.saveToAccount(user, Account.getCurrent().getHost());
+                        refreshUserInfo(Account.getCurrent());
                         mAccountAdapter.notifyDataSetChanged();
                     }
                 });
@@ -264,7 +265,7 @@ public class Navigation {
         mTagAdapter.setListener(new TagAdapter.TagAdapterListener() {
             @Override
             public void onClickedTag(Tag tag) {
-                mCurrentMode = Mode.TAG;
+                mCurrentMode = NoteFragment.Mode.TAG;
                 mCurrentMode.setTagText(tag.getText());
                 if (mCallback != null) {
                     if (mCallback.onShowNotes(mCurrentMode)) {
@@ -288,7 +289,7 @@ public class Navigation {
         mNotebookAdapter.setListener(new NotebookAdapter.NotebookAdapterListener() {
             @Override
             public void onClickedNotebook(Notebook notebook) {
-                mCurrentMode = Mode.NOTEBOOK;
+                mCurrentMode = NoteFragment.Mode.NOTEBOOK;
                 mCurrentMode.setNotebookId(notebook.getId());
                 if (mCallback != null) {
                     if (mCallback.onShowNotes(mCurrentMode)) {
@@ -454,17 +455,17 @@ public class Navigation {
         }
     }
 
-    public Mode getCurrentMode() {
+    public NoteFragment.Mode getCurrentMode() {
         return mCurrentMode;
     }
 
     public void refresh() {
-        refreshUserInfo(AccountService.getCurrent());
+        refreshUserInfo(Account.getCurrent());
         mAccountAdapter.load(AccountService.getAccountList());
         mTagAdapter.refresh();
         mNotebookAdapter.refresh();
-        if (mCurrentMode == Mode.NOTEBOOK && TextUtils.isEmpty(mNotebookAdapter.getCurrentParentId())) {
-            mCurrentMode = Mode.RECENT_NOTES;
+        if (mCurrentMode == NoteFragment.Mode.NOTEBOOK && TextUtils.isEmpty(mNotebookAdapter.getCurrentParentId())) {
+            mCurrentMode = NoteFragment.Mode.RECENT_NOTES;
         }
         if (mCallback != null) {
             if (mCallback.onShowNotes(mCurrentMode)) {
@@ -504,7 +505,7 @@ public class Navigation {
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_ADD_ACCOUNT) {
             if (resultCode == RESULT_OK) {
-                Account account = AccountService.getAccountById(SignInActivity.getAccountIdFromData(data));
+                Account account = AccountDataStore.getAccountById(SignInActivity.getAccountIdFromData(data));
                 if (account != null) {
                     changeAccount(account);
                 }
@@ -545,7 +546,7 @@ public class Navigation {
 
     @OnClick(R.id.rl_recent_notes)
     void clickedRecent() {
-        mCurrentMode = Mode.RECENT_NOTES;
+        mCurrentMode = NoteFragment.Mode.RECENT_NOTES;
         if (mCallback != null) {
             if (mCallback.onShowNotes(mCurrentMode)) {
                 close();
@@ -560,41 +561,16 @@ public class Navigation {
          * @param mode
          * @return true if processed
          */
-        boolean onShowNotes(Mode mode);
+        boolean onShowNotes(NoteFragment.Mode mode);
 
         void onClickSetting();
 
         void onClickAbout();
     }
 
-    public enum Mode {
-        RECENT_NOTES,
-        NOTEBOOK,
-        TAG;
-
-        long notebookId;
-        String tagText;
-
-        public void setNotebookId(long notebookId) {
-            this.notebookId = notebookId;
-        }
-
-        public void setTagText(String tagText) {
-            this.tagText = tagText;
-        }
-
-        @Override
-        public String toString() {
-            return name() + "{" +
-                    "notebookId=" + notebookId +
-                    ", tagText='" + tagText + '\'' +
-                    '}';
-        }
-    }
-
     @OnClick(R.id.rl_blog)
     void clickedMyBlog() {
-        Account current = AccountService.getCurrent();
+        Account current = Account.getCurrent();
         String host = current.getHost();
         if (host == null || host.equals("")) {
             host = "https://leanote.com";

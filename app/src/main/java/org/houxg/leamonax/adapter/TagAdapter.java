@@ -8,11 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Tag;
-import org.houxg.leamonax.service.AccountService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -28,7 +26,7 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.TagHolder> {
     }
 
     public void refresh() {
-        mData = AppDataBase.getAllTags(AccountService.getCurrent().getUserId());
+        mData = Tag.getAllTags(Account.getCurrent().getUserId());
         notifyDataSetChanged();
     }
 
