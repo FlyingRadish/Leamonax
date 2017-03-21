@@ -66,6 +66,10 @@ public class NoteList {
         mAdapter.notifyDataSetChanged();
     }
 
+    public void setHighlight(String keyword) {
+        mAdapter.setHighlight(keyword);
+    }
+
     public void toggleType() {
         int newType = mCurrentType == TYPE_SIMPLE ? TYPE_DETAIL : TYPE_SIMPLE;
         setType(newType);

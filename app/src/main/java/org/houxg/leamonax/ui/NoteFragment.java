@@ -6,10 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,18 +14,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.elvishew.xlog.XLog;
-
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import org.houxg.leamonax.Leamonax;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.adapter.NoteAdapter;
-import org.houxg.leamonax.background.NoteSyncService;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.database.NoteDataStore;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
-import org.houxg.leamonax.model.SyncEvent;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.service.NoteService;
 import org.houxg.leamonax.utils.ActionModeHandler;
 import org.houxg.leamonax.utils.CollectionUtils;
@@ -40,12 +32,12 @@ import org.houxg.leamonax.widget.NoteList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -63,6 +55,12 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     List<Note> mNotes;
     ActionModeHandler<Note> mActionModeHandler;
     NoteList mNoteList;
+    Mode mCurrentMode;
+    OnSearchFinishListener mOnSearchFinishListener;
+
+    public void setOnSearchFinishListener(OnSearchFinishListener onSearchFinishListener) {
+        this.mOnSearchFinishListener = onSearchFinishListener;
+    }
 
     public NoteFragment() {
     }
@@ -129,10 +127,33 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         EventBus.getDefault().unregister(this);
     }
 
-    public void setNotes(List<Note> notes) {
+    public void setMode(Mode mode) {
+        mCurrentMode = mode;
+        List<Note> notes;
+        mNoteList.setHighlight("");
+        switch (mode) {
+            case RECENT_NOTES:
+                notes = NoteDataStore.getAllNotes(Account.getCurrent().getUserId());
+                break;
+            case NOTEBOOK:
+                notes = NoteDataStore.getNotesFromNotebook(Account.getCurrent().getUserId(), mode.notebookId);
+                break;
+            case TAG:
+                notes = NoteDataStore.getByTagText(mode.tagText, Account.getCurrent().getUserId());
+                break;
+            case SEARCH:
+                notes = NoteDataStore.searchByTitle(mode.keywords);
+                mNoteList.setHighlight(mode.keywords);
+                break;
+            default:
+                notes = new ArrayList<>();
+        }
         mNotes = notes;
         Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         mNoteList.render(mNotes);
+        if (mNotes.size() == 0 && mOnSearchFinishListener != null) {
+            mOnSearchFinishListener.doSearchFinish();
+        }
     }
 
     @Override
@@ -151,12 +172,44 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         mNoteList.setSelected(note, isSelected);
     }
 
-    private void deleteNote(final List<Note> notes) {
+    private void deleteNote(List<Note> notes) {
         Observable.from(notes)
                 .flatMap(new Func1<Note, rx.Observable<Note>>() {
                     @Override
-                    public rx.Observable<Note> call(Note note) {
-                        return NoteService.deleteNote(note);
+                    public rx.Observable<Note> call(final Note note) {
+                        return Observable.create(new Observable.OnSubscribe<Note>() {
+                            @Override
+                            public void call(Subscriber<? super Note> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    NoteService.trashNotesOnLocal(note);
+                                    subscriber.onNext(note);
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        });
+                    }
+                })
+                .buffer(notes.size())
+                .flatMap(new Func1<List<Note>, Observable<Note>>() {
+                    @Override
+                    public Observable<Note> call(List<Note> notes) {
+                        NetworkUtils.checkNetwork();
+                        return Observable.from(notes);
+                    }
+                })
+                .flatMap(new Func1<Note, Observable<Note>>() {
+                    @Override
+                    public Observable<Note> call(final Note note) {
+                        return Observable.create(new Observable.OnSubscribe<Note>() {
+                            @Override
+                            public void call(Subscriber<? super Note> subscriber) {
+                                if (!subscriber.isUnsubscribed()) {
+                                    NoteService.saveNote(note.getId());
+                                    subscriber.onNext(note);
+                                    subscriber.onCompleted();
+                                }
+                            }
+                        });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -169,8 +222,12 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
 
                     @Override
                     public void onError(Throwable e) {
-                        ToastUtils.show(getActivity(), R.string.delete_note_failed);
-                        mNoteList.invalidateAllSelected();
+                        if (e instanceof NetworkUtils.NetworkUnavailableException) {
+                            ToastUtils.show(Leamonax.getContext(), R.string.delete_network_error);
+                        } else {
+                            ToastUtils.show(Leamonax.getContext(), R.string.delete_note_failed);
+                        }
+                        refresh();
                     }
 
                     @Override
@@ -180,6 +237,9 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                 });
     }
 
+    private void refresh() {
+        setMode(mCurrentMode);
+    }
 
     @Override
     public boolean onAction(int actionId, List<Note> pendingItems) {
@@ -199,6 +259,7 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                        mActionModeHandler.getPendingItems().clear();
                         mActionModeHandler.dismiss();
                         deleteNote(waitToDelete);
                     }
@@ -207,8 +268,6 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        mActionModeHandler.dismiss();
-                        mNoteList.invalidateAllSelected();
                     }
                 })
                 .show();
@@ -220,6 +279,41 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         if (CollectionUtils.isNotEmpty(pendingItems)) {
             mNoteList.invalidateAllSelected();
         }
+    }
+
+    public enum Mode {
+        RECENT_NOTES,
+        NOTEBOOK,
+        TAG,
+        SEARCH;
+
+        long notebookId;
+        String tagText;
+        String keywords;
+
+        public void setNotebookId(long notebookId) {
+            this.notebookId = notebookId;
+        }
+
+        public void setTagText(String tagText) {
+            this.tagText = tagText;
+        }
+
+        public void setKeywords(String keywords) {
+            this.keywords = keywords;
+        }
+
+        @Override
+        public String toString() {
+            return name() + "{" +
+                    "notebookId=" + notebookId +
+                    ", tagText='" + tagText + '\'' +
+                    '}';
+        }
+    }
+
+    public interface OnSearchFinishListener {
+        void doSearchFinish();
     }
 
 }

@@ -24,7 +24,7 @@
                 android:layout_height="80dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="32dp"
-                android:src="@drawable/logo" />
+                android:src="@drawable/logoabout" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -80,6 +80,7 @@
             <include layout="@layout/divider" />
 
             <LinearLayout
+                android:id="@+id/thanks"
                 style="@style/SettingsPanel"
                 android:orientation="vertical">
 
@@ -93,7 +94,7 @@
                     style="@style/SettingsStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/leanote" />
+                    android:text="https://github.com/houxg/Leamonax" />
 
                 <TextView
                     style="@style/SettingsStatus"

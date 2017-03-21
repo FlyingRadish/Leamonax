@@ -1,7 +1,6 @@
-# Leamonax
-<img src='https://travis-ci.org/houxg/Leamonax.svg?branch=master'/>
+# New Leanote Android (Leamonax)
 
-This is a third party Android client for Leanote.
+[![Build Status](https://travis-ci.org/leanote/leanote-android.svg?branch=master)](https://travis-ci.org/leanote/leanote-android?branch=master)
 
 **It's still in developing.** Be careful when you using it and make sure you have an backup.
 
@@ -12,8 +11,8 @@ This is a third party Android client for Leanote.
 ![Markdown](https://raw.githubusercontent.com/houxg/Leamonax/develop/screenshot/Markdown.png)
 
 # Download
-- [Git Release](https://github.com/houxg/Leamonax/releases/latest)
-- [Pgyer](https://www.pgyer.com/leamonax)
+- [Git Release](https://github.com/leanote/leanote-android/releases/latest)
+- [Pgyer](https://www.pgyer.com/Leanote)
 
 # Features
 - [x] Sign in/up
@@ -27,5 +26,7 @@ This is a third party Android client for Leanote.
 - [ ] Searching for full-text fields
 
 # Contributors
+
+- [houxg](https://github.com/houxg)
 - [xingstarx](https://github.com/xingstarx)
 - [nicacol](https://github.com/nicacol)

@@ -4,9 +4,10 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/menu_text</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:actionMenuTextColor">@color/menu_text</item>
+        <item name="actionMenuTextColor">@color/menu_text</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_white</item>
@@ -48,12 +49,13 @@
     </style>
 
     <style name="SignInEditText">
+        <item name="android:theme">@android:style/Theme.Holo</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">8dp</item>
         <item name="android:layout_marginEnd">16dp</item>
         <item name="android:layout_marginStart">16dp</item>
-        <item name="android:background">#fff</item>
+        <!--<item name="android:background">#fff</item>-->
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">18sp</item>
         <item name="android:textColorHint">@color/hint_text_light</item>

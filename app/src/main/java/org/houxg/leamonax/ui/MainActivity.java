@@ -1,14 +1,12 @@
 package org.houxg.leamonax.ui;
 
 
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,21 +18,18 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.adapter.NotebookAdapter;
 import org.houxg.leamonax.background.NoteSyncService;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.component.PullToRefresh;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.SyncEvent;
-import org.houxg.leamonax.model.Tag;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.ui.edit.NoteEditActivity;
 import org.houxg.leamonax.utils.NetworkUtils;
 import org.houxg.leamonax.utils.ToastUtils;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,9 +44,8 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
 
     @BindView(R.id.drawer)
     View mNavigationView;
-    @BindView(R.id.swiperefresh)
-    SwipeRefreshLayout mSwipeRefresh;
 
+    PullToRefresh mPullToRefresh;
     Navigation mNavigation;
 
     public static Intent getOpenIntent(Context context, boolean shouldReload) {
@@ -68,7 +62,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         initToolBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white);
-        CrashReport.setUserId(AccountService.getCurrent().getUserId());
+        CrashReport.setUserId(Account.getCurrent().getUserId());
 
         mNavigation = new Navigation(this);
         mNavigation.init(this, mNavigationView);
@@ -82,31 +76,26 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
             mNoteFragment = (NoteFragment) getSupportFragmentManager().findFragmentByTag(TAG_NOTE_FRAGMENT);
         }
 
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                syncNotes();
-            }
-        });
+        mPullToRefresh = new PullToRefresh(
+                (SwipeRefreshLayout) findViewById(R.id.swiperefresh),
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        syncNotes();
+                    }
+                });
 
         EventBus.getDefault().register(this);
 
         if (shouldReload) {
-            mSwipeRefresh.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    XLog.i("fetching notes");
-                    mSwipeRefresh.setRefreshing(true);
-                    syncNotes();
-                }
-            }, 200);
+            mPullToRefresh.forceRefresh();
         }
     }
 
     private void syncNotes() {
         if (!NetworkUtils.isNetworkAvailable()) {
             ToastUtils.showNetworkUnavailable(MainActivity.this);
-            mSwipeRefresh.setRefreshing(false);
+            mPullToRefresh.stopRefreshing();
             return;
         }
         NoteSyncService.startServiceForNote(MainActivity.this);
@@ -131,7 +120,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
             return true;
         } else if (item.getItemId() == R.id.action_search) {
             Intent intent = new Intent(this, SearchActivity.class);
-            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -153,12 +142,22 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
 
     @OnClick(R.id.fab)
     void clickedFab() {
-        Account account = AccountService.getCurrent();
+        Account account = Account.getCurrent();
         Note newNote = new Note();
         newNote.setUserId(account.getUserId());
-        Notebook recentNotebook = AppDataBase.getRecentNoteBook(AccountService.getCurrent().getUserId());
-        if (recentNotebook != null) {
-            newNote.setNoteBookId(recentNotebook.getNotebookId());
+        Notebook notebook;
+        NoteFragment.Mode currentMode = mNavigation.getCurrentMode();
+        if (currentMode == NoteFragment.Mode.NOTEBOOK) {
+            notebook = NotebookDataStore.getByLocalId(currentMode.notebookId);
+        } else {
+            notebook = NotebookDataStore.getRecentNoteBook(Account.getCurrent().getUserId());
+        }
+        if (notebook != null) {
+            newNote.setNoteBookId(notebook.getNotebookId());
+        } else {
+            Exception exception = new IllegalStateException(
+                    String.format(Locale.US, "notebook is null, mode:%s, notebookLocalId:%d", currentMode, currentMode.notebookId));
+            CrashReport.postCatchedException(exception);
         }
         newNote.setIsMarkDown(account.getDefaultEditor() == Account.EDITOR_MARKDOWN);
         newNote.save();
@@ -171,28 +170,14 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
         account.updateLastUseTime();
         account.update();
         mNavigation.refresh();
-        mSwipeRefresh.setRefreshing(true);
+        mPullToRefresh.stopRefreshing();
         syncNotes();
         return true;
     }
 
     @Override
-    public boolean onShowNotes(Navigation.Mode mode) {
-        List<Note> notes;
-        switch (mode) {
-            case RECENT_NOTES:
-                notes = AppDataBase.getAllNotes(AccountService.getCurrent().getUserId());
-                break;
-            case NOTEBOOK:
-                notes = AppDataBase.getNotesFromNotebook(AccountService.getCurrent().getUserId(), mode.notebookId);
-                break;
-            case TAG:
-                notes = AppDataBase.getNotesByTagText(mode.tagText, AccountService.getCurrent().getUserId());
-                break;
-            default:
-                return false;
-        }
-        mNoteFragment.setNotes(notes);
+    public boolean onShowNotes(NoteFragment.Mode mode) {
+        mNoteFragment.setMode(mode);
         return true;
     }
 
@@ -211,7 +196,7 @@ public class MainActivity extends BaseActivity implements Navigation.Callback {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(SyncEvent event) {
         XLog.i("RequestNotes rcv: isSucceed=" + event.isSucceed());
-        mSwipeRefresh.setRefreshing(false);
+        mPullToRefresh.stopRefreshing();
         if (event.isSucceed()) {
             mNavigation.refresh();
         } else {

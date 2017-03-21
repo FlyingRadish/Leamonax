@@ -28,19 +28,20 @@ android {
         config {
             keyAlias System.getenv('KEY_ALIAS')
             keyPassword System.getenv('KEY_PWD')
-            storeFile file(projectDir.parentFile.absolutePath + '/houxg-leamonax.jks')
+            storeFile file(projectDir.parentFile.absolutePath + '/leanote-android-new.jks')
             storePassword System.getenv('KEYSTORE_PWD')
         }
     }
     compileSdkVersion 24
     buildToolsVersion "25.0.1"
     defaultConfig {
-        applicationId "org.houxg.leamonax"
-        minSdkVersion 21
+        applicationId "com.leanote.android"
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode ciCode
         versionName ciName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "BUGLY_KEY", String.format("\"%s\"", buglyPrdKey)
     }
 
     lintOptions {
@@ -57,15 +58,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
-            buildConfigField "String", "BUGLY_KEY", String.format("\"%s\"", buglyPrdKey)
-        }
-    }
-
-    buildTypes.each { buildType ->
-        def properties = new Properties();
-        if (buildType.isDebuggable()) {
-            properties.load(new FileInputStream(new File(projectDir.absolutePath + "/staging.properties")))
-            buildType.buildConfigField "String", "BUGLY_KEY", properties['BUGLY_KEY']
         }
     }
 }
@@ -104,7 +96,8 @@ dependencies {
     compile 'jp.wasabeef:glide-transformations:2.0.1'
     compile 'com.android.support:support-v13:24.1.0'
     compile 'com.yuyh.imgsel:library:1.3.2'
-    compile 'com.facebook.stetho:stetho:1.4.1'
+    compile 'com.facebook.stetho:stetho:1.4.2'
+    compile 'com.facebook.stetho:stetho-okhttp3:1.4.2'
     compile 'com.github.houxg:FlexLayout:1.2'
 
     compile 'net.danlew:android.joda:2.9.5'
@@ -112,4 +105,6 @@ dependencies {
     compile 'com.elvishew:xlog:1.3.0'
     compile 'com.github.piasy:BigImageViewer:1.2.5'
     compile 'com.github.piasy:GlideImageLoader:1.2.5'
+    compile 'com.weiwangcn.betterspinner:library-material:1.1.0'
+
 }

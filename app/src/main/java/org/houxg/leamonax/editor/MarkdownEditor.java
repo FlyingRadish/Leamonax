@@ -27,7 +27,7 @@ public class MarkdownEditor extends Editor {
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new Editor.EditorClient());
         mWebView.setWebChromeClient(new WebChromeClient());
-        mWebView.loadUrl("file:///android_asset/markdownEditor/editor-mobile.min.html");
+        mWebView.loadUrl("file:///android_asset/markdownEditor/editor-mobile.min.html?lang=" + Locale.getDefault().getLanguage());
     }
 
     private void execJs(final String script) {

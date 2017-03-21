@@ -1,6 +1,7 @@
 package org.houxg.leamonax.network;
 
 import com.elvishew.xlog.XLog;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import org.houxg.leamonax.BuildConfig;
 import org.houxg.leamonax.model.Account;
@@ -8,7 +9,6 @@ import org.houxg.leamonax.network.api.AuthApi;
 import org.houxg.leamonax.network.api.NoteApi;
 import org.houxg.leamonax.network.api.NotebookApi;
 import org.houxg.leamonax.network.api.UserApi;
-import org.houxg.leamonax.service.AccountService;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class ApiProvider {
     }
 
     public static ApiProvider getInstance() {
-        Account account = AccountService.getCurrent();
+        Account account = Account.getCurrent();
         if (account != null && SingletonHolder.INSTANCE.mApiRetrofit == null) {
             SingletonHolder.INSTANCE.init(account.getHost());
         }
@@ -50,7 +50,7 @@ public class ApiProvider {
                         HttpUrl newUrl = url;
                         if (shouldAddTokenToQuery(path)) {
                             newUrl = url.newBuilder()
-                                    .addQueryParameter("token", AccountService.getCurrent().getAccessToken())
+                                    .addQueryParameter("token", Account.getCurrent().getAccessToken())
                                     .build();
                         }
                         Request newRequest = request.newBuilder()
@@ -68,6 +68,7 @@ public class ApiProvider {
             });
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             builder.addNetworkInterceptor(interceptor);
+            builder.addNetworkInterceptor(new StethoInterceptor());
         }
         OkHttpClient client = builder.build();
         mApiRetrofit = new Retrofit.Builder()
@@ -78,8 +79,8 @@ public class ApiProvider {
     }
 
     private static boolean shouldAddTokenToQuery(String path) {
-        return !path.startsWith("/api/auth/login")
-                && !path.startsWith("/api/auth/register");
+        return !path.endsWith("/api/auth/login")
+                && !path.endsWith("/api/auth/register");
     }
 
     public AuthApi getAuthApi() {

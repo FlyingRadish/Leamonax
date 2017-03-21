@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#212121"
+    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
 
@@ -16,6 +16,7 @@
         <EditText
             android:id="@+id/et_email"
             style="@style/SignInEditText"
+            android:textColorHint="@color/lightGray"
             android:hint="@string/email" />
 
         <EditText
@@ -25,6 +26,7 @@
             android:layout_marginBottom="16dp"
             android:layout_marginTop="16dp"
             android:hint="@string/password"
+            android:textColorHint="@color/lightGray"
             android:inputType="textPassword" />
 
         <EditText
@@ -32,6 +34,7 @@
             style="@style/SignInEditText"
             android:layout_below="@id/et_password"
             android:hint="@string/host_address"
+            android:textColorHint="@color/lightGray"
             android:scaleY="0" />
 
         <LinearLayout
@@ -61,11 +64,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:background="@color/colorAccent"
+                        android:background="#1582b0"
                         android:gravity="center"
                         android:padding="8dp"
                         android:text="@string/sign_up"
-                        android:textColor="#EEEEEE"
+                        android:textColor="@color/lightGray"
                         android:textSize="18sp" />
 
                     <ProgressBar
@@ -88,11 +91,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:background="#757575"
+                        android:background="#1582b0"
                         android:gravity="center"
                         android:padding="8dp"
                         android:text="@string/sign_in"
-                        android:textColor="#EEEEEE"
+                        android:textColor="@color/lightGray"
                         android:textSize="18sp" />
 
                     <ProgressBar
@@ -115,7 +118,7 @@
                 android:layout_marginTop="4dp"
                 android:padding="8dp"
                 android:text="@string/forgot_password"
-                android:textColor="#EEEEEE" />
+                android:textColor="@color/lightGray" />
         </LinearLayout>
 
         <EditText
@@ -148,7 +151,7 @@
             android:layout_height="wrap_content"
             android:text="@string/use_custom_host"
             android:layout_gravity="center_horizontal"
-            android:textColor="#EEEEEE"
+            android:textColor="@color/lightGray"
             android:textSize="16sp" />
 
         <TextView
@@ -157,7 +160,7 @@
             android:layout_height="wrap_content"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:textColor="#EEEEEE"
+            android:textColor="@color/lightGray"
             android:layout_marginTop="8dp"
             android:visibility="gone"/>
 

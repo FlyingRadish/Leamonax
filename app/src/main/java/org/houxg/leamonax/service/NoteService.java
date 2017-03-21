@@ -7,16 +7,16 @@ import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
 import com.elvishew.xlog.XLog;
-import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.bson.types.ObjectId;
 import org.houxg.leamonax.R;
 import org.houxg.leamonax.ReadableException;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.database.NoteDataStore;
+import org.houxg.leamonax.database.NoteFileDataStore;
+import org.houxg.leamonax.database.NotebookDataStore;
 import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Note;
 import org.houxg.leamonax.model.NoteFile;
-import org.houxg.leamonax.model.Note_Table;
 import org.houxg.leamonax.model.Notebook;
 import org.houxg.leamonax.model.RelationshipOfNoteTag;
 import org.houxg.leamonax.model.Tag;
@@ -39,7 +39,6 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import rx.Observable;
-import rx.Subscriber;
 
 public class NoteService {
 
@@ -50,14 +49,23 @@ public class NoteService {
     private static final String CONFLICT_SUFFIX = "--conflict";
     private static final int MAX_ENTRY = 20;
 
+    public static void pushToServer() {
+        List<Note> notes = NoteDataStore.getAllDirtyNotes(Account.getCurrent().getUserId());
+        for (Note note : notes) {
+            if (!note.getTitle().endsWith(CONFLICT_SUFFIX)) {
+                saveNote(note.getId());
+            }
+        }
+    }
+
     public static void fetchFromServer() {
         //sync notebook
-        int notebookUsn = AccountService.getCurrent().getNotebookUsn();
+        int notebookUsn = Account.getCurrent().getNotebookUsn();
         List<Notebook> notebooks;
         do {
             notebooks = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNotebookApi().getSyncNotebooks(notebookUsn, MAX_ENTRY));
             for (Notebook remoteNotebook : notebooks) {
-                Notebook localNotebook = AppDataBase.getNotebookByServerId(remoteNotebook.getNotebookId());
+                Notebook localNotebook = NotebookDataStore.getByServerId(remoteNotebook.getNotebookId());
                 if (localNotebook == null) {
                     XLog.i(TAG + "notebook insert, usn=" + remoteNotebook.getUsn() + ", id=" + remoteNotebook.getNotebookId());
                     remoteNotebook.insert();
@@ -68,7 +76,7 @@ public class NoteService {
                     remoteNotebook.update();
                 }
                 notebookUsn = remoteNotebook.getUsn();
-                Account account = AccountService.getCurrent();
+                Account account = Account.getCurrent();
                 account.setNotebookUsn(notebookUsn);
                 account.save();
             }
@@ -76,13 +84,13 @@ public class NoteService {
 
 
         //sync note
-        int noteUsn = AccountService.getCurrent().getNoteUsn();
+        int noteUsn = Account.getCurrent().getNoteUsn();
         List<Note> notes;
         do {
             notes = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getSyncNotes(noteUsn, MAX_ENTRY));
             for (Note noteMeta : notes) {
                 Note remoteNote = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getNoteAndContent(noteMeta.getNoteId()));
-                Note localNote = AppDataBase.getNoteByServerId(noteMeta.getNoteId());
+                Note localNote = NoteDataStore.getByServerId(noteMeta.getNoteId());
                 noteUsn = remoteNote.getUsn();
                 long localId;
                 if (localNote == null) {
@@ -104,16 +112,19 @@ public class NoteService {
                     localId = localNote.getId();
                 }
                 remoteNote.setIsDirty(false);
+                String content;
                 if (remoteNote.isMarkDown()) {
-                    remoteNote.setContent(convertToLocalImageLinkForMD(localId, remoteNote.getContent()));
+                    content = convertToLocalImageLinkForMD(localId, remoteNote.getContent());
                 } else {
-                    remoteNote.setContent(convertToLocalImageLinkForRichText(localId, remoteNote.getContent()));
+                    content = convertToLocalImageLinkForRichText(localId, remoteNote.getContent());
                 }
                 XLog.i(TAG + "content=" + remoteNote.getContent());
+                remoteNote.setContent(content);
+                remoteNote.setNoteAbstract(content.length() < 500 ? content : content.substring(0, 500));
                 remoteNote.update();
                 handleFile(localId, remoteNote.getNoteFiles());
                 updateTagsToLocal(localId, remoteNote.getTagData());
-                Account account = AccountService.getCurrent();
+                Account account = Account.getCurrent();
                 account.setNoteUsn(noteUsn);
                 account.save();
             }
@@ -129,9 +140,9 @@ public class NoteService {
         for (NoteFile remote : remoteFiles) {
             NoteFile local;
             if (TextUtils.isEmpty(remote.getLocalId())) {
-                local = AppDataBase.getNoteFileByServerId(remote.getServerId());
+                local = NoteFileDataStore.getByServerId(remote.getServerId());
             } else {
-                local = AppDataBase.getNoteFileByLocalId(remote.getLocalId());
+                local = NoteFileDataStore.getByLocalId(remote.getLocalId());
             }
             if (local != null) {
                 XLog.i(TAG + "has local file, id=" + remote.getServerId());
@@ -146,20 +157,20 @@ public class NoteService {
             local.save();
             excepts.add(local.getLocalId());
         }
-        AppDataBase.deleteFileExcept(noteLocalId, excepts);
+        NoteFileDataStore.deleteExcept(noteLocalId, excepts);
     }
 
     private static String convertToLocalImageLinkForRichText(long noteLocalId, String noteContent) {
         return StringUtils.replace(noteContent,
                 "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>",
-                String.format(Locale.US, "\\ssrc\\s*=\\s*\"%s/api/file/getImage\\?fileId=.*?\"", AccountService.getCurrent().getHost()),
+                String.format(Locale.US, "\\ssrc\\s*=\\s*\"%s/api/file/getImage\\?fileId=.*?\"", Account.getCurrent().getHost()),
                 new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
                         XLog.i(TAG + "in=" + original);
                         Uri linkUri = Uri.parse(original.substring(6, original.length() - 1));
                         String serverId = linkUri.getQueryParameter("fileId");
-                        NoteFile noteFile = AppDataBase.getNoteFileByServerId(serverId);
+                        NoteFile noteFile = NoteFileDataStore.getByServerId(serverId);
                         if (noteFile == null) {
                             noteFile = new NoteFile();
                             noteFile.setNoteId((Long) extraData[0]);
@@ -177,14 +188,14 @@ public class NoteService {
 
     private static String convertToLocalImageLinkForMD(long noteLocalId, String noteContent) {
         return StringUtils.replace(noteContent,
-                String.format(Locale.US, "!\\[.*?\\]\\(%s/api/file/getImage\\?fileId=.*?\\)", AccountService.getCurrent().getHost()),
-                String.format(Locale.US, "\\(%s/api/file/getImage\\?fileId=.*?\\)", AccountService.getCurrent().getHost()),
+                String.format(Locale.US, "!\\[.*?\\]\\(%s/api/file/getImage\\?fileId=.*?\\)", Account.getCurrent().getHost()),
+                String.format(Locale.US, "\\(%s/api/file/getImage\\?fileId=.*?\\)", Account.getCurrent().getHost()),
                 new StringUtils.Replacer() {
                     @Override
                     public String replaceWith(String original, Object... extraData) {
                         Uri linkUri = Uri.parse(original.substring(1, original.length() - 1));
                         String serverId = linkUri.getQueryParameter("fileId");
-                        NoteFile noteFile = AppDataBase.getNoteFileByServerId(serverId);
+                        NoteFile noteFile = NoteFileDataStore.getByServerId(serverId);
                         if (noteFile == null) {
                             noteFile = new NoteFile();
                             noteFile.setNoteId((Long) extraData[0]);
@@ -199,15 +210,15 @@ public class NoteService {
     }
 
     public static void saveNote(final long noteLocalId) {
-        Note modifiedNote = AppDataBase.getNoteByLocalId(noteLocalId);
+        Note modifiedNote = NoteDataStore.getByLocalId(noteLocalId);
 
         Map<String, RequestBody> requestBodyMap = generateCommonBodyMap(modifiedNote);
         List<MultipartBody.Part> fileBodies = handleFileBodies(modifiedNote, requestBodyMap);
         Call<Note> call;
-        if (modifiedNote.getUsn() == 0) {
+        if (modifiedNote.isLocalNote()) {
             call = ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
         } else {
-            Note remoteNote = RetrofitUtils.excuteWithException(getNoteByServerId(modifiedNote.getNoteId()));
+            Note remoteNote = RetrofitUtils.excuteWithException(ApiProvider.getInstance().getNoteApi().getNoteAndContent(modifiedNote.getNoteId()));
             if (remoteNote.getUsn() != modifiedNote.getUsn()) {
                 remoteNote.setId(modifiedNote.getId());
                 remoteNote.update();
@@ -220,7 +231,7 @@ public class NoteService {
             } else {
                 requestBodyMap.put("NoteId", createPartFromString(modifiedNote.getNoteId()));
                 requestBodyMap.put("Usn", createPartFromString(String.valueOf(modifiedNote.getUsn())));
-                call = ApiProvider.getInstance().getNoteApi().add(requestBodyMap, fileBodies);
+                call = ApiProvider.getInstance().getNoteApi().update(requestBodyMap, fileBodies);
             }
         }
         Note note = RetrofitUtils.excuteWithException(call);
@@ -274,24 +285,12 @@ public class NoteService {
                 });
     }
 
-    private static Call<List<Note>> getSyncNotes(int afterUsn, int maxEntry) {
-        return ApiProvider.getInstance().getNoteApi().getSyncNotes(afterUsn, maxEntry);
-    }
-
-    private static Call<List<Notebook>> getSyncNotebooks(int afterUsn, int maxEntry) {
-        return ApiProvider.getInstance().getNotebookApi().getSyncNotebooks(afterUsn, maxEntry);
-    }
-
-    public static Call<Note> getNoteByServerId(String serverId) {
-        return ApiProvider.getInstance().getNoteApi().getNoteAndContent(serverId);
-    }
-
     public static boolean revertNote(String serverId) {
-        Note serverNote = RetrofitUtils.excute(NoteService.getNoteByServerId(serverId));
+        Note serverNote = RetrofitUtils.excute(ApiProvider.getInstance().getNoteApi().getNoteAndContent(serverId));
         if (serverNote == null) {
             return false;
         }
-        Note localNote = AppDataBase.getNoteByServerId(serverId);
+        Note localNote = NoteDataStore.getByServerId(serverId);
         long localId;
         if (localNote == null) {
             localId = serverNote.insert();
@@ -310,8 +309,6 @@ public class NoteService {
         return true;
     }
 
-
-
     @NonNull
     private static Map<String, RequestBody> generateCommonBodyMap(Note note) {
         Map<String, RequestBody> requestBodyMap = new HashMap<>();
@@ -326,10 +323,11 @@ public class NoteService {
         requestBodyMap.put("Content", createPartFromString(content));
         requestBodyMap.put("IsMarkdown", createPartFromString(getBooleanString(note.isMarkDown())));
         requestBodyMap.put("IsBlog", createPartFromString(getBooleanString(note.isPublicBlog())));
+        requestBodyMap.put("IsTrash", createPartFromString(getBooleanString(note.isTrash())));
         requestBodyMap.put("CreatedTime", createPartFromString(TimeUtils.toServerTime(note.getCreatedTimeVal())));
         requestBodyMap.put("UpdatedTime", createPartFromString(TimeUtils.toServerTime(note.getUpdatedTimeVal())));
 
-        List<Tag> tags = AppDataBase.getTagByNoteLocalId(note.getId());
+        List<Tag> tags = Tag.getByNoteLocalId(note.getId());
 
         if (CollectionUtils.isNotEmpty(tags)) {
             int size = tags.size();
@@ -351,8 +349,8 @@ public class NoteService {
         } else {
             imageLocalIds = getImagesFromContentForRichText(note.getContent());
         }
-        AppDataBase.deleteFileExcept(note.getId(), imageLocalIds);
-        List<NoteFile> files = AppDataBase.getAllRelatedFile(note.getId());
+        NoteFileDataStore.deleteExcept(note.getId(), imageLocalIds);
+        List<NoteFile> files = NoteFileDataStore.getAllRelated(note.getId());
         if (CollectionUtils.isNotEmpty(files)) {
             int size = files.size();
             for (int index = 0; index < size; index++) {
@@ -402,45 +400,46 @@ public class NoteService {
         return localIds;
     }
 
-    public static Observable<Note> deleteNote(final Note note) {
-        return Observable.create(
-                new Observable.OnSubscribe<Note>() {
-                    @Override
-                    public void call(Subscriber<? super Note> subscriber) {
-                        if (!subscriber.isUnsubscribed()) {
-                            if (TextUtils.isEmpty(note.getNoteId())) {
-                                AppDataBase.deleteNoteByLocalId(note.getId());
-                            } else {
-                                UpdateRe response = RetrofitUtils.excuteWithException(
-                                        ApiProvider.getInstance().getNoteApi().delete(note.getNoteId(), note.getUsn()));
-                                if (response.isOk()) {
-                                    AppDataBase.deleteNoteByLocalId(note.getId());
-                                    updateNoteUsnIfNeed(response.getUsn());
-                                } else {
-                                    throw new IllegalStateException(response.getMsg());
-                                }
-                            }
-                            subscriber.onNext(note);
-                            subscriber.onCompleted();
-                        }
-                    }
-                });
+    public static void trashNotesOnLocal(Note note) {
+        note.setIsTrash(true);
+        note.setIsDirty(true);
+        note.update();
     }
 
+    public static void trashNote(Note note) {
+        if (!note.isLocalNote()) {
+            saveNote(note.getId());
+        }
+    }
+
+    public static void deleteNote(Note note) {
+        if (note.isLocalNote()) {
+            note.delete();
+        } else {
+            Call<UpdateRe> call = ApiProvider.getInstance().getNoteApi().delete(note.getNoteId(), note.getUsn());
+            UpdateRe response = RetrofitUtils.excuteWithException(call);
+            if (response.isOk()) {
+                note.delete();
+                updateNoteUsnIfNeed(response.getUsn());
+            } else {
+                throw new IllegalStateException(response.getMsg());
+            }
+        }
+    }
+
+    /**
+     * if new usn equals to (current usn + 1), then just simply update usn without syncing.
+     */
     private static void updateNoteUsnIfNeed(int newUsn) {
-        Account account = AccountService.getCurrent();
+        Account account = Account.getCurrent();
         if (newUsn - account.getNoteUsn() == 1) {
             account.setNoteUsn(newUsn);
             account.update();
         }
     }
 
-    public static Call<UpdateRe> deleteNote(String noteId, int usn) {
-        return ApiProvider.getInstance().getNoteApi().delete(noteId, usn);
-    }
-
     public static void updateTagsToLocal(long noteLocalId, List<String> tags) {
-        String currentUid = AccountService.getCurrent().getUserId();
+        String currentUid = Account.getCurrent().getUserId();
         if (tags == null) {
             tags = new ArrayList<>();
         }
@@ -450,7 +449,7 @@ public class NoteService {
             if (TextUtils.isEmpty(tagText)) {
                 continue;
             }
-            Tag tag = AppDataBase.getTagByText(tagText, currentUid);
+            Tag tag = Tag.getByText(tagText, currentUid);
             long tagId;
             long relationShipId;
             RelationshipOfNoteTag relationShip;
@@ -461,7 +460,7 @@ public class NoteService {
                 tagId = tag.getId();
             }
 
-            relationShip = AppDataBase.getRelationShip(noteLocalId, tagId, currentUid);
+            relationShip = Tag.getRelationShip(noteLocalId, tagId, currentUid);
             if (relationShip == null) {
                 relationShip = new RelationshipOfNoteTag(noteLocalId, tagId, currentUid);
                 relationShipId = relationShip.insert();
@@ -471,16 +470,15 @@ public class NoteService {
             reservedIds.add(relationShipId);
         }
         if (CollectionUtils.isEmpty(reservedIds)) {
-            AppDataBase.deleteAllRelatedTags(noteLocalId, currentUid);
+            Tag.deleteAllRelatedTags(noteLocalId, currentUid);
         } else {
-            AppDataBase.deleteRelatedTags(noteLocalId,
+            Tag.deleteRelatedTags(noteLocalId,
                     currentUid,
                     reservedIds.get(0),
                     CollectionUtils.toPrimitive(reservedIds.subList(1, reservedIds.size()))
             );
         }
     }
-
 
     private static RequestBody createPartFromString(String content) {
         return RequestBody.create(MediaType.parse(MULTIPART_FORM_DATA), content);
@@ -505,16 +503,5 @@ public class NoteService {
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         RequestBody fileBody = RequestBody.create(MediaType.parse(mimeType), tempFile);
         return MultipartBody.Part.createFormData(String.format("FileDatas[%s]", noteFile.getLocalId()), tempFile.getName(), fileBody);
-    }
-
-    public static List<Note> searchNoteWithTitle(String keyword) {
-        keyword = String.format(Locale.US, "%%%s%%", keyword);
-        return SQLite.select()
-                .from(Note.class)
-                .where(Note_Table.userId.eq(AccountService.getCurrent().getUserId()))
-                .and(Note_Table.title.like(keyword))
-                .and(Note_Table.isTrash.eq(false))
-                .and(Note_Table.isDeleted.eq(false))
-                .queryList();
     }
 }

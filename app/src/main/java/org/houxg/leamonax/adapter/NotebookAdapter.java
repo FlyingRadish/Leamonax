@@ -10,10 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.houxg.leamonax.R;
-import org.houxg.leamonax.database.AppDataBase;
+import org.houxg.leamonax.database.NotebookDataStore;
+import org.houxg.leamonax.model.Account;
 import org.houxg.leamonax.model.Notebook;
-import org.houxg.leamonax.service.AccountService;
 import org.houxg.leamonax.utils.CollectionUtils;
+import org.houxg.leamonax.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +57,14 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 
     private void getSafeNotebook(Stack<String> stack) {
         if (stack.isEmpty()) {
-           mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
+           mData = NotebookDataStore.getRootNotebooks(Account.getCurrent().getUserId());
         } else {
-            Notebook parent = AppDataBase.getNotebookByServerId(stack.peek());
+            Notebook parent = NotebookDataStore.getByServerId(stack.peek());
             if (parent.isDeleted()) {
                 stack.pop();
                 getSafeNotebook(stack);
             } else {
-                mData = AppDataBase.getChildNotebook(mStack.peek(), AccountService.getCurrent().getUserId());
+                mData = NotebookDataStore.getChildNotebook(mStack.peek(), Account.getCurrent().getUserId());
                 mData.add(0, parent);
             }
         }
@@ -100,7 +101,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
                 @Override
                 public void onClick(View v) {
                     if (mListener != null) {
-                        mListener.onClickedAddNotebook(getCurrentParentId());
+                        mListener.onClickedAddNotebook(getCurrentParentId(), mData);
                     }
                 }
             });
@@ -113,14 +114,16 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         String notebookId = notebook.getNotebookId();
         boolean isSuper = isSuper(notebookId);
         boolean isSuperOrRoot = isSuper | mStack.isEmpty();
-        boolean hasChild = hasChild(notebookId);
+        final boolean hasChild = hasChild(notebookId);
         holder.placeholder.setVisibility(isSuperOrRoot ? View.GONE : View.VISIBLE);
-        holder.navigator.setVisibility(mCanOpenEmpty | hasChild ? View.VISIBLE : View.INVISIBLE);
         holder.navigator.setImageResource(isSuper ? R.drawable.ic_expanding : R.drawable.ic_expandable);
         holder.navigator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //TODO: arrow animation
+                if (!hasChild) {
+                    return;
+                }
                 if (isSuper(notebook.getNotebookId())) {
                     listUpper();
                 } else {
@@ -132,9 +135,17 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    listChild(notebook);
                     mListener.onClickedNotebook(notebook);
                 }
+            }
+        });
+        holder.titleTv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (mListener != null) {
+                    mListener.onEditNotebook(notebook);
+                }
+                return true;
             }
         });
     }
@@ -148,7 +159,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     }
 
     private boolean hasChild(String notebookId) {
-        return CollectionUtils.isNotEmpty(AppDataBase.getChildNotebook(notebookId, AccountService.getCurrent().getUserId()));
+        return CollectionUtils.isNotEmpty(NotebookDataStore.getChildNotebook(notebookId, Account.getCurrent().getUserId()));
     }
 
     private void listUpper() {
@@ -158,11 +169,11 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
 
         mStack.pop();
         if (mStack.isEmpty()) {
-            mData = AppDataBase.getRootNotebooks(AccountService.getCurrent().getUserId());
+            mData = NotebookDataStore.getRootNotebooks(Account.getCurrent().getUserId());
         } else {
             String parentId = mStack.peek();
-            mData.add(AppDataBase.getNotebookByServerId(parentId));
-            mData.addAll(AppDataBase.getChildNotebook(parentId, AccountService.getCurrent().getUserId()));
+            mData.add(NotebookDataStore.getByServerId(parentId));
+            mData.addAll(NotebookDataStore.getChildNotebook(parentId, Account.getCurrent().getUserId()));
         }
         notifyItemRangeInserted(0, mData.size());
     }
@@ -181,7 +192,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
         notifyItemChanged(0);
 
         mStack.push(notebook.getNotebookId());
-        List<Notebook> children = AppDataBase.getChildNotebook(notebook.getNotebookId(), AccountService.getCurrent().getUserId());
+        List<Notebook> children = NotebookDataStore.getChildNotebook(notebook.getNotebookId(), Account.getCurrent().getUserId());
         int childrenSize = children.size();
         mData.addAll(children);
         notifyItemRangeInserted(1, childrenSize);
@@ -196,7 +207,9 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.Notebo
     public interface NotebookAdapterListener {
         void onClickedNotebook(Notebook notebook);
 
-        void onClickedAddNotebook(String parentNotebookId);
+        void onClickedAddNotebook(String parentNotebookId, List<Notebook> notebooks);
+
+        void onEditNotebook(Notebook notebook);
     }
 
     static class NotebookHolder extends RecyclerView.ViewHolder {
