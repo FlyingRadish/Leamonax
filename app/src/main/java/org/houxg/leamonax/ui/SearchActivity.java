@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 
 import org.houxg.leamonax.R;
+import org.houxg.leamonax.utils.DisplayUtils;
+import org.houxg.leamonax.utils.ToastUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,6 +47,13 @@ public class SearchActivity extends BaseActivity {
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         mNoteFragment = NoteFragment.newInstance();
+        mNoteFragment.setOnSearchFinishListener(new NoteFragment.OnSearchFinishListener() {
+            @Override
+            public void doSearchFinish() {
+                ToastUtils.show(SearchActivity.this, R.string.activity_search_note_not_found);
+                DisplayUtils.hideKeyboard(mSearchView);
+            }
+        });
         transaction.add(R.id.container, mNoteFragment);
         transaction.commit();
 

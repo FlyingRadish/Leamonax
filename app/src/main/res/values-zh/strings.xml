@@ -113,4 +113,5 @@
     <string name="notebook_choose_notebook_hint">选择该笔记本所在的上一级笔记本目录</string>
     <string name="notebook_default_root_notebook_title">空目录(最顶层目录)</string>
     <string name="delete_network_error">网络不可用，将在下次同步时删除</string>
+    <string name="activity_search_note_not_found">没有找到</string>
 </resources>

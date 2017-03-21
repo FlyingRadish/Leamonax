@@ -56,6 +56,11 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
     ActionModeHandler<Note> mActionModeHandler;
     NoteList mNoteList;
     Mode mCurrentMode;
+    OnSearchFinishListener mOnSearchFinishListener;
+
+    public void setOnSearchFinishListener(OnSearchFinishListener onSearchFinishListener) {
+        this.mOnSearchFinishListener = onSearchFinishListener;
+    }
 
     public NoteFragment() {
     }
@@ -146,6 +151,9 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
         mNotes = notes;
         Collections.sort(mNotes, new Note.UpdateTimeComparetor());
         mNoteList.render(mNotes);
+        if (mNotes.size() == 0 && mOnSearchFinishListener != null) {
+            mOnSearchFinishListener.doSearchFinish();
+        }
     }
 
     @Override
@@ -302,6 +310,10 @@ public class NoteFragment extends Fragment implements NoteAdapter.NoteAdapterLis
                     ", tagText='" + tagText + '\'' +
                     '}';
         }
+    }
+
+    public interface OnSearchFinishListener {
+        void doSearchFinish();
     }
 
 }

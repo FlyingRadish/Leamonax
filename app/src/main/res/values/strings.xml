@@ -115,4 +115,5 @@
     <string name="notebook_choose_notebook_hint">选择该笔记本所在的上一级笔记本目录 Choose current Notebook \'s parentNotebook directory</string>
     <string name="notebook_default_root_notebook_title">Empty directory</string>
     <string name="delete_network_error">Network is unavailable, these notes will be deleted in next sync</string>
+    <string name="activity_search_note_not_found">Not found</string>
 </resources>
