@@ -110,5 +110,6 @@
     <string name="host_example">For example, login api will be:\n%s/api/auth/login</string>
     <string name="notebook_name_cant_be_empty">Notebook\'s name can\'t be empty</string>
     <string name="delete_network_error">Network is unavailable, these notes will be deleted in next sync</string>
+    <string name="failed_to_compress_image">Failed to compress image</string>
 
 </resources>

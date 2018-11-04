@@ -37,6 +37,8 @@ public class NoteFileService {
         return noteFile == null ? null : noteFile.getServerId();
     }
 
+
+
     public static Uri createImageFile(long noteLocalId, String filePath) {
         NoteFile noteFile = new NoteFile();
         noteFile.setNoteId(noteLocalId);

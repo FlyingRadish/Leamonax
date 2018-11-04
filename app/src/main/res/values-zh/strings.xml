@@ -108,4 +108,5 @@
     <string name="host_example">登录接口地址将会是:\n%s/api/auth/login</string>
     <string name="notebook_name_cant_be_empty">笔记本名称不能为空</string>
     <string name="delete_network_error">网络不可用，将在下次同步时删除</string>
+    <string name="failed_to_compress_image">压缩图片失败</string>
 </resources>

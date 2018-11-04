@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -34,13 +35,18 @@ import org.houxg.leamonax.R;
 import org.houxg.leamonax.editor.Editor;
 import org.houxg.leamonax.editor.MarkdownEditor;
 import org.houxg.leamonax.editor.RichTextEditor;
+import org.houxg.leamonax.service.FileService;
 import org.houxg.leamonax.service.NoteFileService;
 import org.houxg.leamonax.ui.PictureViewerActivity;
 import org.houxg.leamonax.utils.CollectionUtils;
 import org.houxg.leamonax.utils.DialogUtils;
+import org.houxg.leamonax.utils.ImageUtils;
 import org.houxg.leamonax.utils.OpenUtils;
+import org.houxg.leamonax.utils.ToastUtil;
+import org.houxg.leamonax.utils.ToastUtils;
 import org.houxg.leamonax.widget.ToggleImageButton;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -206,8 +212,8 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
                 })
                 .multiSelect(false)
                 .backResId(R.drawable.ic_arrow_back_white)
-                .needCrop(true)
-                .cropSize(1, 1, 200, 200)
+                .needCrop(false)
+//                .cropSize(1, 1, 200, 200)
                 .needCamera(supportSelfie)
                 .build();
         ImgSelActivity.startActivity(this, config, REQ_SELECT_IMAGE);
@@ -316,9 +322,16 @@ public class EditorFragment extends Fragment implements Editor.EditorListener {
             List<String> pathList = data.getStringArrayListExtra(ImgSelActivity.INTENT_RESULT);
             if (CollectionUtils.isNotEmpty(pathList)) {
                 String path = pathList.get(0);
+                Bitmap.CompressFormat format = Bitmap.CompressFormat.JPEG;
+                File imageFile = FileService.Companion.createLocalImageFile(format);
+                if (imageFile == null) {
+                    ToastUtil.Companion.show(R.string.failed_to_compress_image);
+                    return;
+                }
+                ImageUtils.Companion.createCompressedImage(path, format, imageFile);
                 XLog.i(TAG + "path=" + path);
                 //create ImageObject
-                Uri imageUri = mListener.createImage(path);
+                Uri imageUri = mListener.createImage(imageFile.getAbsolutePath());
                 //insert to note
                 mEditor.insertImage("untitled", imageUri.toString());
             }
